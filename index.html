@@ -785,43 +785,39 @@ var viewer3D = {
 
         for (var g=0; g<placedGeoms.size(); g++) {
           var placedGeom = placedGeoms.get(g);
-          if (!placedGeom || !placedGeom.geometryExpressID) continue;
-
-          var geom;
-          try { geom = self.ifcAPI.GetGeometry(self.modelID, placedGeom.geometryExpressID); }
-          catch(e) { continue; }
-          if (!geom) continue;
+          if (!placedGeom) continue;
 
           var verts, indices;
           try {
-            // API web-ifc >= 0.0.57: GetVertexData/GetIndexData devuelven puntero WASM
-            if (typeof geom.GetVertexData === 'function' && typeof geom.GetIndexSize === 'function') {
-              verts   = self.ifcAPI.GetVertexArray(geom.GetVertexData(), geom.GetVertexDataSize());
-              indices = self.ifcAPI.GetIndexArray(geom.GetIndexData(), geom.GetIndexSize());
+            // API web-ifc >= 0.0.68: geometría viene en el placedGeom directamente
+            var geomID = placedGeom.geometryExpressID;
+            var geom = self.ifcAPI.GetGeometry(self.modelID, geomID);
+
+            // Intentar obtener punteros WASM (API clásica)
+            if (g === 0 && !window._geomLogged) {
+              window._geomLogged = true;
+              console.log('geom keys:', Object.keys(geom));
+              console.log('geom proto:', Object.getOwnPropertyNames(Object.getPrototypeOf(geom)));
             }
-            // API alternativa: propiedades directas
-            else if (geom.vertexData) {
-              verts   = geom.vertexData;
-              indices = geom.indexData;
+            var vPtr = geom.GetVertexData();
+            var vSize = geom.GetVertexDataSize();
+            var iPtr = geom.GetIndexData();
+            var iSize = geom.GetIndexSize();
+
+            if (vSize > 0 && iSize > 0) {
+              verts   = self.ifcAPI.GetVertexArray(vPtr, vSize);
+              indices = self.ifcAPI.GetIndexArray(iPtr, iSize);
             }
-            // API web-ifc >= 0.0.68: los datos están en el propio geom como arrays tipados
-            else {
-              var rawVerts = geom.GetVertexData ? geom.GetVertexData() : null;
-              var rawIdx   = geom.GetIndexData  ? geom.GetIndexData()  : null;
-              if (rawVerts && rawIdx) {
-                verts   = rawVerts instanceof Float32Array ? rawVerts : new Float32Array(rawVerts);
-                indices = rawIdx   instanceof Uint32Array  ? rawIdx   : new Uint32Array(rawIdx);
-              }
-            }
-          } catch(e) {
             if (geom.delete) geom.delete();
-            continue;
+          } catch(e) {
+            // API alternativa: datos directo en placedGeom (algunas versiones)
+            try {
+              verts   = placedGeom.vertexData   || placedGeom.GetVertexData && placedGeom.GetVertexData();
+              indices = placedGeom.indexData    || placedGeom.GetIndexData  && placedGeom.GetIndexData();
+            } catch(e2) { continue; }
           }
 
-          if (!verts || !indices || !indices.length) {
-            if (geom.delete) geom.delete();
-            continue;
-          }
+          if (!verts || !verts.length || !indices || !indices.length) continue;
 
           var matrix = new THREE.Matrix4().fromArray(placedGeom.flatTransformation);
           var normalMatrix = new THREE.Matrix3().getNormalMatrix(matrix);
@@ -834,7 +830,6 @@ var viewer3D = {
             var n = new THREE.Vector3(verts[vi+3], verts[vi+4], verts[vi+5]).applyMatrix3(normalMatrix).normalize();
             target.norm.push(n.x, n.y, n.z);
           }
-          if (geom.delete) geom.delete();
         }
       });
 
