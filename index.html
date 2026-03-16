@@ -777,7 +777,6 @@ var viewer3D = {
       var posEsp = [], normEsp = [], posBase = [], normBase = [];
       var bbox = new THREE.Box3();
 
-      // Detectar qué API expone web-ifc en esta versión
       this.ifcAPI.StreamAllMeshes(this.modelID, function(mesh) {
         var placedGeoms = mesh.geometries;
         var isEsp = !!espSet[mesh.expressID];
@@ -785,42 +784,30 @@ var viewer3D = {
 
         for (var g=0; g<placedGeoms.size(); g++) {
           var placedGeom = placedGeoms.get(g);
-          if (!placedGeom) continue;
+          if (!placedGeom || !placedGeom.geometryExpressID) continue;
 
           var verts, indices;
           try {
-            // API web-ifc >= 0.0.68: geometría viene en el placedGeom directamente
-            var geomID = placedGeom.geometryExpressID;
-            var geom = self.ifcAPI.GetGeometry(self.modelID, geomID);
+            var geom = self.ifcAPI.GetGeometry(self.modelID, placedGeom.geometryExpressID);
+            // Log diagnóstico solo una vez
             if (!window._geomLogged) {
               window._geomLogged = true;
-              console.log('geom type:', typeof geom, geom && geom.constructor && geom.constructor.name);
-              try { console.log('geom keys:', Object.keys(geom)); } catch(e) {}
               try { console.log('geom proto:', Object.getOwnPropertyNames(Object.getPrototypeOf(geom))); } catch(e) {}
-              console.log('geom instanceof:', geom);
-            }
-
-            // Intentar obtener punteros WASM (API clásica)
-            if (g === 0 && !window._geomLogged) {
-              window._geomLogged = true;
-              console.log('geom keys:', Object.keys(geom));
-              console.log('geom proto:', Object.getOwnPropertyNames(Object.getPrototypeOf(geom)));
+              console.log('geom type:', geom && geom.constructor && geom.constructor.name);
             }
             var vPtr = geom.GetVertexData();
             var vSize = geom.GetVertexDataSize();
             var iPtr = geom.GetIndexData();
             var iSize = geom.GetIndexSize();
-
             if (vSize > 0 && iSize > 0) {
               verts   = self.ifcAPI.GetVertexArray(vPtr, vSize);
               indices = self.ifcAPI.GetIndexArray(iPtr, iSize);
             }
             if (geom.delete) geom.delete();
           } catch(e) {
-            // API alternativa: datos directo en placedGeom (algunas versiones)
             try {
-              verts   = placedGeom.vertexData   || placedGeom.GetVertexData && placedGeom.GetVertexData();
-              indices = placedGeom.indexData    || placedGeom.GetIndexData  && placedGeom.GetIndexData();
+              verts   = placedGeom.vertexData;
+              indices = placedGeom.indexData;
             } catch(e2) { continue; }
           }
 
