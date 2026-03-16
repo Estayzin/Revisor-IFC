@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Explorador BIM — Carlos Estay Ruggieri</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --navy:#060d18; --blue:#0a1628; --accent:#00d4ff; --green:#00c853;
+  --bg:#0a0f1e; --card:#0d1526; --text:#c8d8f0; --muted:#4a6080; --border:#1a2a40;
+  --mono:'JetBrains Mono',monospace; --sans:'Inter',sans-serif;
+  --accent2:#7c4dff; --warn:#ff6b35;
+}
+*,*::before,*::after { box-sizing:border-box; margin:0; padding:0; }
+html,body { height:100%; overflow:hidden; }
+body { font-family:var(--sans); background:var(--bg); color:var(--text); display:flex; flex-direction:column; height:100vh; }
+
+/* HEADER */
+header { background:var(--navy); padding:10px 20px; display:flex; align-items:center; gap:12px;
+  border-bottom:2px solid var(--accent); flex-shrink:0; box-shadow:0 2px 20px rgba(0,212,255,.08); }
+.hicon { width:30px; height:30px; background:linear-gradient(135deg,var(--accent),var(--accent2));
+  border-radius:6px; display:flex; align-items:center; justify-content:center; font-size:14px; flex-shrink:0; }
+.htitle { font:600 12px var(--mono); color:#e0f0ff; letter-spacing:.08em; text-transform:uppercase; }
+.hsub { font:400 10px var(--mono); color:var(--muted); margin-top:1px; letter-spacing:.05em; }
+.hback { margin-left:auto; padding:5px 12px; background:transparent; color:var(--muted);
+  border:1px solid var(--border); border-radius:4px; font:600 9px var(--mono); cursor:pointer;
+  text-transform:uppercase; letter-spacing:.1em; text-decoration:none; transition:all .15s; }
+.hback:hover { border-color:var(--accent); color:var(--accent); }
+
+/* LAYOUT PRINCIPAL */
+.main { display:flex; flex:1; overflow:hidden; }
+
+/* SIDEBAR — navegador de archivos */
+.sidebar { width:260px; flex-shrink:0; background:var(--blue); border-right:1px solid var(--border);
+  display:flex; flex-direction:column; overflow:hidden; }
+.sb-header { padding:12px 14px; border-bottom:1px solid var(--border); flex-shrink:0; }
+.sb-title { font:700 9px var(--mono); color:var(--muted); text-transform:uppercase; letter-spacing:.2em; }
+.sb-search { margin-top:8px; position:relative; }
+.sb-search input { width:100%; padding:6px 10px 6px 28px; background:var(--navy);
+  border:1px solid var(--border); border-radius:4px; font:400 11px var(--mono); color:var(--text); outline:none; }
+.sb-search input:focus { border-color:var(--accent); }
+.sb-search::before { content:'⌕'; position:absolute; left:8px; top:6px;
+  font-size:13px; color:var(--muted); pointer-events:none; }
+
+/* TABS del sidebar */
+.sb-tabs { display:flex; border-bottom:1px solid var(--border); flex-shrink:0; }
+.sb-tab { flex:1; padding:8px 4px; text-align:center; font:600 9px var(--mono); color:var(--muted);
+  text-transform:uppercase; letter-spacing:.1em; cursor:pointer; border-bottom:2px solid transparent;
+  transition:all .15s; }
+.sb-tab.active { color:var(--accent); border-bottom-color:var(--accent); }
+.sb-tab:hover:not(.active) { color:var(--text); }
+
+/* LISTA de archivos */
+.sb-list { flex:1; overflow-y:auto; padding:8px 0; }
+.sb-section { padding:6px 14px 3px; font:700 8px var(--mono); color:var(--muted);
+  text-transform:uppercase; letter-spacing:.2em; }
+.sb-item { display:flex; align-items:center; gap:8px; padding:7px 14px; cursor:pointer;
+  transition:background .12s; border-left:2px solid transparent; }
+.sb-item:hover { background:rgba(0,212,255,.04); }
+.sb-item.active { background:rgba(0,212,255,.07); border-left-color:var(--accent); }
+.sb-item-icon { font-size:13px; flex-shrink:0; opacity:.7; }
+.sb-item-info { flex:1; min-width:0; }
+.sb-item-name { font:500 11px var(--mono); color:var(--text); white-space:nowrap;
+  overflow:hidden; text-overflow:ellipsis; }
+.sb-item-meta { font:400 9px var(--mono); color:var(--muted); margin-top:1px; }
+.sb-item-badge { font:700 8px var(--mono); padding:2px 5px; border-radius:3px;
+  text-transform:uppercase; letter-spacing:.06em; flex-shrink:0; }
+.badge-ifc { background:rgba(0,212,255,.1); color:var(--accent); }
+.badge-pdf { background:rgba(255,107,53,.1); color:var(--warn); }
+.badge-dwg { background:rgba(124,77,255,.1); color:var(--accent2); }
+.badge-rvt { background:rgba(0,200,83,.1); color:var(--green); }
+</style>
+
+/* CONTENIDO PRINCIPAL */
+.content { flex:1; display:flex; flex-direction:column; overflow:hidden; }
+
+/* TABS de vista: 3D / Planos / Documentos */
+.view-tabs { display:flex; align-items:center; padding:0 16px; background:var(--navy);
+  border-bottom:1px solid var(--border); flex-shrink:0; gap:2px; }
+.view-tab { display:flex; align-items:center; gap:6px; padding:10px 16px; font:600 10px var(--mono);
+  color:var(--muted); text-transform:uppercase; letter-spacing:.1em; cursor:pointer;
+  border-bottom:2px solid transparent; transition:all .15s; }
+.view-tab.active { color:var(--accent); border-bottom-color:var(--accent); }
+.view-tab:hover:not(.active) { color:var(--text); }
+.view-tab .tab-icon { font-size:14px; }
+.view-tab .tab-count { font:600 8px var(--mono); background:rgba(0,212,255,.1);
+  color:var(--accent); padding:1px 5px; border-radius:10px; }
+
+/* PANELES de vista */
+.view-panel { display:none; flex:1; overflow:hidden; flex-direction:column; }
+.view-panel.active { display:flex; }
+
+/* === PANEL 3D === */
+.panel-3d { display:flex; flex-direction:column; flex:1; overflow:hidden; }
+.viewer-toolbar { display:flex; align-items:center; gap:8px; padding:7px 14px;
+  background:var(--blue); border-bottom:1px solid var(--border); flex-shrink:0; }
+.vt-btn-group { display:flex; gap:2px; background:rgba(0,212,255,.05);
+  border:1px solid var(--border); border-radius:4px; padding:2px; }
+.vt-btn { padding:4px 10px; border:none; border-radius:3px; font:600 9px var(--mono);
+  cursor:pointer; background:transparent; color:var(--muted); text-transform:uppercase;
+  letter-spacing:.08em; transition:all .15s; }
+.vt-btn.active,.vt-btn:hover { background:var(--accent); color:#000; }
+.vt-sep { width:1px; background:var(--border); margin:0 4px; align-self:stretch; }
+.vt-label { font:400 10px var(--mono); color:var(--muted); margin-left:auto; }
+
+.viewer-area { flex:1; position:relative; background:#050b14; display:flex;
+  align-items:center; justify-content:center; overflow:hidden; }
+.viewer-placeholder { display:flex; flex-direction:column; align-items:center;
+  justify-content:center; gap:16px; opacity:.3; }
+.viewer-placeholder .big-icon { font-size:64px; }
+.viewer-placeholder p { font:400 11px var(--mono); color:var(--muted);
+  text-transform:uppercase; letter-spacing:.12em; }
+.viewer-badge { position:absolute; top:12px; right:12px; background:rgba(0,212,255,.1);
+  border:1px solid rgba(0,212,255,.2); border-radius:4px; padding:5px 10px;
+  font:600 9px var(--mono); color:var(--accent); letter-spacing:.1em; }
+.viewer-coords { position:absolute; bottom:12px; left:12px; background:rgba(6,13,24,.8);
+  border:1px solid var(--border); border-radius:4px; padding:5px 10px;
+  font:400 9px var(--mono); color:var(--muted); letter-spacing:.06em; }
+.viewer-stats { position:absolute; bottom:12px; right:12px; background:rgba(6,13,24,.8);
+  border:1px solid var(--border); border-radius:4px; padding:5px 10px; text-align:right; }
+.viewer-stats div { font:400 9px var(--mono); color:var(--muted); }
+.viewer-stats span { color:var(--accent); }
+
+/* === PANEL PLANOS === */
+.panel-plans { flex:1; display:flex; flex-direction:column; overflow:hidden; }
+.plans-toolbar { display:flex; align-items:center; gap:8px; padding:7px 14px;
+  background:var(--blue); border-bottom:1px solid var(--border); flex-shrink:0; }
+.plans-grid { flex:1; overflow-y:auto; padding:16px; display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(180px,1fr)); gap:12px; align-content:start; }
+.plan-card { background:var(--card); border:1px solid var(--border); border-radius:6px;
+  overflow:hidden; cursor:pointer; transition:all .15s; }
+.plan-card:hover { border-color:var(--accent); box-shadow:0 0 15px rgba(0,212,255,.1); }
+.plan-thumb { height:120px; background:linear-gradient(135deg,#0d1a2e,#0a1220);
+  display:flex; align-items:center; justify-content:center; font-size:36px; opacity:.4; }
+.plan-info { padding:9px 10px; }
+.plan-name { font:600 10px var(--mono); color:var(--text); white-space:nowrap;
+  overflow:hidden; text-overflow:ellipsis; }
+.plan-meta { font:400 9px var(--mono); color:var(--muted); margin-top:2px; }
+
+/* === PANEL DOCUMENTOS === */
+.panel-docs { flex:1; overflow-y:auto; padding:16px; }
+.docs-group { margin-bottom:20px; }
+.docs-group-title { font:700 9px var(--mono); color:var(--muted); text-transform:uppercase;
+  letter-spacing:.2em; margin-bottom:8px; padding-bottom:6px; border-bottom:1px solid var(--border); }
+.doc-row { display:flex; align-items:center; gap:10px; padding:8px 10px;
+  background:var(--card); border:1px solid var(--border); border-radius:5px;
+  margin-bottom:4px; cursor:pointer; transition:all .15s; }
+.doc-row:hover { border-color:var(--accent); background:rgba(0,212,255,.03); }
+.doc-icon { font-size:18px; flex-shrink:0; }
+.doc-info { flex:1; min-width:0; }
+.doc-name { font:500 11px var(--mono); color:var(--text); }
+.doc-meta { font:400 9px var(--mono); color:var(--muted); margin-top:1px; }
+.doc-size { font:400 9px var(--mono); color:var(--muted); flex-shrink:0; }
+.doc-badge { font:700 8px var(--mono); padding:2px 6px; border-radius:3px; flex-shrink:0; }
+</style>
+</head>
+<body>
+<!-- HEADER -->
+<header>
+  <div class="hicon">🏗️</div>
+  <div>
+    <div class="htitle">Explorador BIM</div>
+    <div class="hsub">Carlos Estay Ruggieri · c.estay@outlook.com</div>
+  </div>
+  <a href="index.html" class="hback">← Volver</a>
+</header>
+
+<div class="main">
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="sb-header">
+      <div class="sb-title">Proyectos</div>
+      <div class="sb-search"><input type="text" placeholder="Buscar archivo..."></div>
+    </div>
+    <div class="sb-tabs">
+      <div class="sb-tab active" onclick="sbTab(this,'all')">Todo</div>
+      <div class="sb-tab" onclick="sbTab(this,'3d')">3D</div>
+      <div class="sb-tab" onclick="sbTab(this,'plans')">Planos</div>
+      <div class="sb-tab" onclick="sbTab(this,'docs')">Docs</div>
+    </div>
+    <div class="sb-list" id="sbList">
+      <div class="sb-section">Modelos 3D</div>
+      <div class="sb-item active" onclick="selectFile(this,'3d')">
+        <div class="sb-item-icon">📦</div>
+        <div class="sb-item-info">
+          <div class="sb-item-name">ARQ-Arquitectura.ifc</div>
+          <div class="sb-item-meta">13.6 MB · IFC2x3</div>
+        </div>
+        <div class="sb-item-badge badge-ifc">IFC</div>
+      </div>
+      <div class="sb-item" onclick="selectFile(this,'3d')">
+        <div class="sb-item-icon">📦</div>
+        <div class="sb-item-info">
+          <div class="sb-item-name">EST-Estructural.ifc</div>
+          <div class="sb-item-meta">8.2 MB · IFC2x3</div>
+        </div>
+        <div class="sb-item-badge badge-ifc">IFC</div>
+      </div>
+      <div class="sb-item" onclick="selectFile(this,'3d')">
+        <div class="sb-item-icon">📐</div>
+        <div class="sb-item-info">
+          <div class="sb-item-name">COO-Coordinacion.rvt</div>
+          <div class="sb-item-meta">45.1 MB · Revit 2024</div>
+        </div>
+        <div class="sb-item-badge badge-rvt">RVT</div>
+      </div>
+      <div class="sb-section">Planos</div>
+      <div class="sb-item" onclick="selectFile(this,'plans')">
+        <div class="sb-item-icon">📋</div>
+        <div class="sb-item-info">
+          <div class="sb-item-name">PL-ARQ-001_Planta.pdf</div>
+          <div class="sb-item-meta">2.1 MB · A1</div>
+        </div>
+        <div class="sb-item-badge badge-pdf">PDF</div>
+      </div>
+      <div class="sb-item" onclick="selectFile(this,'plans')">
+        <div class="sb-item-icon">📋</div>
+        <div class="sb-item-info">
+          <div class="sb-item-name">PL-ARQ-002_Cortes.dwg</div>
+          <div class="sb-item-meta">5.4 MB · AutoCAD</div>
+        </div>
+        <div class="sb-item-badge badge-dwg">DWG</div>
+      </div>
+      <div class="sb-section">Documentos</div>
+      <div class="sb-item" onclick="selectFile(this,'docs')">
+        <div class="sb-item-icon">📄</div>
+        <div class="sb-item-info">
+          <div class="sb-item-name">BEP-v2.1.pdf</div>
+          <div class="sb-item-meta">1.3 MB · BIM Execution Plan</div>
+        </div>
+        <div class="sb-item-badge badge-pdf">PDF</div>
+      </div>
+      <div class="sb-item" onclick="selectFile(this,'docs')">
+        <div class="sb-item-icon">📄</div>
+        <div class="sb-item-info">
+          <div class="sb-item-name">Reporte-ARQ.html</div>
+          <div class="sb-item-meta">0.4 MB · Reporte IFC</div>
+        </div>
+        <div class="sb-item-badge badge-ifc">IFC</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONTENIDO -->
+  <div class="content">
+
+    <!-- TABS 3D / PLANOS / DOCUMENTOS -->
+    <div class="view-tabs">
+      <div class="view-tab active" onclick="viewTab(this,'v3d')">
+        <span class="tab-icon">⬛</span> 3D <span class="tab-count">3</span>
+      </div>
+      <div class="view-tab" onclick="viewTab(this,'vplans')">
+        <span class="tab-icon">📋</span> Planos <span class="tab-count">2</span>
+      </div>
+      <div class="view-tab" onclick="viewTab(this,'vdocs')">
+        <span class="tab-icon">📁</span> Documentos <span class="tab-count">2</span>
+      </div>
+    </div>
+
+    <!-- PANEL 3D -->
+    <div class="view-panel active" id="v3d">
+      <div class="panel-3d">
+        <div class="viewer-toolbar">
+          <div class="vt-btn-group">
+            <div class="vt-btn active">Orbitar</div>
+            <div class="vt-btn">Pan</div>
+            <div class="vt-btn">Zoom</div>
+          </div>
+          <div class="vt-sep"></div>
+          <div class="vt-btn-group">
+            <div class="vt-btn">Planta</div>
+            <div class="vt-btn">Norte</div>
+            <div class="vt-btn">Isométrico</div>
+          </div>
+          <div class="vt-sep"></div>
+          <div class="vt-btn-group">
+            <div class="vt-btn">Sólido</div>
+            <div class="vt-btn">Bordes</div>
+          </div>
+          <div class="vt-label" id="vtLabel">ARQ-Arquitectura.ifc · IFC2x3</div>
+        </div>
+        <div class="viewer-area">
+          <div class="viewer-placeholder">
+            <div class="big-icon">⬛</div>
+            <p>Visor 3D — En desarrollo</p>
+          </div>
+          <div class="viewer-badge">⬛ 3D VIEWER</div>
+          <div class="viewer-coords">X: 0.000 · Y: 0.000 · Z: 0.000</div>
+          <div class="viewer-stats">
+            <div>Vértices: <span>—</span></div>
+            <div>Elementos: <span>—</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PANEL PLANOS -->
+    <div class="view-panel" id="vplans">
+      <div class="panel-plans">
+        <div class="plans-toolbar">
+          <div class="vt-btn-group">
+            <div class="vt-btn active">Grilla</div>
+            <div class="vt-btn">Lista</div>
+          </div>
+          <div class="vt-sep"></div>
+          <div class="vt-btn-group">
+            <div class="vt-btn">A0</div>
+            <div class="vt-btn">A1</div>
+            <div class="vt-btn">A3</div>
+          </div>
+        </div>
+        <div class="plans-grid">
+          <div class="plan-card">
+            <div class="plan-thumb">📋</div>
+            <div class="plan-info">
+              <div class="plan-name">PL-ARQ-001_Planta.pdf</div>
+              <div class="plan-meta">Planta General · A1 · 2.1 MB</div>
+            </div>
+          </div>
+          <div class="plan-card">
+            <div class="plan-thumb">📐</div>
+            <div class="plan-info">
+              <div class="plan-name">PL-ARQ-002_Cortes.dwg</div>
+              <div class="plan-meta">Cortes · AutoCAD · 5.4 MB</div>
+            </div>
+          </div>
+          <div class="plan-card" style="opacity:.35;pointer-events:none;">
+            <div class="plan-thumb" style="opacity:.3">＋</div>
+            <div class="plan-info">
+              <div class="plan-name" style="color:var(--muted)">Agregar plano...</div>
+              <div class="plan-meta">PDF · DWG · DXF</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PANEL DOCUMENTOS -->
+    <div class="view-panel" id="vdocs">
+      <div class="panel-docs">
+        <div class="docs-group">
+          <div class="docs-group-title">BIM</div>
+          <div class="doc-row">
+            <div class="doc-icon">📄</div>
+            <div class="doc-info">
+              <div class="doc-name">BEP-v2.1.pdf</div>
+              <div class="doc-meta">BIM Execution Plan · Rev 2.1 · Mar 2026</div>
+            </div>
+            <div class="doc-size">1.3 MB</div>
+            <div class="doc-badge badge-pdf" style="background:rgba(255,107,53,.1);color:var(--warn)">PDF</div>
+          </div>
+          <div class="doc-row">
+            <div class="doc-icon">📊</div>
+            <div class="doc-info">
+              <div class="doc-name">Reporte-ARQ.html</div>
+              <div class="doc-meta">Reporte IFC · Arquitectura · Mar 2026</div>
+            </div>
+            <div class="doc-size">0.4 MB</div>
+            <div class="doc-badge badge-ifc" style="background:rgba(0,212,255,.1);color:var(--accent)">IFC</div>
+          </div>
+        </div>
+        <div class="docs-group">
+          <div class="docs-group-title">Contratos y Bases</div>
+          <div class="doc-row" style="opacity:.4;pointer-events:none;">
+            <div class="doc-icon">📁</div>
+            <div class="doc-info">
+              <div class="doc-name">Sin documentos</div>
+              <div class="doc-meta">Arrastra archivos aquí para agregarlos</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /main -->
+
+<script>
+function viewTab(el, panelId) {
+  document.querySelectorAll('.view-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.view-panel').forEach(p => p.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById(panelId).classList.add('active');
+}
+
+function sbTab(el, filter) {
+  document.querySelectorAll('.sb-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  // Filtro visual (demo)
+  document.querySelectorAll('.sb-item').forEach(item => {
+    if (filter === 'all') { item.style.display = ''; return; }
+    const badge = item.querySelector('.sb-item-badge');
+    if (!badge) { item.style.display = ''; return; }
+    const cls = badge.className;
+    if (filter === '3d' && (cls.includes('ifc') || cls.includes('rvt'))) item.style.display = '';
+    else if (filter === 'plans' && (cls.includes('pdf') || cls.includes('dwg'))) item.style.display = '';
+    else if (filter === 'docs' && cls.includes('pdf')) item.style.display = '';
+    else item.style.display = 'none';
+  });
+}
+
+function selectFile(el, view) {
+  document.querySelectorAll('.sb-item').forEach(i => i.classList.remove('active'));
+  el.classList.add('active');
+  const tabMap = { '3d':'v3d', 'plans':'vplans', 'docs':'vdocs' };
+  const tabEl = document.querySelector(`.view-tab[onclick*="${tabMap[view]}"]`);
+  if (tabEl) viewTab(tabEl, tabMap[view]);
+  const name = el.querySelector('.sb-item-name')?.textContent || '';
+  const meta = el.querySelector('.sb-item-meta')?.textContent || '';
+  const lbl = document.getElementById('vtLabel');
+  if (lbl) lbl.textContent = name + (meta ? ' · ' + meta : '');
+}
+</script>
+</body>
+</html>
