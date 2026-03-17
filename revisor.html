@@ -760,36 +760,39 @@ function verificarClasificacion(est) {
 // ============================================================
 // CSS PARA REPORTE HTML GENERADO
 // ============================================================
-var CSS="<style>*{box-sizing:border-box}body{font-family:Arial,sans-serif;margin:40px;background:#f4f6f8;color:#333}.header{background:#1a3a5c;color:white;padding:24px 32px;border-radius:8px;margin-bottom:24px}.header h1{margin:0 0 6px;font-size:22px}.header p{margin:2px 0;font-size:13px;opacity:.85}.resumen{display:flex;gap:16px;margin-bottom:24px}.card{background:white;border-radius:8px;padding:16px 24px;flex:1;box-shadow:0 1px 4px rgba(0,0,0,.1);text-align:center}.card .numero{font-size:32px;font-weight:bold;color:#1a3a5c}.card .label{font-size:12px;color:#888;margin-top:4px}.seccion-titulo{font-size:14px;font-weight:bold;color:#1a3a5c;margin-bottom:10px;border-left:4px solid #1a3a5c;padding-left:10px}table{width:100%;border-collapse:collapse;background:white;border-radius:8px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.1);margin-bottom:32px}th{background:#1a3a5c;color:white;padding:12px 16px;text-align:left;font-size:13px}td{padding:11px 16px;border-bottom:1px solid #eee;font-size:13px}tr:last-child td{border-bottom:none}tr.present{background:#f0faf0}tr.absent{background:#fff5f5}tr.unclassified{background:#fffbe6}tr.proxy{background:#fff0e0}tr.proxy-hito{background:#e8f5e9}.cantidad{font-weight:bold;font-size:15px;text-align:center}tr.present .cantidad{color:#2e7d32}tr.absent .cantidad{color:#c62828}tr.unclassified .cantidad{color:#e65100}tr.proxy .cantidad{color:#bf360c}tr.proxy-hito .cantidad{color:#2e7d32}.estado{text-align:center;font-size:18px}tr.present .estado{color:#2e7d32}tr.absent .estado{color:#c62828}code{background:#eef;padding:2px 6px;border-radius:3px;font-size:12px}.seccion-nc{margin-top:8px}.nc-header{background:#fff8e1;border-left:4px solid #f9a825;border-radius:6px 6px 0 0;padding:14px 18px}.nc-titulo{display:block;font-weight:bold;font-size:14px;color:#6d4c00;margin-bottom:4px}.nc-subtitulo{display:block;font-size:12px;color:#8a6200}.footer{margin-top:20px;font-size:11px;color:#aaa;text-align:center}</style>";
+var CSS="<style>@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Inter:wght@300;400;500;600;700&display=swap');:root{--navy:#060d18;--blue:#0a1628;--accent:#00d4ff;--green:#00c853;--bg:#0a0f1e;--card:#0d1526;--text:#c8d8f0;--muted:#4a6080;--border:#1a2a40;--mono:'JetBrains Mono',monospace;--sans:'Inter',sans-serif;--accent2:#7c4dff;--warn:#ff6b35;--red:#ff3d57}*{box-sizing:border-box;margin:0;padding:0}body{font-family:var(--sans);background:var(--bg);color:var(--text);padding:32px;font-size:13px;line-height:1.5;min-height:100vh}.rpt-header{background:var(--navy);border:1px solid var(--border);border-top:3px solid var(--accent);border-radius:8px;padding:24px 28px;margin-bottom:20px;display:flex;justify-content:space-between;align-items:flex-start}.rpt-header h1{font:700 16px var(--mono);color:#e0f0ff;letter-spacing:.06em;text-transform:uppercase;margin-bottom:6px}.rpt-header p{font:400 10px var(--mono);color:var(--muted);margin-top:3px;letter-spacing:.04em}.rpt-badge{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;background:rgba(0,212,255,.08);border:1px solid rgba(0,212,255,.2);border-radius:12px;font:600 9px var(--mono);color:var(--accent);text-transform:uppercase;letter-spacing:.12em}.resumen{display:flex;gap:12px;margin-bottom:20px}.card{background:var(--card);border:1px solid var(--border);border-radius:6px;padding:14px 18px;flex:1;text-align:center}.card .numero{font:700 28px var(--mono);color:var(--accent);margin-bottom:4px}.card .numero.red{color:var(--red)}.card .numero.green{color:var(--green)}.card .label{font:400 9px var(--mono);color:var(--muted);text-transform:uppercase;letter-spacing:.12em}.seccion-titulo{font:700 9px var(--mono);color:var(--muted);text-transform:uppercase;letter-spacing:.18em;margin-bottom:8px;padding-left:10px;border-left:3px solid var(--accent);display:flex;align-items:center;gap:8px}table{width:100%;border-collapse:collapse;background:var(--card);border:1px solid var(--border);border-radius:6px;overflow:hidden;margin-bottom:24px;font-size:12px}th{background:var(--navy);color:var(--muted);padding:9px 14px;text-align:left;font:600 9px var(--mono);text-transform:uppercase;letter-spacing:.12em;border-bottom:1px solid var(--border)}td{padding:9px 14px;border-bottom:1px solid var(--border);font:400 12px var(--mono);color:var(--text)}tr:last-child td{border-bottom:none}tr.present td{background:rgba(0,200,83,.04)}tr.absent td{background:rgba(255,61,87,.04)}tr.unclassified td{background:rgba(255,107,53,.04)}tr.proxy td{background:rgba(255,107,53,.06)}tr.proxy-hito td{background:rgba(0,200,83,.04)}.cantidad{font-weight:700;font-size:13px;text-align:center}tr.present .cantidad{color:var(--green)}tr.absent .cantidad{color:var(--red)}tr.unclassified .cantidad{color:var(--warn)}tr.proxy .cantidad{color:var(--warn)}tr.proxy-hito .cantidad{color:var(--green)}.estado{text-align:center;font-size:16px}tr.present .estado{color:var(--green)}tr.absent .estado{color:var(--red)}code{background:rgba(0,212,255,.08);color:var(--accent);padding:2px 7px;border-radius:3px;font:400 11px var(--mono);border:1px solid rgba(0,212,255,.15)}.sec-box{border-radius:6px 6px 0 0;padding:10px 16px;margin-bottom:0;font:600 11px var(--mono)}.sec-box-ok{background:rgba(0,200,83,.08);border-left:3px solid var(--green);color:var(--green)}.sec-box-err{background:rgba(255,61,87,.08);border-left:3px solid var(--red);color:var(--red)}.sec-box-warn{background:rgba(255,107,53,.08);border-left:3px solid var(--warn);color:var(--warn)}.sec-box-info{background:rgba(0,212,255,.06);border-left:3px solid var(--accent);color:var(--accent)}.seccion-nc{margin-top:0}.nc-header{background:rgba(255,107,53,.06);border-left:3px solid var(--warn);border-radius:6px 6px 0 0;padding:12px 16px}.nc-titulo{display:block;font:700 11px var(--mono);color:var(--warn);margin-bottom:4px}.nc-subtitulo{display:block;font:400 10px var(--mono);color:var(--muted)}.footer{margin-top:24px;font:400 9px var(--mono);color:var(--muted);text-align:center;letter-spacing:.08em;padding-top:16px;border-top:1px solid var(--border)}.section-wrap{margin-bottom:28px}</style>";
 
 // ============================================================
 // SECCIONES HTML DEL REPORTE
 // ============================================================
 function hOrigen(res){
   if(!res.length)return "";
-  var ok=res.every(function(r){return r.ok;}),cb=ok?"#2e7d32":"#c62828",ch=ok?"#e8f5e9":"#fff5f5";
+  var ok=res.every(function(r){return r.ok;});
+  var cls=ok?"sec-box-ok":"sec-box-err";
   var f=res.map(function(r){return "<tr class='"+(r.ok?'present':'absent')+"'><td>"+r.entidad+"</td><td>"+r.nombre+"</td><td class='cantidad'>"+r.x+"</td><td class='cantidad'>"+r.y+"</td><td class='cantidad'>"+r.z+"</td><td class='estado'>"+(r.ok?'&#10003;':'&#10007;')+"</td></tr>";}).join("");
-  return "<div style='margin-bottom:32px'><div class='seccion-titulo' style='border-left-color:"+cb+";color:"+cb+";'>"+(ok?'&#10003;':'&#10007;')+" Verificacion de Origen Interno</div><div style='background:"+ch+";border-left:4px solid "+cb+";border-radius:6px 6px 0 0;padding:12px 18px;font-size:13px;font-weight:bold;color:"+cb+";'>"+(ok?"Origen interno en (0,0,0) &mdash; correcto":"Modelo desplazado del origen (0,0,0)")+"</div><table><thead><tr><th>Entidad</th><th>Nombre</th><th style='text-align:center'>X</th><th style='text-align:center'>Y</th><th style='text-align:center'>Z</th><th style='text-align:center'>OK</th></tr></thead><tbody>"+f+"</tbody></table></div>";
+  return "<div class='section-wrap'><div class='seccion-titulo'>"+(ok?'&#10003;':'&#10007;')+" Verificacion de Origen Interno</div><div class='sec-box "+cls+"'>"+(ok?"Origen interno en (0,0,0) &mdash; correcto":"Modelo desplazado del origen (0,0,0)")+"</div><table><thead><tr><th>Entidad</th><th>Nombre</th><th style='text-align:center'>X</th><th style='text-align:center'>Y</th><th style='text-align:center'>Z</th><th style='text-align:center'>OK</th></tr></thead><tbody>"+f+"</tbody></table></div>";
 }
 function hNombres(res){
   if(!res.length)return "";
-  var ok=res.every(function(r){return r.ok;}),cb=ok?"#2e7d32":"#c62828",ch=ok?"#e8f5e9":"#fff5f5";
-  var f=res.map(function(r){return "<tr class='"+(r.ok?'present':'absent')+"'><td><code>"+r.tipo+"</code></td><td><strong>"+r.nombre+"</strong></td><td class='cantidad'>"+r.largo+"</td><td style='text-align:center;font-size:12px;color:#666;'>"+r.desc+"</td><td class='estado'>"+(r.ok?'&#10003;':'&#10007;')+"</td></tr>";}).join("");
-  return "<div style='margin-bottom:32px'><div class='seccion-titulo' style='border-left-color:"+cb+";color:"+cb+";'>"+(ok?'&#10003;':'&#10007;')+" Nombres de Sitio y Edificio</div><div style='background:"+ch+";border-left:4px solid "+cb+";border-radius:6px 6px 0 0;padding:12px 18px;font-size:13px;font-weight:bold;color:"+cb+";'>"+(ok?"Nombres de Sitio y Edificio correctos":"Nombre(s) de Sitio o Edificio incorrectos")+"</div><table><thead><tr><th>Entidad</th><th>Nombre</th><th style='text-align:center'>N&#176; caracteres</th><th style='text-align:center'>Regla</th><th style='text-align:center'>OK</th></tr></thead><tbody>"+f+"</tbody></table></div>";
+  var ok=res.every(function(r){return r.ok;});
+  var cls=ok?"sec-box-ok":"sec-box-err";
+  var f=res.map(function(r){return "<tr class='"+(r.ok?'present':'absent')+"'><td><code>"+r.tipo+"</code></td><td><strong>"+r.nombre+"</strong></td><td class='cantidad'>"+r.largo+"</td><td style='text-align:center;font-size:11px;color:var(--muted);'>"+r.desc+"</td><td class='estado'>"+(r.ok?'&#10003;':'&#10007;')+"</td></tr>";}).join("");
+  return "<div class='section-wrap'><div class='seccion-titulo'>"+(ok?'&#10003;':'&#10007;')+" Nombres de Sitio y Edificio</div><div class='sec-box "+cls+"'>"+(ok?"Nombres correctos":"Nombre(s) de Sitio o Edificio incorrectos")+"</div><table><thead><tr><th>Entidad</th><th>Nombre</th><th style='text-align:center'>N&#176; caracteres</th><th style='text-align:center'>Regla</th><th style='text-align:center'>OK</th></tr></thead><tbody>"+f+"</tbody></table></div>";
 }
 function hNiveles(res){
-  if(!res.length)return "<div style='margin-bottom:32px'><div class='seccion-titulo'>Niveles del Proyecto</div><div style='background:#f5f5f5;border-left:4px solid #aaa;border-radius:6px;padding:12px 18px;font-size:13px;color:#666;'>No se encontraron IfcBuildingStorey en el modelo.</div></div>";
-  var ok=res.every(function(r){return r.ok;}),nOk=res.filter(function(r){return r.ok;}).length,cb=ok?"#2e7d32":"#c62828",ch=ok?"#e8f5e9":"#fff5f5";
+  if(!res.length)return "<div class='section-wrap'><div class='seccion-titulo'>Niveles del Proyecto</div><div class='sec-box sec-box-info'>No se encontraron IfcBuildingStorey en el modelo.</div></div>";
+  var ok=res.every(function(r){return r.ok;}),nOk=res.filter(function(r){return r.ok;}).length;
+  var cls=ok?"sec-box-ok":"sec-box-err";
   var f=res.map(function(r){return "<tr class='"+(r.ok?'present':'absent')+"'><td>"+r.id+"</td><td><strong>"+r.nombre+"</strong></td><td class='cantidad'>"+r.largo+"</td><td class='estado'>"+(r.ok?'&#10003;':'&#10007;')+"</td></tr>";}).join("");
-  return "<div style='margin-bottom:32px'><div class='seccion-titulo' style='border-left-color:"+cb+";color:"+cb+";'>"+(ok?'&#10003;':'&#10007;')+" Niveles del Proyecto (IfcBuildingStorey)</div><div style='background:"+ch+";border-left:4px solid "+cb+";border-radius:6px 6px 0 0;padding:12px 18px;font-size:13px;font-weight:bold;color:"+cb+";'>"+(ok?"Todos los niveles tienen 5 caracteres ("+nOk+"/"+res.length+")":(res.length-nOk)+" nivel(es) con nombre incorrecto &mdash; se esperan exactamente 5 caracteres")+"</div><table><thead><tr><th>ID</th><th>Nombre</th><th style='text-align:center'>N&#176; caracteres</th><th style='text-align:center'>OK</th></tr></thead><tbody>"+f+"</tbody></table></div>";
+  return "<div class='section-wrap'><div class='seccion-titulo'>"+(ok?'&#10003;':'&#10007;')+" Niveles del Proyecto</div><div class='sec-box "+cls+"'>"+(ok?"Todos los niveles tienen 5 caracteres ("+nOk+"/"+res.length+")":(res.length-nOk)+" nivel(es) con nombre incorrecto &mdash; se esperan exactamente 5 caracteres")+"</div><table><thead><tr><th>ID</th><th>Nombre</th><th style='text-align:center'>N&#176; caracteres</th><th style='text-align:center'>OK</th></tr></thead><tbody>"+f+"</tbody></table></div>";
 }
 function hClas(res){
   if(!res||res.total===0)return "";
   var pct=res.total?Math.round(res.con_clas/res.total*100):0;
   var sub="Del total de "+res.total+" elementos, "+res.con_clas+" tienen clasificacion asignada ("+pct+"%).";
-  if(!res.codigos.length)return "<div style='margin-bottom:32px'><div class='seccion-titulo' style='border-left-color:#f9a825;color:#6d4c00;'>&#9888; Clasificacion de Elementos</div><div style='background:#fff8e1;border-left:4px solid #f9a825;border-radius:6px;padding:14px 18px;font-size:13px;color:#6d4c00;'>"+sub+" No se encontraron codigos de clasificacion.</div></div>";
-  var f=res.codigos.map(function(c){return "<tr><td><code style='background:#e8f0fe;color:#1a3a5c;padding:3px 8px;border-radius:4px;'>"+c.codigo+"</code></td><td style='color:#555;font-size:13px;'>"+(c.sistema||"&mdash;")+"</td><td class='cantidad' style='color:#1a3a5c;'>"+c.cantidad+"</td></tr>";}).join("");
-  return "<div style='margin-bottom:32px'><div class='seccion-titulo' style='border-left-color:#f9a825;color:#6d4c00;'>&#9888; Clasificacion de Elementos</div><div style='background:#fff8e1;border-left:4px solid #f9a825;border-radius:6px 6px 0 0;padding:12px 18px;font-size:13px;color:#6d4c00;'>"+sub+"</div><table><thead><tr><th>Codigo</th><th>Sistema</th><th style='text-align:center'>Elementos</th></tr></thead><tbody>"+f+"</tbody><tfoot><tr><td colspan='2' style='font-weight:bold;padding:10px 16px;'>Total clasificados</td><td class='cantidad' style='font-weight:bold;padding:10px 16px;color:#1a3a5c;'>"+res.con_clas+"</td></tr></tfoot></table></div>";
+  if(!res.codigos.length)return "<div class='section-wrap'><div class='seccion-titulo'>&#9888; Clasificacion de Elementos</div><div class='sec-box sec-box-warn'>"+sub+" No se encontraron codigos de clasificacion.</div></div>";
+  var f=res.codigos.map(function(c){return "<tr><td><code>"+c.codigo+"</code></td><td style='color:var(--muted);font-size:11px;'>"+(c.sistema||"&mdash;")+"</td><td class='cantidad' style='color:var(--accent);'>"+c.cantidad+"</td></tr>";}).join("");
+  return "<div class='section-wrap'><div class='seccion-titulo'>&#9888; Clasificacion de Elementos</div><div class='sec-box sec-box-warn'>"+sub+"</div><table><thead><tr><th>Codigo</th><th>Sistema</th><th style='text-align:center'>Elementos</th></tr></thead><tbody>"+f+"</tbody><tfoot><tr><td colspan='2' style='font-weight:bold;padding:9px 14px;color:var(--text);'>Total clasificados</td><td class='cantidad' style='font-weight:bold;color:var(--accent);'>"+res.con_clas+"</td></tr></tfoot></table></div>";
 }
 
 function generarHTML(espNombre, ents, entsNoRev, est, modeloNombre, fecha) {
@@ -803,20 +806,16 @@ function generarHTML(espNombre, ents, entsNoRev, est, modeloNombre, fecha) {
   var ncData=obtenerNoClasificados(conteo);
   var rOrg=verificarOrigen(est),rNom=verificarNombres(est),rNiv=verificarNiveles(est),rCla=verificarClasificacion(est);
 
-  // Sección entidades no revisadas
   var secNoRev="";
   if(entsNoRev&&entsNoRev.length){
     var fnr="";
     for(var i=0;i<entsNoRev.length;i++){
       var cls=entsNoRev[i][0],nom=entsNoRev[i][1];
       var qty=conteo[cls]||0;
-      var clsLower=cls.charAt(0)+cls.slice(1).toLowerCase();
-      fnr+="<tr style='background:#f5f5f5;color:#888;'><td>"+nom+"</td><td><code style='background:#eee;color:#888;'>"+clsLower+"</code></td><td class='cantidad' style='color:#aaa;'>"+(qty||"&mdash;")+"</td></tr>";
+      fnr+="<tr style='opacity:.5'><td>"+nom+"</td><td><code>"+cls+"</code></td><td class='cantidad' style='color:var(--muted);'>"+(qty||"&mdash;")+"</td></tr>";
     }
-    secNoRev="<div style='margin-bottom:32px'>"
-      +"<div class='seccion-titulo' style='border-left-color:#9e9e9e;color:#666;'>&#9711; Entidades no revisadas ("+entsNoRev.length+")</div>"
-      +"<div style='background:#f5f5f5;border-left:4px solid #9e9e9e;border-radius:6px 6px 0 0;padding:12px 18px;font-size:13px;color:#666;'>"
-      +"Estas entidades pertenecen a la especialidad pero no fueron incluidas en esta revision.</div>"
+    secNoRev="<div class='section-wrap'><div class='seccion-titulo'>&#9711; Entidades no revisadas ("+entsNoRev.length+")</div>"
+      +"<div class='sec-box sec-box-info'>Entidades de la especialidad no incluidas en esta revision.</div>"
       +"<table><thead><tr><th>Nombre</th><th>Clase IFC</th><th style='text-align:center'>En modelo</th></tr></thead>"
       +"<tbody>"+fnr+"</tbody></table></div>";
   }
@@ -828,31 +827,39 @@ function generarHTML(espNombre, ents, entsNoRev, est, modeloNombre, fecha) {
       var cls=ncData.nc[i][0],qty=ncData.nc[i][1]; tnc+=qty;
       var isP=cls==="IFCBUILDINGELEMENTPROXY";
       var rc=isP&&qty===1?"proxy-hito":isP?"proxy":"unclassified";
-      var et=isP&&qty===1?" &#8505; Hito de sitio (esperado)":isP?" &#9888; Proxy":"";
+      var et=isP&&qty===1?" <span style='color:var(--green);font-size:10px;'>&nbsp;&#8505; Hito de sitio</span>":isP?" <span style='color:var(--warn);font-size:10px;'>&nbsp;&#9888; Proxy</span>":"";
       fn+="<tr class='"+rc+"'><td><code>"+cls+"</code>"+et+"</td><td class='cantidad'>"+qty+"</td></tr>";
     }
-    secNc="<div class='seccion-nc'><div class='nc-header'><span class='nc-titulo'>&#9888; Entidades fuera de clasificacion</span><span class='nc-subtitulo'>Estas entidades existen en el modelo pero no forman parte del listado de esta especialidad, o son elementos Proxy sin clasificar.</span></div><table><thead><tr><th>Clase IFC</th><th style='text-align:center'>Cantidad</th></tr></thead><tbody>"+fn+"</tbody><tfoot><tr><td style='font-weight:bold;padding:10px 16px;'>Total no clasificados</td><td class='cantidad' style='font-weight:bold;padding:10px 16px;'>"+tnc+"</td></tr></tfoot></table></div>";
+    secNc="<div class='section-wrap'><div class='seccion-titulo'>&#9888; Entidades fuera de clasificacion</div>"
+      +"<div class='nc-header'><span class='nc-titulo'>Entidades no clasificadas en esta especialidad</span>"
+      +"<span class='nc-subtitulo'>Existen en el modelo pero no forman parte del listado de esta especialidad.</span></div>"
+      +"<table><thead><tr><th>Clase IFC</th><th style='text-align:center'>Cantidad</th></tr></thead><tbody>"+fn+"</tbody>"
+      +"<tfoot><tr><td style='font-weight:bold;padding:9px 14px;color:var(--text);'>Total no clasificados</td><td class='cantidad' style='color:var(--warn);font-weight:bold;'>"+tnc+"</td></tr></tfoot></table></div>";
   } else {
-    secNc="<div class='seccion-nc'><div class='nc-header'><span class='nc-titulo'>&#10003; Sin entidades fuera de clasificacion</span><span class='nc-subtitulo'>Todas las entidades del modelo estan dentro del listado de esta especialidad.</span></div></div>";
+    secNc="<div class='section-wrap'><div class='seccion-titulo'>&#10003; Sin entidades fuera de clasificacion</div>"
+      +"<div class='sec-box sec-box-ok'>Todas las entidades del modelo estan dentro del listado de esta especialidad.</div></div>";
   }
 
   var secComp="";
   if(ncData.comp.length){
-    var fc=ncData.comp.map(function(c){return "<tr style='background:#f0f4ff;'><td><code style='background:#dde8ff;color:#1a3a5c;'>"+c[0]+"</code></td><td style='font-size:12px;color:#555;'>"+c[1]+"</td><td class='cantidad' style='color:#1a3a5c;'>"+c[2]+"</td></tr>";}).join("");
-    secComp="<div style='margin-top:16px;'><div style='background:#e8eeff;border-left:4px solid #1a3a5c;border-radius:6px 6px 0 0;padding:12px 18px;'><span style='font-weight:bold;font-size:14px;color:#1a3a5c;'>&#9432; Entidades complementarias</span><span style='display:block;font-size:12px;color:#3a5080;margin-top:3px;'>Subcomponentes geometricos que no requieren clasificacion independiente.</span></div><table><thead><tr><th>Clase IFC</th><th>Descripcion</th><th style='text-align:center'>Cantidad</th></tr></thead><tbody>"+fc+"</tbody></table></div>";
+    var fc=ncData.comp.map(function(c){return "<tr><td><code>"+c[0]+"</code></td><td style='font-size:11px;color:var(--muted);'>"+c[1]+"</td><td class='cantidad' style='color:var(--accent);'>"+c[2]+"</td></tr>";}).join("");
+    secComp="<div class='section-wrap'><div class='seccion-titulo'>&#9432; Entidades complementarias</div>"
+      +"<div class='sec-box sec-box-info'>Subcomponentes geometricos sin clasificacion independiente.</div>"
+      +"<table><thead><tr><th>Clase IFC</th><th>Descripcion</th><th style='text-align:center'>Cantidad</th></tr></thead><tbody>"+fc+"</tbody></table></div>";
   }
 
   return "<!DOCTYPE html><html lang='es'><head><meta charset='UTF-8'><title>Reporte &mdash; "+espNombre+"</title>"+CSS+"</head><body>"
-    +"<div class='header'><h1>Reporte de Entidades IFC &mdash; "+espNombre+"</h1><p>Modelo: "+modeloNombre+"</p><p>Generado: "+fecha+"</p></div>"
-    +"<div class='resumen'><div class='card'><div class='numero'>"+ents.length+"</div><div class='label'>Entidades revisadas</div></div>"
-    +"<div class='card'><div class='numero' style='color:#2e7d32'>"+presentes+"</div><div class='label'>Entidades presentes</div></div>"
-    +"<div class='card'><div class='numero' style='color:#c62828'>"+ausentes+"</div><div class='label'>Entidades ausentes</div></div>"
+    +"<div class='rpt-header'><div><h1>Reporte IFC &mdash; "+espNombre+"</h1><p>Modelo: "+modeloNombre+"</p><p>Generado: "+fecha+"</p></div><div class='rpt-badge'>&#127959; PlanBIM</div></div>"
+    +"<div class='resumen'>"
+    +"<div class='card'><div class='numero'>"+ents.length+"</div><div class='label'>Revisadas</div></div>"
+    +"<div class='card'><div class='numero green'>"+presentes+"</div><div class='label'>Presentes</div></div>"
+    +"<div class='card'><div class='numero red'>"+ausentes+"</div><div class='label'>Ausentes</div></div>"
     +"<div class='card'><div class='numero'>"+totalEsp+"</div><div class='label'>Total elementos</div></div></div>"
     +hOrigen(rOrg)+hNombres(rNom)+hNiveles(rNiv)
-    +"<div class='seccion-titulo'>Entidades del listado</div>"
-    +"<table><thead><tr><th>Nombre</th><th>Clase IFC</th><th style='text-align:center'>Cantidad</th><th style='text-align:center'>Presente</th></tr></thead><tbody>"+filas+"</tbody></table>"
+    +"<div class='section-wrap'><div class='seccion-titulo'>&#9776; Entidades del listado</div>"
+    +"<table><thead><tr><th>Nombre</th><th>Clase IFC</th><th style='text-align:center'>Cantidad</th><th style='text-align:center'>Estado</th></tr></thead><tbody>"+filas+"</tbody></table></div>"
     +secNoRev+secNc+secComp+hClas(rCla)
-    +"<div class='footer'>Creado por Carlos Estay Ruggieri</div></body></html>";
+    +"<div class='footer'>Creado por Carlos Estay Ruggieri &mdash; Plataforma BIM MOP Chile</div></body></html>";
 }
 
 // ============================================================
