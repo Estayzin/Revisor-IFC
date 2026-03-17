@@ -98,9 +98,12 @@ header p  { font-size:10px; color:#4a6080; margin-top:1px; font-weight:400; font
 .vframe.split { width:50%; height:100%; flex:none; border-right:2px solid var(--accent); }
 
 /* Canvas 3D */
-#canvas3d { flex:1; width:100%; display:none; background:#1a1a2e; }
-#canvas3d.show { display:block; }
-#canvas3d.split { width:50%; height:100%; flex:none; }
+#canvas3d { flex:1; width:100%; display:block; background:#050b14; }
+#canvas3dWrap { display:none; flex:1; flex-direction:column; overflow:hidden; }
+#canvas3dWrap.show { display:flex; }
+#canvas3dWrap.split { width:50%; height:100%; flex:none; border-right:2px solid var(--accent); }
+/* Viewer toolbar 3D */
+.viewer-toolbar-3d { display:flex; align-items:center; gap:8px; padding:7px 14px; background:var(--blue); border-bottom:1px solid var(--border); flex-shrink:0; flex-wrap:wrap; }
 
 /* Overlay de estado del visor 3D */
 #viewer-overlay {
@@ -421,7 +424,64 @@ header p  { font-size:10px; color:#4a6080; margin-top:1px; font-weight:400; font
     </div>
     <div class="view-content" id="viewContent">
       <iframe class="vframe" id="vframe" src="about:blank"></iframe>
-      <canvas id="canvas3d"></canvas>
+      <!-- AREA VISOR 3D -->
+      <div id="canvas3dWrap" style="display:none;flex:1;flex-direction:column;overflow:hidden;">
+        <!-- Toolbar del visor -->
+        <div class="viewer-toolbar-3d" id="viewerToolbar3d">
+          <div class="vt-btn-group">
+            <div class="vt-btn active" onclick="v3dSetNavMode(this,'orbit')">Orbitar</div>
+            <div class="vt-btn" onclick="v3dSetNavMode(this,'pan')">Pan</div>
+          </div>
+          <div class="vt-sep"></div>
+          <div class="vt-btn-group">
+            <div class="vt-btn" onclick="v3dSetCam('top')">Planta</div>
+            <div class="vt-btn" onclick="v3dSetCam('front')">Frente</div>
+            <div class="vt-btn" onclick="v3dSetCam('iso')">Iso</div>
+          </div>
+          <div class="vt-sep"></div>
+          <div class="vt-btn-group">
+            <div class="vt-btn" id="v3dBtnCats" onclick="v3dToggleCats()">Categorías</div>
+            <div class="vt-btn" id="v3dBtnProps" onclick="v3dToggleProps()">Propiedades</div>
+          </div>
+        </div>
+        <!-- Área canvas -->
+        <div class="viewer-area" id="v3dArea" style="flex:1;position:relative;background:#050b14;overflow:hidden;">
+          <canvas id="canvas3d" style="width:100%;height:100%;display:block;"></canvas>
+          <!-- Loading -->
+          <div id="v3dLoading" style="display:none;position:absolute;inset:0;background:rgba(5,11,20,.9);flex-direction:column;align-items:center;justify-content:center;gap:14px;z-index:30;">
+            <div style="width:32px;height:32px;border:2px solid rgba(0,212,255,.2);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite;"></div>
+            <div id="v3dLoadText" style="font:400 10px var(--mono);color:var(--muted);letter-spacing:.1em;text-transform:uppercase;">Cargando...</div>
+          </div>
+          <!-- Badge -->
+          <div style="position:absolute;top:12px;right:12px;display:flex;gap:6px;z-index:10;pointer-events:none;">
+            <div style="background:rgba(0,212,255,.1);border:1px solid rgba(0,212,255,.2);border-radius:4px;padding:5px 10px;font:600 9px var(--mono);color:var(--accent);">⬛ 3D VIEWER</div>
+            <div id="v3dStatus" style="background:rgba(6,13,24,.85);border:1px solid var(--border);border-radius:4px;padding:5px 10px;font:600 9px var(--mono);color:var(--muted);">Sin modelo</div>
+          </div>
+          <!-- Stats -->
+          <div style="position:absolute;bottom:12px;right:12px;background:rgba(6,13,24,.85);border:1px solid var(--border);border-radius:4px;padding:5px 10px;text-align:right;z-index:10;">
+            <div style="font:400 9px var(--mono);color:var(--muted);">Elementos: <span id="v3dStatElems" style="color:var(--accent);">—</span></div>
+            <div style="font:400 9px var(--mono);color:var(--muted);">Triángulos: <span id="v3dStatTris" style="color:var(--accent);">—</span></div>
+          </div>
+          <!-- Panel Categorías -->
+          <div id="v3dCatsPanel" style="display:none;position:absolute;top:0;left:0;width:200px;height:100%;background:var(--blue);border-right:1px solid var(--border);flex-direction:column;z-index:20;">
+            <div style="padding:10px 12px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;">
+              <span style="font:600 9px var(--mono);color:var(--accent);text-transform:uppercase;letter-spacing:.15em;">Categorías</span>
+              <button onclick="v3dToggleCats()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:14px;">✕</button>
+            </div>
+            <div id="v3dCatsBody" style="flex:1;overflow-y:auto;padding:8px 0;"></div>
+          </div>
+          <!-- Panel Propiedades -->
+          <div id="v3dPropsPanel" style="display:none;position:absolute;top:0;right:0;width:240px;height:100%;background:var(--blue);border-left:1px solid var(--border);flex-direction:column;z-index:20;">
+            <div style="padding:10px 12px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;">
+              <span style="font:600 9px var(--mono);color:var(--accent);text-transform:uppercase;letter-spacing:.15em;">Propiedades BIM</span>
+              <button onclick="v3dToggleProps()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:14px;">✕</button>
+            </div>
+            <div id="v3dPropsBody" style="flex:1;overflow-y:auto;padding:10px 0;">
+              <div style="padding:0 12px;font:400 10px var(--mono);color:var(--muted);">Haz clic sobre un elemento para ver sus propiedades.</div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
     <div id="viewer-overlay"></div>
   </div>
@@ -1038,230 +1098,209 @@ function generarHTML(espNombre, ents, entsNoRev, est, modeloNombre, fecha) {
 }
 
 // ============================================================
-// VISOR 3D — IFCjs + Three.js
+// VISOR 3D — Three.js (mismo motor que explorer.html)
 // ============================================================
-var viewer3D = {
-  ifcAPI: null,
-  modelID: null,
-  renderer: null,
-  scene: null,
-  camera: null,
-  controls: null,
-  animFrame: null,
-  ready: false,
-  loading: false,
-  idsEsp: [],       // expressIDs de la especialidad (azul)
-  matEsp: null,
-  matBase: null,
-  subEsp: null,
-  subBase: null,
+var v3dRenderer=null, v3dScene=null, v3dCamera=null, v3dControls=null;
+var v3dRaycaster=null, v3dMouse=null;
+var v3dMeshes=[], v3dSelected=null, v3dCategories={}, v3dLoading=false;
 
-  init: function() {
-    if (this.renderer) return;
-    var canvas = document.getElementById('canvas3d');
-
-    // Renderer
-    this.renderer = new THREE.WebGLRenderer({canvas: canvas, antialias: true});
-    this.renderer.setPixelRatio(window.devicePixelRatio);
-    this.renderer.setSize(canvas.clientWidth, canvas.clientHeight);
-    this.renderer.setClearColor(0x1a1a2e);
-
-    // Scene
-    this.scene = new THREE.Scene();
-
-    // Luz
-    var ambient = new THREE.AmbientLight(0xffffff, 0.6);
-    this.scene.add(ambient);
-    var dir = new THREE.DirectionalLight(0xffffff, 0.8);
-    dir.position.set(50, 100, 50);
-    this.scene.add(dir);
-
-    // Camera
-    this.camera = new THREE.PerspectiveCamera(45, canvas.clientWidth/canvas.clientHeight, 0.1, 5000);
-    this.camera.position.set(20, 20, 20);
-
-    // Controls
-    this.controls = new THREE.OrbitControls(this.camera, this.renderer.domElement);
-    this.controls.enableDamping = true;
-    this.controls.dampingFactor = 0.07;
-
-    // Resize
-    var self = this;
-    window.addEventListener('resize', function() { self.onResize(); });
-
-    // Materiales
-    this.matEsp = new THREE.MeshLambertMaterial({color: 0x2196f3, side: THREE.DoubleSide});
-    this.matBase = new THREE.MeshLambertMaterial({color: 0x888888, transparent: true, opacity: 0.18, side: THREE.DoubleSide});
-
-    this.animate();
-  },
-
-  animate: function() {
-    var self = this;
-    this.animFrame = requestAnimationFrame(function(){ self.animate(); });
-    if (this.controls) this.controls.update();
-    if (this.renderer && this.scene && this.camera) {
-      this.renderer.render(this.scene, this.camera);
-    }
-  },
-
-  onResize: function() {
-    var canvas = document.getElementById('canvas3d');
-    if (!canvas || !this.renderer) return;
-    var w = canvas.clientWidth, h = canvas.clientHeight;
-    this.renderer.setSize(w, h);
-    if (this.camera) { this.camera.aspect = w/h; this.camera.updateProjectionMatrix(); }
-  },
-
-  setOverlay: function(msg) {
-    var el = document.getElementById('viewer-overlay');
-    if (msg) { el.textContent = msg; el.style.display = 'block'; }
-    else { el.style.display = 'none'; }
-  },
-
-  cargarModelo: async function(buffer, idsEspecialidad) {
-    if (this.loading) return;
-    this.loading = true;
-    this.idsEsp = idsEspecialidad || [];
-    this.setOverlay('Cargando modelo 3D...');
-
-    try {
-      // Cargar e inicializar web-ifc si aún no está listo
-      if (!this.ifcAPI) {
-        // Cargar via script type=module (único método que funciona con ESM)
-        if (!window._IfcAPI && window._loadWebIfc) {
-          await window._loadWebIfc();
-        }
-        if (!window._IfcAPI) {
-          throw new Error('No se pudo cargar web-ifc. Asegúrate de haber subido js/web-ifc-api.js al repositorio.');
-        }
-        var api = new window._IfcAPI();
-        // WASM: intentar local primero, luego CDN
-        var wasmBase = './wasm/';
-        try {
-          var wr = await fetch('./wasm/web-ifc.wasm', {method:'HEAD'});
-          if (!wr.ok) wasmBase = 'https://unpkg.com/web-ifc@0.0.74/';
-        } catch(e) { wasmBase = 'https://unpkg.com/web-ifc@0.0.74/'; }
-        api.SetWasmPath(wasmBase);
-        await api.Init();
-        this.ifcAPI = api;
-      }
-
-      // Limpiar escena anterior
-      if (this.modelID !== null) {
-        try { this.ifcAPI.CloseModel(this.modelID); } catch(e){}
-        this.modelID = null;
-      }
-      // Limpiar meshes
-      var toRemove = [];
-      this.scene.traverse(function(obj){ if(obj.isMesh) toRemove.push(obj); });
-      toRemove.forEach(function(obj){ obj.geometry.dispose(); obj.parent.remove(obj); });
-
-      // Cargar modelo
-      var data = new Uint8Array(buffer);
-      this.modelID = this.ifcAPI.OpenModel(data, {COORDINATE_TO_ORIGIN: true, OPTIMIZE_PROFILES: false});
-
-      // Set de IDs de especialidad para lookup O(1)
-      var espSet = {};
-      for (var i=0; i<this.idsEsp.length; i++) espSet[this.idsEsp[i]] = true;
-
-      this.setOverlay('Generando geometría...');
-
-      var self = this;
-      var posEsp = [], normEsp = [], posBase = [], normBase = [];
-      var bbox = new THREE.Box3();
-
-      this.ifcAPI.StreamAllMeshes(this.modelID, function(mesh) {
-        var placedGeoms = mesh.geometries;
-        var isEsp = !!espSet[mesh.expressID];
-        var target = isEsp ? {pos:posEsp, norm:normEsp} : {pos:posBase, norm:normBase};
-
-        for (var g=0; g<placedGeoms.size(); g++) {
-          var placedGeom = placedGeoms.get(g);
-          if (!placedGeom || !placedGeom.geometryExpressID) continue;
-
-          var verts, indices;
-          try {
-            var geom = self.ifcAPI.GetGeometry(self.modelID, placedGeom.geometryExpressID);
-            // Log diagnóstico solo una vez
-            if (!window._geomLogged) {
-              window._geomLogged = true;
-              try { console.log('geom proto:', Object.getOwnPropertyNames(Object.getPrototypeOf(geom))); } catch(e) {}
-              console.log('geom type:', geom && geom.constructor && geom.constructor.name);
-            }
-            var vPtr = geom.GetVertexData();
-            var vSize = geom.GetVertexDataSize();
-            var iPtr = geom.GetIndexData();
-            var iSize = geom.GetIndexSize();
-            if (vSize > 0 && iSize > 0) {
-              verts   = self.ifcAPI.GetVertexArray(vPtr, vSize);
-              indices = self.ifcAPI.GetIndexArray(iPtr, iSize);
-            }
-            if (geom.delete) geom.delete();
-          } catch(e) {
-            try {
-              verts   = placedGeom.vertexData;
-              indices = placedGeom.indexData;
-            } catch(e2) { continue; }
-          }
-
-          if (!verts || !verts.length || !indices || !indices.length) continue;
-
-          var matrix = new THREE.Matrix4().fromArray(placedGeom.flatTransformation);
-          var normalMatrix = new THREE.Matrix3().getNormalMatrix(matrix);
-
-          for (var idx=0; idx<indices.length; idx++) {
-            var vi = indices[idx] * 6;
-            var v = new THREE.Vector3(verts[vi], verts[vi+1], verts[vi+2]).applyMatrix4(matrix);
-            bbox.expandByPoint(v);
-            target.pos.push(v.x, v.y, v.z);
-            var n = new THREE.Vector3(verts[vi+3], verts[vi+4], verts[vi+5]).applyMatrix3(normalMatrix).normalize();
-            target.norm.push(n.x, n.y, n.z);
-          }
-        }
-      });
-
-      // Crear meshes
-      function buildMesh(pos, norm, mat) {
-        if (pos.length === 0) return null;
-        var geo = new THREE.BufferGeometry();
-        geo.setAttribute('position', new THREE.Float32BufferAttribute(new Float32Array(pos), 3));
-        geo.setAttribute('normal',   new THREE.Float32BufferAttribute(new Float32Array(norm), 3));
-        return new THREE.Mesh(geo, mat);
-      }
-
-      var meshBase = buildMesh(posBase, normBase, this.matBase);
-      var meshEsp  = buildMesh(posEsp,  normEsp,  this.matEsp);
-
-      if (meshBase) this.scene.add(meshBase);
-      if (meshEsp)  this.scene.add(meshEsp);
-
-      // Centrar cámara
-      if (!bbox.isEmpty()) {
-        var center = new THREE.Vector3();
-        bbox.getCenter(center);
-        var size = new THREE.Vector3();
-        bbox.getSize(size);
-        var maxDim = Math.max(size.x, size.y, size.z);
-        var fov = this.camera.fov * (Math.PI / 180);
-        var dist = Math.abs(maxDim / Math.sin(fov/2)) * 0.7;
-        this.camera.position.set(center.x + dist*0.6, center.y + dist*0.5, center.z + dist*0.6);
-        this.controls.target.copy(center);
-        this.controls.update();
-      }
-
-      var nEsp = posEsp.length/9, nBase = posBase.length/9;
-      this.setOverlay(nEsp + ' triángulos especialidad · ' + nBase + ' resto');
-      setTimeout(function(){ self.setOverlay(null); }, 3000);
-      this.ready = true;
-
-    } catch(err) {
-      this.setOverlay('Error al cargar modelo: ' + err.message);
-      console.error('IFC viewer error:', err);
-    }
-    this.loading = false;
+function v3dInit() {
+  if (v3dRenderer) return;
+  var canvas = document.getElementById('canvas3d');
+  var area   = document.getElementById('v3dArea');
+  var w = area.clientWidth || 800, h = area.clientHeight || 600;
+  v3dRenderer = new THREE.WebGLRenderer({canvas:canvas, antialias:true});
+  v3dRenderer.setPixelRatio(window.devicePixelRatio);
+  v3dRenderer.setClearColor(0x050b14);
+  v3dRenderer.setSize(w, h);
+  v3dScene = new THREE.Scene();
+  v3dCamera = new THREE.PerspectiveCamera(45, w/h, 0.1, 5000);
+  v3dCamera.position.set(20, 15, 20);
+  v3dControls = new THREE.OrbitControls(v3dCamera, v3dRenderer.domElement);
+  v3dControls.enableDamping = true;
+  v3dControls.dampingFactor = 0.07;
+  v3dScene.add(new THREE.AmbientLight(0xffffff, 0.5));
+  var dir = new THREE.DirectionalLight(0xffffff, 0.8);
+  dir.position.set(50, 100, 50); v3dScene.add(dir);
+  v3dScene.add(new THREE.GridHelper(100, 50, 0x1a2a40, 0x1a2a40));
+  v3dRaycaster = new THREE.Raycaster();
+  v3dMouse = new THREE.Vector2();
+  v3dRenderer.domElement.addEventListener('click', v3dOnClick);
+  v3dRenderer.domElement.addEventListener('mousemove', v3dOnMouseMove);
+  window.addEventListener('resize', v3dResize);
+  (function loop(){ requestAnimationFrame(loop);
+    if(v3dControls) v3dControls.update();
+    if(v3dRenderer) v3dRenderer.render(v3dScene, v3dCamera); })();
+}
+function v3dResize() {
+  var area = document.getElementById('v3dArea');
+  if (!v3dRenderer || !area) return;
+  var w = area.clientWidth, h = area.clientHeight;
+  if (!w || !h) return;
+  v3dRenderer.setSize(w, h);
+  if (v3dCamera) { v3dCamera.aspect = w/h; v3dCamera.updateProjectionMatrix(); }
+}
+function v3dSetNavMode(el, mode) {
+  document.querySelectorAll('#viewerToolbar3d .vt-btn-group:first-child .vt-btn').forEach(function(b){b.classList.remove('active');});
+  el.classList.add('active');
+  if (v3dControls) { v3dControls.enableRotate = mode==='orbit'; v3dControls.enablePan = mode==='pan'; }
+}
+function v3dSetCam(view) {
+  if (!v3dCamera || !v3dControls) return;
+  var bbox = new THREE.Box3(); v3dMeshes.forEach(function(m){bbox.expandByObject(m);});
+  var center = bbox.isEmpty() ? new THREE.Vector3() : bbox.getCenter(new THREE.Vector3());
+  var size = bbox.isEmpty() ? 30 : bbox.getSize(new THREE.Vector3()).length();
+  var d = size * 1.5;
+  if (view==='top') v3dCamera.position.set(center.x, center.y+d, center.z);
+  else if (view==='front') v3dCamera.position.set(center.x, center.y, center.z+d);
+  else v3dCamera.position.set(center.x+d*.6, center.y+d*.5, center.z+d*.6);
+  v3dControls.target.copy(center); v3dControls.update();
+}
+function v3dToggleCats() {
+  var p = document.getElementById('v3dCatsPanel');
+  p.style.display = p.style.display==='flex' ? 'none' : 'flex';
+}
+function v3dToggleProps() {
+  var p = document.getElementById('v3dPropsPanel');
+  p.style.display = p.style.display==='flex' ? 'none' : 'flex';
+}
+function v3dOnClick(e) {
+  if (!v3dRenderer || !v3dMeshes.length) return;
+  var rect = v3dRenderer.domElement.getBoundingClientRect();
+  v3dMouse.x = ((e.clientX-rect.left)/rect.width)*2-1;
+  v3dMouse.y = -((e.clientY-rect.top)/rect.height)*2+1;
+  v3dRaycaster.setFromCamera(v3dMouse, v3dCamera);
+  if (v3dSelected) { v3dSelected.material.emissive=new THREE.Color(0,0,0); v3dSelected=null; }
+  var hits = v3dRaycaster.intersectObjects(v3dMeshes);
+  if (hits.length) {
+    v3dSelected = hits[0].object;
+    v3dSelected.material.emissive = new THREE.Color(0, 0.3, 0.4);
+    v3dMostrarProps(v3dSelected);
+    document.getElementById('v3dPropsPanel').style.display = 'flex';
   }
-};
+}
+function v3dOnMouseMove(e) {
+  var rect = v3dRenderer.domElement.getBoundingClientRect();
+  // solo coordenadas de pantalla como referencia
+}
+function v3dMostrarProps(mesh) {
+  var cls = mesh.userData.cls || 'Desconocido';
+  var ids = mesh.userData.ids || [];
+  var isEsp = mesh.userData.isEsp;
+  var html = '<div style="padding:0 12px 10px;">'
+    +'<div style="font:700 8px var(--mono);color:var(--muted);text-transform:uppercase;letter-spacing:.15em;margin-bottom:8px;">Entidad IFC</div>'
+    +'<div style="display:flex;gap:6px;padding:4px 0;border-bottom:1px solid rgba(26,42,64,.5);">'
+    +'<div style="font:400 9px var(--mono);color:var(--muted);flex:1;">Clase</div>'
+    +'<div style="font:600 9px var(--mono);color:var(--text);flex:1;text-align:right;">'+cls+'</div></div>'
+    +'<div style="display:flex;gap:6px;padding:4px 0;border-bottom:1px solid rgba(26,42,64,.5);">'
+    +'<div style="font:400 9px var(--mono);color:var(--muted);flex:1;">Elementos</div>'
+    +'<div style="font:600 9px var(--mono);color:var(--text);flex:1;text-align:right;">'+ids.length+'</div></div>'
+    +(isEsp ? '<div style="margin-top:6px;font:600 9px var(--mono);color:var(--accent);">✓ Especialidad seleccionada</div>' : '')
+    +'</div>';
+  document.getElementById('v3dPropsBody').innerHTML = html;
+}
+function v3dActualizarCategorias() {
+  var html = '';
+  Object.keys(v3dCategories).forEach(function(cls){
+    var cat = v3dCategories[cls];
+    html += '<div style="display:flex;align-items:center;gap:8px;padding:6px 12px;cursor:pointer;">'
+      +'<input type="checkbox" '+(cat.visible?'checked':'')
+      +' onchange="v3dToggleCategoria(\''+cls+'\',this.checked)" style="accent-color:var(--accent);cursor:pointer;">'
+      +'<div style="font:400 10px var(--mono);color:var(--text);flex:1;">'+cls+'</div>'
+      +'<div style="font:400 9px var(--mono);color:var(--muted);">'+cat.count+'</div>'
+      +'</div>';
+  });
+  document.getElementById('v3dCatsBody').innerHTML = html || '<div style="padding:10px 12px;font:400 10px var(--mono);color:var(--muted);">Sin categorías</div>';
+}
+function v3dToggleCategoria(cls, visible) {
+  if (v3dCategories[cls]) { v3dCategories[cls].mesh.visible = visible; v3dCategories[cls].visible = visible; }
+}
+async function v3dCargarModelo(buffer, idsEspecialidad) {
+  if (v3dLoading) return;
+  v3dLoading = true;
+  var loading = document.getElementById('v3dLoading');
+  var loadText = document.getElementById('v3dLoadText');
+  loading.style.display = 'flex';
+  loadText.textContent = 'Inicializando web-ifc...';
+  try {
+    if (!window._IfcAPI && window._loadWebIfc) await window._loadWebIfc();
+    if (!window._IfcAPI) throw new Error('web-ifc no disponible');
+    var api = new window._IfcAPI();
+    var wasmBase = './wasm/';
+    try { var r=await fetch('./wasm/web-ifc.wasm',{method:'HEAD'}); if(!r.ok) wasmBase='https://unpkg.com/web-ifc@0.0.74/'; }
+    catch(e){ wasmBase='https://unpkg.com/web-ifc@0.0.74/'; }
+    api.SetWasmPath(wasmBase);
+    await api.Init();
+    loadText.textContent = 'Cargando geometría...';
+    v3dMeshes.forEach(function(m){m.geometry.dispose(); v3dScene.remove(m);});
+    v3dMeshes=[]; v3dCategories={};
+    var espSet = {};
+    (idsEspecialidad||[]).forEach(function(id){espSet[id]=true;});
+    var modelID = api.OpenModel(new Uint8Array(buffer), {COORDINATE_TO_ORIGIN:true, OPTIMIZE_PROFILES:false});
+    var catColors = {
+      IFCWALL:[0.4,0.7,1],IFCWALLSTANDARDCASE:[0.4,0.7,1],IFCSLAB:[0.6,0.6,0.8],
+      IFCCOLUMN:[1,0.8,0.3],IFCBEAM:[1,0.6,0.2],IFCDOOR:[0.3,1,0.6],
+      IFCWINDOW:[0.2,0.9,1],IFCROOF:[0.8,0.4,0.4],DEFAULT:[0.5,0.6,0.7]
+    };
+    var catData = {};
+    api.StreamAllMeshes(modelID, function(mesh) {
+      var geoms = mesh.geometries;
+      var isEsp = !!espSet[mesh.expressID];
+      var cls = 'DEFAULT';
+      try { var l=api.GetLine(modelID,mesh.expressID,false); if(l&&l.constructor)cls=l.constructor.name.toUpperCase(); } catch(e){}
+      var key = isEsp ? '★ '+cls : cls;
+      if (!catData[key]) catData[key]={positions:[],normals:[],ids:[],isEsp:isEsp,cls:cls};
+      for (var g=0;g<geoms.size();g++) {
+        var pg=geoms.get(g); if(!pg||!pg.geometryExpressID) continue;
+        try {
+          var geom=api.GetGeometry(modelID,pg.geometryExpressID);
+          var verts=api.GetVertexArray(geom.GetVertexData(),geom.GetVertexDataSize());
+          var idx=api.GetIndexArray(geom.GetIndexData(),geom.GetIndexSize());
+          var mat=new THREE.Matrix4(); mat.fromArray(pg.flatTransformation);
+          for(var i=0;i<idx.length;i+=3) for(var j=0;j<3;j++){
+            var vi=idx[i+j]*6;
+            var v=new THREE.Vector3(verts[vi],verts[vi+1],verts[vi+2]).applyMatrix4(mat);
+            catData[key].positions.push(v.x,v.y,v.z);
+            catData[key].normals.push(verts[vi+3],verts[vi+4],verts[vi+5]);
+          }
+          if(geom.delete) geom.delete();
+        } catch(e){}
+      }
+      catData[key].ids.push(mesh.expressID);
+    });
+    Object.keys(catData).forEach(function(key){
+      var cd=catData[key]; if(!cd.positions.length) return;
+      var col = cd.isEsp ? [0.13,0.82,1] : (catColors[cd.cls]||catColors.DEFAULT);
+      var geo=new THREE.BufferGeometry();
+      geo.setAttribute('position',new THREE.Float32BufferAttribute(cd.positions,3));
+      geo.setAttribute('normal',new THREE.Float32BufferAttribute(cd.normals,3));
+      var matOpts={color:new THREE.Color(col[0],col[1],col[2]),side:THREE.DoubleSide};
+      if(!cd.isEsp){matOpts.transparent=true;matOpts.opacity=0.25;}
+      var mat=new THREE.MeshLambertMaterial(matOpts);
+      var m=new THREE.Mesh(geo,mat);
+      m.userData={cls:key,ids:cd.ids,isEsp:cd.isEsp,originalColor:new THREE.Color(col[0],col[1],col[2])};
+      v3dScene.add(m); v3dMeshes.push(m);
+      v3dCategories[key]={mesh:m,visible:true,count:cd.ids.length};
+    });
+    api.CloseModel(modelID);
+    var bbox=new THREE.Box3(); v3dMeshes.forEach(function(m){bbox.expandByObject(m);});
+    if(!bbox.isEmpty()){
+      var center=bbox.getCenter(new THREE.Vector3());
+      var size=bbox.getSize(new THREE.Vector3()).length();
+      v3dControls.target.copy(center);
+      v3dCamera.position.set(center.x+size*.7,center.y+size*.5,center.z+size*.7);
+      v3dControls.update();
+    }
+    document.getElementById('v3dStatElems').textContent = v3dMeshes.length;
+    document.getElementById('v3dStatTris').textContent = v3dMeshes.reduce(function(s,m){return s+(m.geometry.attributes.position.count/3|0);},0).toLocaleString();
+    document.getElementById('v3dStatus').textContent = 'Modelo cargado';
+    v3dActualizarCategorias();
+    loading.style.display = 'none';
+  } catch(err) {
+    loading.style.display = 'none';
+    document.getElementById('v3dStatus').textContent = 'Error: '+err.message;
+    console.error(err);
+  }
 
 // ============================================================
 // TOGGLE REPORTE / 3D
@@ -1270,41 +1309,27 @@ var currentMode = 'report';
 
 function setMode(mode) {
   currentMode = mode;
-  var frame   = document.getElementById('vframe');
-  var canvas  = document.getElementById('canvas3d');
-  var btnR    = document.getElementById('btnModeReport');
-  var btnB    = document.getElementById('btnModeBoth');
-  var btn3D   = document.getElementById('btnMode3D');
-
-  // Resetear clases
+  var frame  = document.getElementById('vframe');
+  var wrap3d = document.getElementById('canvas3dWrap');
+  var btnR   = document.getElementById('btnModeReport');
+  var btnB   = document.getElementById('btnModeBoth');
+  var btn3D  = document.getElementById('btnMode3D');
   frame.classList.remove('show','split');
-  canvas.classList.remove('show','split');
-  btnR.classList.remove('active');
-  btnB.classList.remove('active');
-  btn3D.classList.remove('active');
+  wrap3d.classList.remove('show','split');
+  [btnR,btnB,btn3D].forEach(function(b){b.classList.remove('active');});
   document.getElementById('viewContent').classList.remove('split-mode');
-
   if (mode === 'report') {
-    frame.classList.add('show');
-    btnR.classList.add('active');
+    frame.classList.add('show'); btnR.classList.add('active');
   } else if (mode === '3d') {
-    canvas.classList.add('show');
-    btn3D.classList.add('active');
-    viewer3D.init();
-    viewer3D.onResize();
-    if (pendingBuffer && !viewer3D.ready && !viewer3D.loading) {
-      viewer3D.cargarModelo(pendingBuffer, pendingIdsEsp);
-    }
+    wrap3d.classList.add('show'); btn3D.classList.add('active');
+    requestAnimationFrame(function(){ v3dInit(); v3dResize();
+      if (pendingBuffer && !v3dLoading) v3dCargarModelo(pendingBuffer, pendingIdsEsp); });
   } else if (mode === 'both') {
-    frame.classList.add('show','split');
-    canvas.classList.add('show','split');
+    frame.classList.add('show','split'); wrap3d.classList.add('show','split');
     btnB.classList.add('active');
     document.getElementById('viewContent').classList.add('split-mode');
-    viewer3D.init();
-    viewer3D.onResize();
-    if (pendingBuffer && !viewer3D.ready && !viewer3D.loading) {
-      viewer3D.cargarModelo(pendingBuffer, pendingIdsEsp);
-    }
+    requestAnimationFrame(function(){ v3dInit(); v3dResize();
+      if (pendingBuffer && !v3dLoading) v3dCargarModelo(pendingBuffer, pendingIdsEsp); });
   }
 }
 
@@ -1379,7 +1404,7 @@ function procesar(){
   document.getElementById("btnGen").disabled=true;
 
   // Reset visor 3D para el nuevo modelo
-  viewer3D.ready = false;
+  v3dLoading = false;
   pendingBuffer = null;
   pendingIdsEsp = [];
 
@@ -1447,10 +1472,9 @@ function procesar(){
   var readerBuf = new FileReader();
   readerBuf.onload = function(e){
     pendingBuffer = e.target.result;
-    // Si el usuario ya cambió a modo 3D, iniciar carga
-    if (currentMode === '3d') {
-      viewer3D.init();
-      viewer3D.cargarModelo(pendingBuffer, pendingIdsEsp);
+    if (currentMode === '3d' || currentMode === 'both') {
+      v3dInit();
+      v3dCargarModelo(pendingBuffer, pendingIdsEsp);
     }
   };
   readerBuf.readAsArrayBuffer(selFile);
@@ -1478,7 +1502,7 @@ function handleFile(file){
   document.getElementById("vempty").style.display="";
   document.getElementById("rlist").innerHTML="";
   if(typeof currentBlobUrl!=="undefined"&&currentBlobUrl){URL.revokeObjectURL(currentBlobUrl);currentBlobUrl=null;}
-  pendingBuffer=null; pendingIdsEsp=[]; viewer3D.ready=false;
+  pendingBuffer=null; pendingIdsEsp=[]; v3dLoading=false;
 }
 
 poblarDropdown();
