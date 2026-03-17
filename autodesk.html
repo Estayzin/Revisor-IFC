@@ -4,7 +4,7 @@
   Autor:    Carlos Estay Ruggieri
   Contacto: c.estay@outlook.com
   Rol:      Coordinación BIM
-  Versión:  2.0 | 2026
+  Versión:  3.0 | 2026
   Repo:     https://github.com/Estayzin/Revisor-IFC
   Licencia: MIT — ver LICENSE en el repositorio
   ============================================================
@@ -27,74 +27,395 @@
   --accent2:#7c4dff; --warn:#ff6b35; --aps:#0090ff;
 }
 *,*::before,*::after { box-sizing:border-box; margin:0; padding:0; }
-html,body { height:100%; }
+html,body { height:100%; overflow:hidden; }
 body { font-family:var(--sans); background:var(--bg); color:var(--text); display:flex; flex-direction:column; height:100vh; }
 header { background:var(--navy); padding:11px 24px; display:flex; align-items:center; gap:14px; border-bottom:2px solid var(--aps); flex-shrink:0; }
 .hicon { width:34px; height:34px; background:linear-gradient(135deg,var(--aps),var(--accent2)); border-radius:6px; display:flex; align-items:center; justify-content:center; font-size:16px; }
 .hback { margin-left:auto; padding:5px 12px; background:transparent; color:var(--muted); border:1px solid var(--border); border-radius:4px; font:600 9px var(--mono); cursor:pointer; text-transform:uppercase; letter-spacing:.1em; text-decoration:none; transition:all .15s; }
 .hback:hover { border-color:var(--aps); color:var(--aps); }
-.main { flex:1; display:flex; align-items:center; justify-content:center; padding:40px; }
-.content { max-width:600px; text-align:center; }
-.big-icon { font-size:64px; margin-bottom:24px; opacity:.4; }
-.title { font:700 28px var(--sans); color:var(--text); margin-bottom:12px; }
-.title span { color:var(--aps); }
-.desc { font:400 13px var(--mono); color:var(--muted); line-height:1.8; margin-bottom:32px; }
-.features { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:32px; text-align:left; }
-.feature { background:var(--card); border:1px solid var(--border); border-radius:8px; padding:16px; }
-.feature-icon { font-size:20px; margin-bottom:8px; }
-.feature-title { font:600 11px var(--mono); color:var(--text); margin-bottom:4px; }
-.feature-desc { font:400 9px var(--mono); color:var(--muted); line-height:1.6; }
-.status-badge { display:inline-flex; align-items:center; gap:8px; padding:8px 16px; background:rgba(124,77,255,.08); border:1px solid rgba(124,77,255,.2); border-radius:20px; font:600 10px var(--mono); color:var(--accent2); text-transform:uppercase; letter-spacing:.12em; }
-.status-dot { width:6px; height:6px; border-radius:50%; background:var(--accent2); animation:pulse 2s infinite; }
-@keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.5;transform:scale(.8)} }
 </style>
+/* LAYOUT */
+.workspace { display:flex; flex:1; overflow:hidden; }
+/* PANEL IZQUIERDO — árbol de proyectos */
+.panel-left { width:280px; flex-shrink:0; background:var(--blue); border-right:1px solid var(--border); display:flex; flex-direction:column; overflow:hidden; }
+.pl-header { padding:12px 16px; border-bottom:1px solid var(--border); flex-shrink:0; }
+.pl-title { font:700 9px var(--mono); color:var(--muted); text-transform:uppercase; letter-spacing:.2em; margin-bottom:10px; }
+.btn-login { width:100%; padding:10px; background:var(--aps); color:#fff; border:none; border-radius:6px; font:700 11px var(--mono); cursor:pointer; letter-spacing:.08em; text-transform:uppercase; transition:all .15s; display:flex; align-items:center; justify-content:center; gap:8px; }
+.btn-login:hover { background:#0077dd; box-shadow:0 0 20px rgba(0,144,255,.3); }
+.btn-login.connected { background:rgba(0,200,83,.15); color:var(--green); border:1px solid rgba(0,200,83,.3); cursor:default; }
+.user-info { margin-top:10px; padding:8px 10px; background:var(--navy); border-radius:5px; border:1px solid var(--border); }
+.user-name { font:600 11px var(--mono); color:var(--text); }
+.user-email { font:400 9px var(--mono); color:var(--muted); margin-top:2px; }
+/* Árbol de proyectos */
+.tree { flex:1; overflow-y:auto; padding:8px 0; }
+.tree-section { padding:6px 16px 3px; font:700 8px var(--mono); color:var(--muted); text-transform:uppercase; letter-spacing:.2em; }
+.tree-item { display:flex; align-items:center; gap:8px; padding:6px 16px; cursor:pointer; transition:background .12s; border-left:2px solid transparent; }
+.tree-item:hover { background:rgba(0,144,255,.06); }
+.tree-item.active { background:rgba(0,144,255,.1); border-left-color:var(--aps); }
+.tree-item.disabled { opacity:.4; cursor:default; }
+.tree-icon { font-size:13px; flex-shrink:0; }
+.tree-info { flex:1; min-width:0; }
+.tree-name { font:500 11px var(--mono); color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.tree-meta { font:400 9px var(--mono); color:var(--muted); margin-top:1px; }
+.tree-badge { font:700 8px var(--mono); padding:2px 5px; border-radius:3px; flex-shrink:0; background:rgba(0,144,255,.1); color:var(--aps); }
+/* PANEL DERECHO — visor */
+.panel-right { flex:1; display:flex; flex-direction:column; overflow:hidden; background:var(--bg); }
+/* Toolbar del visor */
+.viewer-toolbar { padding:8px 16px; background:var(--navy); border-bottom:1px solid var(--border); display:flex; align-items:center; gap:10px; flex-shrink:0; }
+.vt-title { font:600 11px var(--mono); color:var(--text); flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; letter-spacing:.05em; text-transform:uppercase; }
+.vt-badge { font:600 9px var(--mono); padding:3px 8px; border-radius:3px; background:rgba(0,144,255,.1); color:var(--aps); border:1px solid rgba(0,144,255,.2); }
+/* Área del visor de Autodesk */
+#forgeViewer { flex:1; width:100%; position:relative; }
+/* Estado vacío */
+.viewer-empty { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:16px; color:var(--muted); }
+.viewer-empty .eicon { font-size:48px; opacity:.15; }
+.viewer-empty p { font:400 11px var(--mono); letter-spacing:.08em; text-transform:uppercase; }
+.viewer-empty .hint { font:400 10px var(--mono); color:var(--muted); opacity:.5; max-width:280px; text-align:center; line-height:1.6; }
+/* Loading */
+.loading-overlay { position:absolute; inset:0; background:rgba(10,15,30,.9); display:none; flex-direction:column; align-items:center; justify-content:center; gap:14px; z-index:100; }
+.loading-overlay.show { display:flex; }
+.load-spinner { width:36px; height:36px; border:2px solid rgba(0,144,255,.2); border-top-color:var(--aps); border-radius:50%; animation:spin .8s linear infinite; }
+.load-text { font:400 10px var(--mono); color:var(--muted); letter-spacing:.1em; text-transform:uppercase; }
+@keyframes spin { to { transform:rotate(360deg); } }
+@keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.5;transform:scale(.8)} }
+/* Estado de conexión */
+.conn-dot { width:7px; height:7px; border-radius:50%; background:var(--muted); flex-shrink:0; }
+.conn-dot.connected { background:var(--green); animation:pulse 2s infinite; }
+</style>
+<!-- Autodesk Viewer SDK -->
+<link rel="stylesheet" href="https://developer.api.autodesk.com/modelderivative/v2/viewers/7.*/style.css">
+<script src="https://developer.api.autodesk.com/modelderivative/v2/viewers/7.*/viewer3D.min.js"></script>
 </head>
 <body>
 <script>
 if (sessionStorage.getItem('ifc_auth') !== '1' && window.location.protocol !== 'file:') window.location.href = 'index.html';
 </script>
 <header>
-  <div class="hicon">🔗</div>
+  <div class="hicon">&#128279;</div>
   <div>
     <div style="font:600 13px var(--mono);color:#e0f0ff;letter-spacing:.05em;text-transform:uppercase;">Autodesk Platform Services</div>
-    <div style="font:400 10px var(--mono);color:var(--muted);margin-top:1px;">Revisión de modelos RVT · BIM 360 · ACC</div>
+    <div style="font:400 10px var(--mono);color:var(--muted);margin-top:1px;">Visor de modelos RVT &middot; BIM 360 &middot; ACC</div>
   </div>
-  <a href="index.html" class="hback">← Portal</a>
+  <div style="display:flex;align-items:center;gap:8px;margin-left:auto;">
+    <div class="conn-dot" id="connDot"></div>
+    <span id="connStatus" style="font:400 9px var(--mono);color:var(--muted);">Sin conexi&oacute;n</span>
+  </div>
+  <a href="index.html" class="hback">&#8592; Portal</a>
 </header>
-<div class="main">
-  <div class="content">
-    <div class="big-icon">🔗</div>
-    <div class="title">Módulo <span>Autodesk APS</span></div>
-    <div class="desc">
-      Este módulo permitirá conectarse directamente a Autodesk Platform Services para revisar modelos Revit (.rvt) y acceder a proyectos alojados en BIM 360 o Autodesk Construction Cloud sin necesidad de descargar archivos.
-    </div>
-    <div class="features">
-      <div class="feature">
-        <div class="feature-icon">📐</div>
-        <div class="feature-title">Modelos Revit</div>
-        <div class="feature-desc">Revisión directa de archivos .rvt via Model Derivative API sin conversión manual.</div>
-      </div>
-      <div class="feature">
-        <div class="feature-icon">☁️</div>
-        <div class="feature-title">BIM 360 / ACC</div>
-        <div class="feature-desc">Acceso a proyectos alojados en la nube de Autodesk sin descargar archivos localmente.</div>
-      </div>
-      <div class="feature">
-        <div class="feature-icon">🔐</div>
-        <div class="feature-title">OAuth 2.0</div>
-        <div class="feature-desc">Autenticación segura con cuenta Autodesk. Requiere acceso a APS Developer Portal.</div>
-      </div>
-      <div class="feature">
-        <div class="feature-icon">📊</div>
-        <div class="feature-title">Reportes BIM</div>
-        <div class="feature-desc">Generación de reportes de entidades desde metadatos del modelo en la nube.</div>
+
+<div class="workspace">
+  <!-- PANEL IZQUIERDO -->
+  <div class="panel-left">
+    <div class="pl-header">
+      <div class="pl-title">Autodesk Account</div>
+      <button class="btn-login" id="btnLogin" onclick="iniciarLogin()">
+        <span>&#128279;</span> Conectar con Autodesk
+      </button>
+      <div class="user-info" id="userInfo" style="display:none;">
+        <div class="user-name" id="userName">-</div>
+        <div class="user-email" id="userEmail">-</div>
       </div>
     </div>
-    <div class="status-badge"><div class="status-dot"></div>En desarrollo &middot; Requiere credenciales APS</div>
+    <div class="tree" id="projectTree">
+      <div style="padding:20px 16px;text-align:center;">
+        <div style="font:400 10px var(--mono);color:var(--muted);line-height:1.8;">
+          Conecta tu cuenta Autodesk para ver tus proyectos BIM 360 / ACC
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PANEL DERECHO -->
+  <div class="panel-right">
+    <div class="viewer-toolbar" id="viewerToolbar" style="display:none;">
+      <span class="vt-title" id="viewerTitle">Sin modelo</span>
+      <span class="vt-badge" id="viewerBadge">APS Viewer</span>
+    </div>
+    <div id="viewerContainer" style="flex:1;position:relative;display:flex;flex-direction:column;">
+      <div class="viewer-empty" id="viewerEmpty">
+        <div class="eicon">&#127959;</div>
+        <p>Selecciona un modelo</p>
+        <div class="hint">Conecta tu cuenta Autodesk y selecciona un modelo RVT de tus proyectos BIM 360 o ACC</div>
+      </div>
+      <div id="forgeViewer" style="flex:1;display:none;"></div>
+      <div class="loading-overlay" id="loadingOverlay">
+        <div class="load-spinner"></div>
+        <div class="load-text" id="loadText">Cargando...</div>
+      </div>
+    </div>
   </div>
 </div>
-<footer style="text-align:center;padding:10px;font:400 9px var(--mono);color:var(--muted);border-top:1px solid var(--border);letter-spacing:.08em;">
+
+<footer style="text-align:center;padding:6px;font:400 9px var(--mono);color:var(--muted);border-top:1px solid var(--border);letter-spacing:.08em;flex-shrink:0;">
   &copy; 2026 Carlos Estay Ruggieri &mdash; Coordinaci&oacute;n BIM &mdash; MIT License
 </footer>
+<script>
+// ============================================================
+// CONFIGURACIÓN APS
+// ============================================================
+var APS_CLIENT_ID = 'kOJ4igA0Lm8a9ZHA3KGkATKASthAdjiWBjY9ventTQBnGVab';
+var APS_CALLBACK  = 'https://revisor-ifc-pages.pages.dev/autodesk.html';
+var APS_SCOPES    = 'data:read data:write viewables:read';
+var apsToken      = null;
+var viewer        = null;
+
+// ============================================================
+// OAUTH — Detectar token en URL tras callback
+// ============================================================
+(function detectCallback() {
+  // Intentar extraer access_token de hash (implicit flow) o code (authorization code)
+  var hash   = window.location.hash.substring(1);
+  var params = new URLSearchParams(hash);
+  var token  = params.get('access_token');
+
+  if (token) {
+    apsToken = token;
+    sessionStorage.setItem('aps_token', token);
+    window.history.replaceState({}, document.title, window.location.pathname);
+    onTokenReady();
+    return;
+  }
+
+  // Intentar desde sessionStorage (token ya guardado)
+  var stored = sessionStorage.getItem('aps_token');
+  if (stored) {
+    apsToken = stored;
+    onTokenReady();
+  }
+})();
+
+function iniciarLogin() {
+  var url = 'https://developer.api.autodesk.com/authentication/v2/authorize'
+    + '?response_type=token'
+    + '&client_id=' + encodeURIComponent(APS_CLIENT_ID)
+    + '&redirect_uri=' + encodeURIComponent(APS_CALLBACK)
+    + '&scope=' + encodeURIComponent(APS_SCOPES);
+  window.location.href = url;
+}
+
+function cerrarSesion() {
+  sessionStorage.removeItem('aps_token');
+  apsToken = null;
+  document.getElementById('btnLogin').innerHTML = '<span>&#128279;</span> Conectar con Autodesk';
+  document.getElementById('btnLogin').className = 'btn-login';
+  document.getElementById('btnLogin').onclick = iniciarLogin;
+  document.getElementById('userInfo').style.display = 'none';
+  document.getElementById('connDot').className = 'conn-dot';
+  document.getElementById('connStatus').textContent = 'Sin conexión';
+  document.getElementById('projectTree').innerHTML = '<div style="padding:20px 16px;text-align:center;"><div style="font:400 10px var(--mono);color:var(--muted);line-height:1.8;">Conecta tu cuenta Autodesk para ver tus proyectos BIM 360 / ACC</div></div>';
+}
+
+// ============================================================
+// TRAS OBTENER TOKEN — cargar usuario y hubs
+// ============================================================
+async function onTokenReady() {
+  mostrarLoading('Obteniendo información de usuario...');
+  try {
+    // Obtener perfil del usuario
+    var res = await fetch('https://api.userprofile.autodesk.com/userinfo', {
+      headers: { 'Authorization': 'Bearer ' + apsToken }
+    });
+    if (!res.ok) throw new Error('Token inválido o expirado');
+    var user = await res.json();
+
+    document.getElementById('userName').textContent  = user.name || user.given_name + ' ' + user.family_name;
+    document.getElementById('userEmail').textContent = user.email;
+    document.getElementById('userInfo').style.display = 'block';
+    document.getElementById('btnLogin').innerHTML  = '&#10003; Conectado &mdash; Cerrar sesi&oacute;n';
+    document.getElementById('btnLogin').className  = 'btn-login connected';
+    document.getElementById('btnLogin').onclick    = cerrarSesion;
+    document.getElementById('connDot').className   = 'conn-dot connected';
+    document.getElementById('connStatus').textContent = user.name || 'Conectado';
+
+    ocultarLoading();
+    cargarHubs();
+  } catch(e) {
+    ocultarLoading();
+    sessionStorage.removeItem('aps_token');
+    mostrarError('Error de autenticación: ' + e.message);
+  }
+}
+
+// ============================================================
+// CARGAR HUBS (BIM 360 / ACC)
+// ============================================================
+async function cargarHubs() {
+  mostrarLoading('Cargando hubs...');
+  try {
+    var res = await fetch('https://developer.api.autodesk.com/project/v1/hubs', {
+      headers: { 'Authorization': 'Bearer ' + apsToken }
+    });
+    var data = await res.json();
+    var hubs = data.data || [];
+    ocultarLoading();
+
+    if (!hubs.length) {
+      document.getElementById('projectTree').innerHTML = '<div style="padding:16px;font:400 10px var(--mono);color:var(--muted);">No se encontraron hubs en tu cuenta.</div>';
+      return;
+    }
+
+    var html = '';
+    hubs.forEach(function(hub) {
+      var tipo = hub.attributes.extension.type.includes('a360') ? '&#9729;&#65039; A360' : '&#128736;&#65039; ACC/BIM360';
+      html += '<div class="tree-section">' + (hub.attributes.name || 'Hub') + '</div>';
+      html += '<div class="tree-item" onclick="cargarProyectos(\'' + hub.id + '\', this)">'
+            + '<div class="tree-icon">&#127968;</div>'
+            + '<div class="tree-info"><div class="tree-name">' + (hub.attributes.name || hub.id) + '</div>'
+            + '<div class="tree-meta">' + tipo + '</div></div>'
+            + '<div class="tree-badge">HUB</div>'
+            + '</div>';
+    });
+    document.getElementById('projectTree').innerHTML = html;
+  } catch(e) {
+    ocultarLoading();
+    mostrarError('Error cargando hubs: ' + e.message);
+  }
+}
+
+// ============================================================
+// CARGAR PROYECTOS DE UN HUB
+// ============================================================
+async function cargarProyectos(hubId, el) {
+  document.querySelectorAll('.tree-item').forEach(i => i.classList.remove('active'));
+  el.classList.add('active');
+  mostrarLoading('Cargando proyectos...');
+  try {
+    var res = await fetch('https://developer.api.autodesk.com/project/v1/hubs/' + hubId + '/projects', {
+      headers: { 'Authorization': 'Bearer ' + apsToken }
+    });
+    var data = await res.json();
+    var proyectos = data.data || [];
+    ocultarLoading();
+
+    var hubHtml = el.parentElement.innerHTML;
+    var html = document.getElementById('projectTree').innerHTML;
+
+    // Insertar proyectos debajo del hub
+    var subsHtml = '';
+    proyectos.forEach(function(proj) {
+      var rootId = proj.relationships.rootFolder.data.id;
+      subsHtml += '<div class="tree-item" style="padding-left:28px;" onclick="cargarModelos(\'' + proj.id + '\',\'' + hubId + '\',\'' + rootId + '\', this)">'
+               + '<div class="tree-icon">&#128193;</div>'
+               + '<div class="tree-info"><div class="tree-name">' + (proj.attributes.name || proj.id) + '</div>'
+               + '<div class="tree-meta">Proyecto</div></div>'
+               + '</div>';
+    });
+
+    // Insertar después del item del hub
+    var parser = new DOMParser();
+    var doc = parser.parseFromString(document.getElementById('projectTree').innerHTML, 'text/html');
+    el.insertAdjacentHTML('afterend', subsHtml);
+  } catch(e) {
+    ocultarLoading();
+    mostrarError('Error cargando proyectos: ' + e.message);
+  }
+}
+
+// ============================================================
+// CARGAR MODELOS DE UN PROYECTO
+// ============================================================
+async function cargarModelos(projectId, hubId, folderId, el) {
+  document.querySelectorAll('.tree-item').forEach(i => i.classList.remove('active'));
+  el.classList.add('active');
+  mostrarLoading('Cargando modelos...');
+  try {
+    var res = await fetch('https://developer.api.autodesk.com/data/v1/projects/' + projectId + '/folders/' + folderId + '/contents', {
+      headers: { 'Authorization': 'Bearer ' + apsToken }
+    });
+    var data = await res.json();
+    var items = (data.data || []).filter(i => i.type === 'items');
+    ocultarLoading();
+
+    if (!items.length) {
+      el.insertAdjacentHTML('afterend', '<div style="padding:8px 28px;font:400 9px var(--mono);color:var(--muted);">Sin modelos en esta carpeta</div>');
+      return;
+    }
+
+    var subsHtml = '';
+    items.forEach(function(item) {
+      var ext = (item.attributes.displayName || '').split('.').pop().toUpperCase();
+      var icon = ext === 'RVT' ? '&#128208;' : ext === 'IFC' ? '&#128230;' : '&#128196;';
+      var urn = item.relationships.tip && item.relationships.tip.data ? item.relationships.tip.data.id : null;
+      var onclick = urn ? 'cargarVisor(\'' + btoa(urn).replace(/=/g,'') + '\',\'' + (item.attributes.displayName||'Modelo') + '\', this)' : '';
+      subsHtml += '<div class="tree-item' + (urn ? '' : ' disabled') + '" style="padding-left:44px;" ' + (urn ? 'onclick="'+onclick+'"' : '') + '>'
+               + '<div class="tree-icon">' + icon + '</div>'
+               + '<div class="tree-info"><div class="tree-name">' + (item.attributes.displayName || item.id) + '</div>'
+               + '<div class="tree-meta">' + ext + (urn ? '' : ' &middot; Sin traducci&oacute;n') + '</div></div>'
+               + '</div>';
+    });
+    el.insertAdjacentHTML('afterend', subsHtml);
+  } catch(e) {
+    ocultarLoading();
+    mostrarError('Error cargando modelos: ' + e.message);
+  }
+}
+
+// ============================================================
+// CARGAR VISOR DE AUTODESK
+// ============================================================
+function cargarVisor(urn, nombre, el) {
+  document.querySelectorAll('.tree-item').forEach(i => i.classList.remove('active'));
+  if (el) el.classList.add('active');
+
+  document.getElementById('viewerEmpty').style.display = 'none';
+  document.getElementById('forgeViewer').style.display = 'block';
+  document.getElementById('viewerToolbar').style.display = 'flex';
+  document.getElementById('viewerTitle').textContent = nombre;
+  mostrarLoading('Iniciando visor...');
+
+  Autodesk.Viewing.Initializer({ env: 'AutodeskProduction', accessToken: apsToken }, function() {
+    if (viewer) { viewer.finish(); viewer = null; }
+    var el3d = document.getElementById('forgeViewer');
+    el3d.innerHTML = '';
+    viewer = new Autodesk.Viewing.GuiViewer3D(el3d, {
+      theme: 'dark-theme',
+      extensions: ['Autodesk.DocumentBrowser']
+    });
+    var startCode = viewer.start();
+    if (startCode > 0) {
+      ocultarLoading();
+      mostrarError('Error iniciando visor: código ' + startCode);
+      return;
+    }
+    document.getElementById('loadText').textContent = 'Cargando modelo...';
+    var docUrn = 'urn:' + urn;
+    Autodesk.Viewing.Document.load(docUrn,
+      function(doc) {
+        ocultarLoading();
+        var defaultModel = doc.getRoot().getDefaultGeometry();
+        viewer.loadDocumentNode(doc, defaultModel, {
+          keepCurrentModels: false
+        }).then(function() {
+          console.log('Modelo cargado:', nombre);
+        });
+      },
+      function(code, msg) {
+        ocultarLoading();
+        mostrarError('Error cargando documento (' + code + '): ' + msg);
+      }
+    );
+  });
+}
+
+// ============================================================
+// UTILIDADES UI
+// ============================================================
+function mostrarLoading(msg) {
+  document.getElementById('loadText').textContent = msg || 'Cargando...';
+  document.getElementById('loadingOverlay').classList.add('show');
+}
+function ocultarLoading() {
+  document.getElementById('loadingOverlay').classList.remove('show');
+}
+function mostrarError(msg) {
+  console.error(msg);
+  var tree = document.getElementById('projectTree');
+  var err = document.createElement('div');
+  err.style.cssText = 'padding:10px 16px;font:400 9px var(--mono);color:#ff3d57;background:rgba(255,61,87,.08);border-left:3px solid #ff3d57;margin:8px;border-radius:3px;';
+  err.textContent = msg;
+  tree.prepend(err);
+  setTimeout(function() { err.remove(); }, 5000);
+}
+</script>
 </body>
 </html>
