@@ -204,7 +204,7 @@ header p  { font-size:10px; color:#4a6080; margin-top:1px; font-weight:400; font
 <body>
 
 <!-- LOGIN SCREEN -->
-<div id="loginScreen">
+<div id="loginScreen" style="display:none!important;">
   <div class="login-card">
     <!-- Izquierda: branding -->
     <div class="login-left">
@@ -436,7 +436,8 @@ header p  { font-size:10px; color:#4a6080; margin-top:1px; font-weight:400; font
 // PROTECCIÓN DE SESIÓN
 // ============================================================
 (function(){
-  if (sessionStorage.getItem('ifc_auth') !== '1') {
+  var isLocal = window.location.protocol === 'file:';
+  if (!isLocal && sessionStorage.getItem('ifc_auth') !== '1') {
     window.location.href = 'index.html';
   }
 })();
