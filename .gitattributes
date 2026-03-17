@@ -1,2 +1,6 @@
-# Auto detect text files and perform LF normalization
-* text=auto
+# Archivos binarios — no tocar line endings
+*.wasm binary
+*.wasm -text -diff
+
+# JS minificado — no diff
+js/web-ifc-api.js -diff
