@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Explorador BIM — Carlos Estay Ruggieri</title>
+<title>Explorador BIM ÔÇö Carlos Estay Ruggieri</title>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -31,7 +31,7 @@ header { background:var(--navy); padding:10px 20px; display:flex; align-items:ce
 .sb-search { margin-top:8px; position:relative; }
 .sb-search input { width:100%; padding:6px 10px 6px 28px; background:var(--navy); border:1px solid var(--border); border-radius:4px; font:400 11px var(--mono); color:var(--text); outline:none; }
 .sb-search input:focus { border-color:var(--accent); }
-.sb-search::before { content:'⌕'; position:absolute; left:8px; top:6px; font-size:13px; color:var(--muted); pointer-events:none; }
+.sb-search::before { content:'Ôîò'; position:absolute; left:8px; top:6px; font-size:13px; color:var(--muted); pointer-events:none; }
 .sb-tabs { display:flex; border-bottom:1px solid var(--border); flex-shrink:0; }
 .sb-tab { flex:1; padding:8px 4px; text-align:center; font:600 9px var(--mono); color:var(--muted); text-transform:uppercase; letter-spacing:.1em; cursor:pointer; border-bottom:2px solid transparent; transition:all .15s; }
 .sb-tab.active { color:var(--accent); border-bottom-color:var(--accent); }
@@ -94,7 +94,7 @@ header { background:var(--navy); padding:10px 20px; display:flex; align-items:ce
 .prop-row { display:flex; gap:6px; padding:4px 0; border-bottom:1px solid rgba(26,42,64,.5); }
 .prop-key { font:400 9px var(--mono); color:var(--muted); flex:1; min-width:0; }
 .prop-val { font:600 9px var(--mono); color:var(--text); flex:1; min-width:0; text-align:right; word-break:break-all; }
-/* PANEL CATEGORÍAS */
+/* PANEL CATEGOR├ìAS */
 .cats-panel { position:absolute; top:0; left:0; width:200px; height:100%; background:var(--blue); border-right:1px solid var(--border); display:none; flex-direction:column; z-index:20; }
 .cats-panel.show { display:flex; }
 .cats-header { padding:10px 12px; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; flex-shrink:0; }
@@ -137,12 +137,12 @@ header { background:var(--navy); padding:10px 20px; display:flex; align-items:ce
 </head>
 <body>
 <header>
-  <div class="hicon">🏗️</div>
+  <div class="hicon">­ƒÅù´©Å</div>
   <div>
     <div class="htitle">Explorador BIM</div>
-    <div class="hsub">Carlos Estay Ruggieri · c.estay [at] outlook.com</div>
+    <div class="hsub">Carlos Estay Ruggieri ┬À c.estay [at] outlook.com</div>
   </div>
-  <a href="index.html" class="hback">← Volver</a>
+  <a href="index.html" class="hback">ÔåÉ Volver</a>
 </header>
 <div class="main">
   <!-- SIDEBAR -->
@@ -160,60 +160,60 @@ header { background:var(--navy); padding:10px 20px; display:flex; align-items:ce
     <div class="sb-list" id="sbList">
       <div class="sb-section">Modelos 3D</div>
       <div class="sb-item active" onclick="selectFile(this,'3d'); cargarDesdeUrl('https://estayzin.github.io/Revisor-IFC/ARQ-Arquitectura.ifc','ARQ-Arquitectura.ifc')" data-type="3d">
-        <div class="sb-item-icon">📦</div>
+        <div class="sb-item-icon">­ƒôª</div>
         <div class="sb-item-info">
           <div class="sb-item-name">ARQ-Arquitectura.ifc</div>
-          <div class="sb-item-meta">13.6 MB · IFC2x3</div>
+          <div class="sb-item-meta">13.6 MB ┬À IFC2x3</div>
         </div>
         <div class="sb-item-badge badge-ifc">IFC</div>
       </div>
       <div class="sb-item" onclick="selectFile(this,'3d')" data-type="3d">
-        <div class="sb-item-icon">📦</div>
+        <div class="sb-item-icon">­ƒôª</div>
         <div class="sb-item-info">
           <div class="sb-item-name">EST-Estructural.ifc</div>
-          <div class="sb-item-meta">8.2 MB · IFC2x3</div>
+          <div class="sb-item-meta">8.2 MB ┬À IFC2x3</div>
         </div>
         <div class="sb-item-badge badge-ifc">IFC</div>
       </div>
       <div class="sb-item" onclick="selectFile(this,'3d')" data-type="3d">
-        <div class="sb-item-icon">📐</div>
+        <div class="sb-item-icon">­ƒôÉ</div>
         <div class="sb-item-info">
           <div class="sb-item-name">COO-Coordinacion.rvt</div>
-          <div class="sb-item-meta">45.1 MB · Revit 2024</div>
+          <div class="sb-item-meta">45.1 MB ┬À Revit 2024</div>
         </div>
         <div class="sb-item-badge badge-rvt">RVT</div>
       </div>
       <div class="sb-section">Planos</div>
       <div class="sb-item" onclick="selectFile(this,'plans')" data-type="plans">
-        <div class="sb-item-icon">📋</div>
+        <div class="sb-item-icon">­ƒôï</div>
         <div class="sb-item-info">
           <div class="sb-item-name">PL-ARQ-001_Planta.pdf</div>
-          <div class="sb-item-meta">2.1 MB · A1</div>
+          <div class="sb-item-meta">2.1 MB ┬À A1</div>
         </div>
         <div class="sb-item-badge badge-pdf">PDF</div>
       </div>
       <div class="sb-item" onclick="selectFile(this,'plans')" data-type="plans">
-        <div class="sb-item-icon">📋</div>
+        <div class="sb-item-icon">­ƒôï</div>
         <div class="sb-item-info">
           <div class="sb-item-name">PL-ARQ-002_Cortes.dwg</div>
-          <div class="sb-item-meta">5.4 MB · AutoCAD</div>
+          <div class="sb-item-meta">5.4 MB ┬À AutoCAD</div>
         </div>
         <div class="sb-item-badge badge-dwg">DWG</div>
       </div>
       <div class="sb-section">Documentos</div>
       <div class="sb-item" onclick="selectFile(this,'docs')" data-type="docs">
-        <div class="sb-item-icon">📄</div>
+        <div class="sb-item-icon">­ƒôä</div>
         <div class="sb-item-info">
           <div class="sb-item-name">BEP-v2.1.pdf</div>
-          <div class="sb-item-meta">1.3 MB · BIM Execution Plan</div>
+          <div class="sb-item-meta">1.3 MB ┬À BIM Execution Plan</div>
         </div>
         <div class="sb-item-badge badge-pdf">PDF</div>
       </div>
       <div class="sb-item" onclick="selectFile(this,'docs')" data-type="docs">
-        <div class="sb-item-icon">📊</div>
+        <div class="sb-item-icon">­ƒôè</div>
         <div class="sb-item-info">
           <div class="sb-item-name">Reporte-ARQ.html</div>
-          <div class="sb-item-meta">0.4 MB · Reporte IFC</div>
+          <div class="sb-item-meta">0.4 MB ┬À Reporte IFC</div>
         </div>
         <div class="sb-item-badge badge-ifc">IFC</div>
       </div>
@@ -222,9 +222,9 @@ header { background:var(--navy); padding:10px 20px; display:flex; align-items:ce
   <!-- CONTENIDO -->
   <div class="content">
     <div class="view-tabs">
-      <div class="view-tab active" onclick="viewTab(this,'v3d')">⬛ 3D <span class="tab-count">3</span></div>
-      <div class="view-tab" onclick="viewTab(this,'vplans')">📋 Planos <span class="tab-count">2</span></div>
-      <div class="view-tab" onclick="viewTab(this,'vdocs')">📁 Documentos <span class="tab-count">2</span></div>
+      <div class="view-tab active" onclick="viewTab(this,'v3d')">Ô¼ø 3D <span class="tab-count">3</span></div>
+      <div class="view-tab" onclick="viewTab(this,'vplans')">­ƒôï Planos <span class="tab-count">2</span></div>
+      <div class="view-tab" onclick="viewTab(this,'vdocs')">­ƒôü Documentos <span class="tab-count">2</span></div>
     </div>
     <!-- PANEL 3D -->
     <div class="view-panel active" id="v3d">
@@ -242,7 +242,7 @@ header { background:var(--navy); padding:10px 20px; display:flex; align-items:ce
           </div>
           <div class="vt-sep"></div>
           <div class="vt-btn-group">
-            <div class="vt-btn active" id="btnCats" onclick="toggleCats()">Categorías</div>
+            <div class="vt-btn active" id="btnCats" onclick="toggleCats()">Categor├¡as</div>
             <div class="vt-btn" id="btnProps" onclick="toggleProps()">Propiedades</div>
           </div>
           <div class="vt-sep"></div>
@@ -258,21 +258,21 @@ header { background:var(--navy); padding:10px 20px; display:flex; align-items:ce
           </div>
           <!-- Overlay superior -->
           <div class="viewer-overlay-top">
-            <div class="viewer-badge" id="viewerBadge">⬛ 3D VIEWER</div>
+            <div class="viewer-badge" id="viewerBadge">Ô¼ø 3D VIEWER</div>
             <div class="viewer-status" id="viewerStatusBadge">Sin modelo</div>
           </div>
           <!-- Coords -->
-          <div class="viewer-coords" id="viewerCoords">X: 0.000 · Y: 0.000 · Z: 0.000</div>
+          <div class="viewer-coords" id="viewerCoords">X: 0.000 ┬À Y: 0.000 ┬À Z: 0.000</div>
           <!-- Stats -->
           <div class="viewer-stats">
-            <div>Elementos: <span id="statElems">—</span></div>
-            <div>Triángulos: <span id="statTris">—</span></div>
+            <div>Elementos: <span id="statElems">ÔÇö</span></div>
+            <div>Tri├íngulos: <span id="statTris">ÔÇö</span></div>
           </div>
-          <!-- Panel Categorías -->
+          <!-- Panel Categor├¡as -->
           <div class="cats-panel" id="catsPanel">
             <div class="cats-header">
-              <div class="cats-title">Categorías</div>
-              <button class="props-close" onclick="toggleCats()">✕</button>
+              <div class="cats-title">Categor├¡as</div>
+              <button class="props-close" onclick="toggleCats()">Ô£ò</button>
             </div>
             <div class="cats-body" id="catsBody"></div>
           </div>
@@ -280,7 +280,7 @@ header { background:var(--navy); padding:10px 20px; display:flex; align-items:ce
           <div class="props-panel" id="propsPanel">
             <div class="props-header">
               <div class="props-title">Propiedades BIM</div>
-              <button class="props-close" onclick="toggleProps()">✕</button>
+              <button class="props-close" onclick="toggleProps()">Ô£ò</button>
             </div>
             <div class="props-body" id="propsBody">
               <div class="prop-group">
@@ -302,9 +302,9 @@ header { background:var(--navy); padding:10px 20px; display:flex; align-items:ce
           </div>
         </div>
         <div class="plans-grid">
-          <div class="plan-card"><div class="plan-thumb">📋</div><div class="plan-info"><div class="plan-name">PL-ARQ-001_Planta.pdf</div><div class="plan-meta">Planta General · A1 · 2.1 MB</div></div></div>
-          <div class="plan-card"><div class="plan-thumb">📐</div><div class="plan-info"><div class="plan-name">PL-ARQ-002_Cortes.dwg</div><div class="plan-meta">Cortes · AutoCAD · 5.4 MB</div></div></div>
-          <div class="plan-card" style="opacity:.35;pointer-events:none;"><div class="plan-thumb" style="opacity:.3">＋</div><div class="plan-info"><div class="plan-name" style="color:var(--muted)">Agregar plano...</div><div class="plan-meta">PDF · DWG · DXF</div></div></div>
+          <div class="plan-card"><div class="plan-thumb">­ƒôï</div><div class="plan-info"><div class="plan-name">PL-ARQ-001_Planta.pdf</div><div class="plan-meta">Planta General ┬À A1 ┬À 2.1 MB</div></div></div>
+          <div class="plan-card"><div class="plan-thumb">­ƒôÉ</div><div class="plan-info"><div class="plan-name">PL-ARQ-002_Cortes.dwg</div><div class="plan-meta">Cortes ┬À AutoCAD ┬À 5.4 MB</div></div></div>
+          <div class="plan-card" style="opacity:.35;pointer-events:none;"><div class="plan-thumb" style="opacity:.3">´╝ï</div><div class="plan-info"><div class="plan-name" style="color:var(--muted)">Agregar plano...</div><div class="plan-meta">PDF ┬À DWG ┬À DXF</div></div></div>
         </div>
       </div>
     </div>
@@ -313,8 +313,8 @@ header { background:var(--navy); padding:10px 20px; display:flex; align-items:ce
       <div class="panel-docs">
         <div class="docs-group">
           <div class="docs-group-title">BIM</div>
-          <div class="doc-row"><div class="doc-icon">📄</div><div class="doc-info"><div class="doc-name">BEP-v2.1.pdf</div><div class="doc-meta">BIM Execution Plan · Rev 2.1</div></div><div class="doc-size">1.3 MB</div><div class="doc-badge badge-pdf" style="background:rgba(255,107,53,.1);color:var(--warn)">PDF</div></div>
-          <div class="doc-row"><div class="doc-icon">📊</div><div class="doc-info"><div class="doc-name">Reporte-ARQ.html</div><div class="doc-meta">Reporte IFC · Arquitectura</div></div><div class="doc-size">0.4 MB</div><div class="doc-badge badge-ifc" style="background:rgba(0,212,255,.1);color:var(--accent)">IFC</div></div>
+          <div class="doc-row"><div class="doc-icon">­ƒôä</div><div class="doc-info"><div class="doc-name">BEP-v2.1.pdf</div><div class="doc-meta">BIM Execution Plan ┬À Rev 2.1</div></div><div class="doc-size">1.3 MB</div><div class="doc-badge badge-pdf" style="background:rgba(255,107,53,.1);color:var(--warn)">PDF</div></div>
+          <div class="doc-row"><div class="doc-icon">­ƒôè</div><div class="doc-info"><div class="doc-name">Reporte-ARQ.html</div><div class="doc-meta">Reporte IFC ┬À Arquitectura</div></div><div class="doc-size">0.4 MB</div><div class="doc-badge badge-ifc" style="background:rgba(0,212,255,.1);color:var(--accent)">IFC</div></div>
         </div>
       </div>
     </div>
@@ -326,7 +326,7 @@ header { background:var(--navy); padding:10px 20px; display:flex; align-items:ce
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
 <script>
 // ============================================================
-// NAVEGACIÓN SIDEBAR
+// NAVEGACI├ôN SIDEBAR
 // ============================================================
 function viewTab(el, panelId) {
   document.querySelectorAll('.view-tab').forEach(t => t.classList.remove('active'));
@@ -361,7 +361,7 @@ function selectFile(el, view) {
   document.getElementById('vtLabel').textContent = name;
 }
 // ============================================================
-// VISOR 3D — Three.js
+// VISOR 3D ÔÇö Three.js
 // ============================================================
 var renderer, scene, camera, controls, raycaster, mouse;
 var meshes = [], selectedMesh = null;
@@ -460,25 +460,109 @@ function onIfcFile(e) {
 async function cargarIFC(buffer, nombre) {
   mostrarLoading('Inicializando web-ifc...');
   try {
-    // Obtener IfcAPI — en 0.0.44 UMD está en WebIFCWasm global
-    var IfcAPIClass = window._IfcAPI;
-    if (!IfcAPIClass) {
-      if (typeof WebIFCWasm !== 'undefined') {
-        IfcAPIClass = WebIFCWasm.IfcAPI || WebIFCWasm;
-      } else {
-        throw new Error('web-ifc 0.0.44 no cargó — revisa js/web-ifc-api.js');
-      }
-    }
-    var api = new IfcAPIClass();
-    api.SetWasmPath('./wasm/');
+    if (!window._IfcAPI && window._loadWebIfc) await window._loadWebIfc();
+    if (!window._IfcAPI) throw new Error('web-ifc no disponible');
+    var api = new window._IfcAPI();
+    var wasmBase = './wasm/';
+    try { var r = await fetch('./wasm/web-ifc.wasm',{method:'HEAD'}); if(!r.ok) wasmBase='https://unpkg.com/web-ifc@0.0.74/'; } catch(e){ wasmBase='https://unpkg.com/web-ifc@0.0.74/'; }
+    api.SetWasmPath(wasmBase);
     await api.Init();
+    mostrarLoading('Cargando geometr├¡a...');
+    // Limpiar escena
+    meshes.forEach(m => { m.geometry.dispose(); scene.remove(m); });
+    meshes = []; categories = {}; ifcData = {};
+    var data = new Uint8Array(buffer);
+    var modelID = api.OpenModel(data, {COORDINATE_TO_ORIGIN:true, OPTIMIZE_PROFILES:false});
+    var posAll=[], normAll=[], colAll=[];
+    var catColors = {
+      IFCWALL:[0.4,0.7,1], IFCWALLSTANDARDCASE:[0.4,0.7,1],
+      IFCSLAB:[0.6,0.6,0.8], IFCCOLUMN:[1,0.8,0.3],
+      IFCBEAM:[1,0.6,0.2], IFCDOOR:[0.3,1,0.6],
+      IFCWINDOW:[0.2,0.9,1], IFCROOF:[0.8,0.4,0.4],
+      DEFAULT:[0.5,0.6,0.7]
+    };
+    var catMeshData = {}; // cls -> {positions, normals}
+    api.StreamAllMeshes(modelID, function(mesh) {
+      var geoms = mesh.geometries;
+      var cls = 'DEFAULT';
+      try {
+        var line = api.GetLine(modelID, mesh.expressID, false);
+        if (line && line.constructor && line.constructor.name) cls = line.constructor.name.toUpperCase();
+      } catch(e){}
+      if (!catMeshData[cls]) catMeshData[cls] = {positions:[], normals:[], ids:[]};
+      for (var g=0; g<geoms.size(); g++) {
+        var pg = geoms.get(g);
+        if (!pg || !pg.geometryExpressID) continue;
+        try {
+          var geom = api.GetGeometry(modelID, pg.geometryExpressID);
+          var vPtr=geom.GetVertexData(), vSize=geom.GetVertexDataSize();
+          var iPtr=geom.GetIndexData(), iSize=geom.GetIndexSize();
+          if (vSize>0 && iSize>0) {
+            var verts = api.GetVertexArray(vPtr, vSize);
+            var idx = api.GetIndexArray(iPtr, iSize);
+            var mat = new THREE.Matrix4();
+            mat.fromArray(pg.flatTransformation);
+            for (var i=0; i<idx.length; i+=3) {
+              for (var j=0; j<3; j++) {
+                var vi = idx[i+j]*6;
+                var v = new THREE.Vector3(verts[vi],verts[vi+1],verts[vi+2]).applyMatrix4(mat);
+                var n = new THREE.Vector3(verts[vi+3],verts[vi+4],verts[vi+5]);
+                catMeshData[cls].positions.push(v.x,v.y,v.z);
+                catMeshData[cls].normals.push(n.x,n.y,n.z);
+              }
+            }
+          }
+          if (geom.delete) geom.delete();
+        } catch(e){}
+      }
+      catMeshData[cls].ids.push(mesh.expressID);
+    });
+    // Crear un mesh por categor├¡a
+    var catKeys = Object.keys(catMeshData);
+    for (var ci=0; ci<catKeys.length; ci++) {
+      var cls = catKeys[ci];
+      var cd = catMeshData[cls];
+      if (!cd.positions.length) continue;
+      var col = catColors[cls] || catColors.DEFAULT;
+      var geo = new THREE.BufferGeometry();
+      geo.setAttribute('position', new THREE.Float32BufferAttribute(cd.positions, 3));
+      geo.setAttribute('normal', new THREE.Float32BufferAttribute(cd.normals, 3));
+      var mat = new THREE.MeshLambertMaterial({color:new THREE.Color(col[0],col[1],col[2]), side:THREE.DoubleSide});
+      var mesh = new THREE.Mesh(geo, mat);
+      mesh.userData = { cls, ids:cd.ids, originalColor: new THREE.Color(col[0],col[1],col[2]) };
+      scene.add(mesh);
+      meshes.push(mesh);
+      categories[cls] = { mesh, visible:true, count:cd.ids.length };
+    }
+    api.CloseModel(modelID);
+    // Centrar c├ímara
+    var bbox = new THREE.Box3();
+    meshes.forEach(m => bbox.expandByObject(m));
+    if (!bbox.isEmpty()) {
+      var center = bbox.getCenter(new THREE.Vector3());
+      var size = bbox.getSize(new THREE.Vector3()).length();
+      controls.target.copy(center);
+      camera.position.set(center.x+size*0.7, center.y+size*0.5, center.z+size*0.7);
+      controls.update();
+    }
+    document.getElementById('statElems').textContent = meshes.length;
+    document.getElementById('statTris').textContent = meshes.reduce((s,m)=>s+(m.geometry.attributes.position.count/3|0),0).toLocaleString();
+    document.getElementById('viewerStatusBadge').textContent = nombre;
+    actualizarPanelCategorias();
+    ocultarLoading();
+  } catch(err) {
+    ocultarLoading();
+    document.getElementById('viewerStatusBadge').textContent = 'Error: ' + err.message;
+    console.error(err);
+  }
+}
 function mostrarLoading(msg) {
   document.getElementById('loadText').textContent = msg || 'Cargando...';
   document.getElementById('viewerLoading').classList.add('show');
 }
 function ocultarLoading() { document.getElementById('viewerLoading').classList.remove('show'); }
 // ============================================================
-// SELECCIÓN Y PROPIEDADES
+// SELECCI├ôN Y PROPIEDADES
 // ============================================================
 var matSelected = null;
 function onCanvasClick(e) {
@@ -505,7 +589,7 @@ function onCanvasMouseMove(e) {
   var rect = renderer.domElement.getBoundingClientRect();
   var x = e.clientX - rect.left, y = e.clientY - rect.top;
   document.getElementById('viewerCoords').textContent =
-    'X: ' + (x).toFixed(0) + ' · Y: ' + (y).toFixed(0);
+    'X: ' + (x).toFixed(0) + ' ┬À Y: ' + (y).toFixed(0);
 }
 function mostrarPropiedades(mesh) {
   var cls = mesh.userData.cls || 'Desconocido';
@@ -516,9 +600,9 @@ function mostrarPropiedades(mesh) {
   html += '</div>';
   html += '<div class="prop-group"><div class="prop-group-title">Propiedades</div>';
   var demoProps = {
-    'Material': 'Hormigón Armado', 'Nivel': 'N+0.00',
-    'Clasificación': 'ARQ-' + (Math.floor(Math.random()*900)+100),
-    'Estado': 'Existente', 'Fase': 'Diseño Básico'
+    'Material': 'Hormig├│n Armado', 'Nivel': 'N+0.00',
+    'Clasificaci├│n': 'ARQ-' + (Math.floor(Math.random()*900)+100),
+    'Estado': 'Existente', 'Fase': 'Dise├▒o B├ísico'
   };
   Object.entries(demoProps).forEach(([k,v]) => {
     html += '<div class="prop-row"><div class="prop-key">' + k + '</div><div class="prop-val">' + v + '</div></div>';
@@ -527,7 +611,7 @@ function mostrarPropiedades(mesh) {
   document.getElementById('propsBody').innerHTML = html;
 }
 // ============================================================
-// CATEGORÍAS
+// CATEGOR├ìAS
 // ============================================================
 function toggleCats() {
   document.getElementById('catsPanel').classList.toggle('show');
@@ -544,7 +628,7 @@ function actualizarPanelCategorias() {
       + '<div class="cat-count">' + cat.count + '</div>'
       + '</div>';
   });
-  document.getElementById('catsBody').innerHTML = html || '<div style="padding:10px 12px;font:400 10px var(--mono);color:var(--muted)">Sin categorías</div>';
+  document.getElementById('catsBody').innerHTML = html || '<div style="padding:10px 12px;font:400 10px var(--mono);color:var(--muted)">Sin categor├¡as</div>';
 }
 function toggleCategoria(cls, visible) {
   if (categories[cls]) {
@@ -559,13 +643,12 @@ window.addEventListener('DOMContentLoaded', function() {
   initViewer();
 });
 </script>
-<!-- web-ifc 0.0.44 UMD — funciona como script clásico -->
-<script src="js/web-ifc-api.js"></script>
-<script>
-  // En 0.0.44 UMD, la API queda en WebIFCWasm global
-  window._IfcAPI = (typeof WebIFCWasm !== 'undefined') ? WebIFCWasm.IfcAPI : null;
-  if (!window._IfcAPI && typeof WebIFCWasm !== 'undefined') window._IfcAPI = WebIFCWasm;
-  console.log('web-ifc 0.0.44 disponible:', !!window._IfcAPI);
+<!-- web-ifc ESM -->
+<script type="module">
+  import * as WebIFC from 'https://unpkg.com/web-ifc@0.0.74/web-ifc-api.js';
+  window._IfcAPI = WebIFC.IfcAPI;
+  window._loadWebIfc = async function() {};
+  console.log('web-ifc 0.0.74 cargado');
 </script>
 </body>
 </html>
