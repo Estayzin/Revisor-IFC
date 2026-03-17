@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es">
 <head>
 <meta charset="UTF-8">
@@ -460,102 +460,18 @@ function onIfcFile(e) {
 async function cargarIFC(buffer, nombre) {
   mostrarLoading('Inicializando web-ifc...');
   try {
-    if (!window._IfcAPI && window._loadWebIfc) await window._loadWebIfc();
-    if (!window._IfcAPI) throw new Error('web-ifc no disponible');
-    var api = new window._IfcAPI();
-    var wasmBase = './wasm/';
-    try { var r = await fetch('./wasm/web-ifc.wasm',{method:'HEAD'}); if(!r.ok) wasmBase='https://unpkg.com/web-ifc@0.0.74/'; } catch(e){ wasmBase='https://unpkg.com/web-ifc@0.0.74/'; }
-    api.SetWasmPath(wasmBase);
-    await api.Init();
-    mostrarLoading('Cargando geometría...');
-    // Limpiar escena
-    meshes.forEach(m => { m.geometry.dispose(); scene.remove(m); });
-    meshes = []; categories = {}; ifcData = {};
-    var data = new Uint8Array(buffer);
-    var modelID = api.OpenModel(data, {COORDINATE_TO_ORIGIN:true, OPTIMIZE_PROFILES:false});
-    var posAll=[], normAll=[], colAll=[];
-    var catColors = {
-      IFCWALL:[0.4,0.7,1], IFCWALLSTANDARDCASE:[0.4,0.7,1],
-      IFCSLAB:[0.6,0.6,0.8], IFCCOLUMN:[1,0.8,0.3],
-      IFCBEAM:[1,0.6,0.2], IFCDOOR:[0.3,1,0.6],
-      IFCWINDOW:[0.2,0.9,1], IFCROOF:[0.8,0.4,0.4],
-      DEFAULT:[0.5,0.6,0.7]
-    };
-    var catMeshData = {}; // cls -> {positions, normals}
-    api.StreamAllMeshes(modelID, function(mesh) {
-      var geoms = mesh.geometries;
-      var cls = 'DEFAULT';
-      try {
-        var line = api.GetLine(modelID, mesh.expressID, false);
-        if (line && line.constructor && line.constructor.name) cls = line.constructor.name.toUpperCase();
-      } catch(e){}
-      if (!catMeshData[cls]) catMeshData[cls] = {positions:[], normals:[], ids:[]};
-      for (var g=0; g<geoms.size(); g++) {
-        var pg = geoms.get(g);
-        if (!pg || !pg.geometryExpressID) continue;
-        try {
-          var geom = api.GetGeometry(modelID, pg.geometryExpressID);
-          var vPtr=geom.GetVertexData(), vSize=geom.GetVertexDataSize();
-          var iPtr=geom.GetIndexData(), iSize=geom.GetIndexSize();
-          if (vSize>0 && iSize>0) {
-            var verts = api.GetVertexArray(vPtr, vSize);
-            var idx = api.GetIndexArray(iPtr, iSize);
-            var mat = new THREE.Matrix4();
-            mat.fromArray(pg.flatTransformation);
-            for (var i=0; i<idx.length; i+=3) {
-              for (var j=0; j<3; j++) {
-                var vi = idx[i+j]*6;
-                var v = new THREE.Vector3(verts[vi],verts[vi+1],verts[vi+2]).applyMatrix4(mat);
-                var n = new THREE.Vector3(verts[vi+3],verts[vi+4],verts[vi+5]);
-                catMeshData[cls].positions.push(v.x,v.y,v.z);
-                catMeshData[cls].normals.push(n.x,n.y,n.z);
-              }
-            }
-          }
-          if (geom.delete) geom.delete();
-        } catch(e){}
+    // Obtener IfcAPI — en 0.0.44 UMD está en WebIFCWasm global
+    var IfcAPIClass = window._IfcAPI;
+    if (!IfcAPIClass) {
+      if (typeof WebIFCWasm !== 'undefined') {
+        IfcAPIClass = WebIFCWasm.IfcAPI || WebIFCWasm;
+      } else {
+        throw new Error('web-ifc 0.0.44 no cargó — revisa js/web-ifc-api.js');
       }
-      catMeshData[cls].ids.push(mesh.expressID);
-    });
-    // Crear un mesh por categoría
-    var catKeys = Object.keys(catMeshData);
-    for (var ci=0; ci<catKeys.length; ci++) {
-      var cls = catKeys[ci];
-      var cd = catMeshData[cls];
-      if (!cd.positions.length) continue;
-      var col = catColors[cls] || catColors.DEFAULT;
-      var geo = new THREE.BufferGeometry();
-      geo.setAttribute('position', new THREE.Float32BufferAttribute(cd.positions, 3));
-      geo.setAttribute('normal', new THREE.Float32BufferAttribute(cd.normals, 3));
-      var mat = new THREE.MeshLambertMaterial({color:new THREE.Color(col[0],col[1],col[2]), side:THREE.DoubleSide});
-      var mesh = new THREE.Mesh(geo, mat);
-      mesh.userData = { cls, ids:cd.ids, originalColor: new THREE.Color(col[0],col[1],col[2]) };
-      scene.add(mesh);
-      meshes.push(mesh);
-      categories[cls] = { mesh, visible:true, count:cd.ids.length };
     }
-    api.CloseModel(modelID);
-    // Centrar cámara
-    var bbox = new THREE.Box3();
-    meshes.forEach(m => bbox.expandByObject(m));
-    if (!bbox.isEmpty()) {
-      var center = bbox.getCenter(new THREE.Vector3());
-      var size = bbox.getSize(new THREE.Vector3()).length();
-      controls.target.copy(center);
-      camera.position.set(center.x+size*0.7, center.y+size*0.5, center.z+size*0.7);
-      controls.update();
-    }
-    document.getElementById('statElems').textContent = meshes.length;
-    document.getElementById('statTris').textContent = meshes.reduce((s,m)=>s+(m.geometry.attributes.position.count/3|0),0).toLocaleString();
-    document.getElementById('viewerStatusBadge').textContent = nombre;
-    actualizarPanelCategorias();
-    ocultarLoading();
-  } catch(err) {
-    ocultarLoading();
-    document.getElementById('viewerStatusBadge').textContent = 'Error: ' + err.message;
-    console.error(err);
-  }
-}
+    var api = new IfcAPIClass();
+    api.SetWasmPath('./wasm/');
+    await api.Init();
 function mostrarLoading(msg) {
   document.getElementById('loadText').textContent = msg || 'Cargando...';
   document.getElementById('viewerLoading').classList.add('show');
@@ -643,12 +559,13 @@ window.addEventListener('DOMContentLoaded', function() {
   initViewer();
 });
 </script>
-<!-- web-ifc ESM -->
-<script type="module">
-  import * as WebIFC from 'https://unpkg.com/web-ifc@0.0.74/web-ifc-api.js';
-  window._IfcAPI = WebIFC.IfcAPI;
-  window._loadWebIfc = async function() {};
-  console.log('web-ifc 0.0.74 cargado');
+<!-- web-ifc 0.0.44 UMD — funciona como script clásico -->
+<script src="js/web-ifc-api.js"></script>
+<script>
+  // En 0.0.44 UMD, la API queda en WebIFCWasm global
+  window._IfcAPI = (typeof WebIFCWasm !== 'undefined') ? WebIFCWasm.IfcAPI : null;
+  if (!window._IfcAPI && typeof WebIFCWasm !== 'undefined') window._IfcAPI = WebIFCWasm;
+  console.log('web-ifc 0.0.44 disponible:', !!window._IfcAPI);
 </script>
 </body>
 </html>
