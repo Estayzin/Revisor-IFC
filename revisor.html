@@ -1155,8 +1155,8 @@ var viewer3D = {
         var wasmBase = './wasm/';
         try {
           var wr = await fetch('./wasm/web-ifc.wasm', {method:'HEAD'});
-          if (!wr.ok) wasmBase = 'https://unpkg.com/web-ifc@0.0.74/';
-        } catch(e) { wasmBase = 'https://unpkg.com/web-ifc@0.0.74/'; }
+          if (!wr.ok) wasmBase = 'https://unpkg.com/web-ifc@0.0.44/';
+        } catch(e) { wasmBase = 'https://unpkg.com/web-ifc@0.0.44/'; }
         api.SetWasmPath(wasmBase);
         await api.Init();
         this.ifcAPI = api;
@@ -1537,35 +1537,18 @@ function mostrarReporte(rep) {
   };
 }
 </script>
-<script type="module">
-// Cargar web-ifc como ESM (único formato disponible) y exponer globalmente
-// Se precarga al cargar la página para que esté listo cuando el usuario lo necesite
-async function loadWebIfc() {
-  if (window._IfcAPI) return; // ya cargado
-  var urls = [
-    './js/web-ifc-api.js',
-    'https://unpkg.com/web-ifc@0.0.74/web-ifc-api.js',
-    'https://cdn.jsdelivr.net/npm/web-ifc@0.0.74/web-ifc-api.js'
-  ];
-  for (var i = 0; i < urls.length; i++) {
-    try {
-      var mod = await import(urls[i]);
-      var IfcAPI = mod.IfcAPI || (mod.default && mod.default.IfcAPI);
-      if (IfcAPI) {
-        window._IfcAPI = IfcAPI;
-        console.log('web-ifc cargado desde:', urls[i]);
-        return;
-      }
-    } catch(e) {
-      console.log('Fallo cargando web-ifc desde:', urls[i], e.message);
-    }
+<script src="./js/web-ifc-api.js"></script>
+<script>
+// web-ifc 0.0.44 UMD — exponer IfcAPI globalmente
+(function() {
+  // En 0.0.44 UMD, la API queda en WebIFCWasm global
+  if (typeof WebIFCWasm !== 'undefined') {
+    window._IfcAPI = WebIFCWasm.IfcAPI || WebIFCWasm;
+    console.log('web-ifc 0.0.44 UMD cargado. IfcAPI:', !!window._IfcAPI);
+  } else {
+    console.warn('WebIFCWasm no encontrado en scope global');
   }
-  console.warn('No se pudo cargar web-ifc desde ninguna fuente');
-}
-// Exponer para que cargarModelo pueda llamarlo
-window._loadWebIfc = loadWebIfc;
-// Precargar inmediatamente (en segundo plano)
-loadWebIfc();
+})();
 </script>
 <footer style="text-align:center;padding:6px;font:400 9px var(--mono);color:var(--muted);border-top:1px solid var(--border);letter-spacing:.08em;flex-shrink:0;">
   &copy; 2026 Carlos Estay Ruggieri &mdash; Coordinaci&oacute;n BIM &mdash; MIT License
