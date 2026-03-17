@@ -1,9 +1,9 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Explorador BIM ÔÇö Carlos Estay Ruggieri</title>
+<title>Explorador BIM &mdash; Carlos Estay Ruggieri</title>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -31,7 +31,7 @@ header { background:var(--navy); padding:10px 20px; display:flex; align-items:ce
 .sb-search { margin-top:8px; position:relative; }
 .sb-search input { width:100%; padding:6px 10px 6px 28px; background:var(--navy); border:1px solid var(--border); border-radius:4px; font:400 11px var(--mono); color:var(--text); outline:none; }
 .sb-search input:focus { border-color:var(--accent); }
-.sb-search::before { content:'Ôîò'; position:absolute; left:8px; top:6px; font-size:13px; color:var(--muted); pointer-events:none; }
+.sb-search::before { content:'&#9906;'; position:absolute; left:8px; top:6px; font-size:13px; color:var(--muted); pointer-events:none; }
 .sb-tabs { display:flex; border-bottom:1px solid var(--border); flex-shrink:0; }
 .sb-tab { flex:1; padding:8px 4px; text-align:center; font:600 9px var(--mono); color:var(--muted); text-transform:uppercase; letter-spacing:.1em; cursor:pointer; border-bottom:2px solid transparent; transition:all .15s; }
 .sb-tab.active { color:var(--accent); border-bottom-color:var(--accent); }
@@ -49,17 +49,13 @@ header { background:var(--navy); padding:10px 20px; display:flex; align-items:ce
 .badge-pdf { background:rgba(255,107,53,.1); color:var(--warn); }
 .badge-dwg { background:rgba(124,77,255,.1); color:var(--accent2); }
 .badge-rvt { background:rgba(0,200,83,.1); color:var(--green); }
-</style>
-<style>
 /* CONTENIDO */
 .content { flex:1; display:flex; flex-direction:column; overflow:hidden; }
-/* VIEW TABS */
 .view-tabs { display:flex; align-items:center; padding:0 16px; background:var(--navy); border-bottom:1px solid var(--border); flex-shrink:0; gap:2px; }
 .view-tab { display:flex; align-items:center; gap:6px; padding:10px 16px; font:600 10px var(--mono); color:var(--muted); text-transform:uppercase; letter-spacing:.1em; cursor:pointer; border-bottom:2px solid transparent; transition:all .15s; }
 .view-tab.active { color:var(--accent); border-bottom-color:var(--accent); }
 .view-tab:hover:not(.active) { color:var(--text); }
 .tab-count { font:600 8px var(--mono); background:rgba(0,212,255,.1); color:var(--accent); padding:1px 5px; border-radius:10px; }
-/* PANELES */
 .view-panel { display:none; flex:1; overflow:hidden; flex-direction:column; }
 .view-panel.active { display:flex; }
 /* PANEL 3D */
@@ -71,7 +67,6 @@ header { background:var(--navy); padding:10px 20px; display:flex; align-items:ce
 .vt-btn:hover:not(.active) { background:rgba(0,212,255,.1); color:var(--text); }
 .vt-sep { width:1px; background:var(--border); margin:0 4px; align-self:stretch; }
 .vt-label { font:400 10px var(--mono); color:var(--muted); margin-left:auto; }
-/* AREA VISOR */
 .viewer-area { flex:1; position:relative; background:#050b14; overflow:hidden; }
 #viewerCanvas { width:100%; height:100%; display:block; }
 .viewer-overlay-top { position:absolute; top:12px; right:12px; display:flex; gap:6px; z-index:10; pointer-events:none; }
@@ -81,7 +76,7 @@ header { background:var(--navy); padding:10px 20px; display:flex; align-items:ce
 .viewer-stats { position:absolute; bottom:12px; right:12px; background:rgba(6,13,24,.85); border:1px solid var(--border); border-radius:4px; padding:5px 10px; text-align:right; z-index:10; }
 .viewer-stats div { font:400 9px var(--mono); color:var(--muted); }
 .viewer-stats span { color:var(--accent); }
-/* PANEL PROPIEDADES */
+/* PANELES LATERALES */
 .props-panel { position:absolute; top:0; right:0; width:240px; height:100%; background:var(--blue); border-left:1px solid var(--border); display:none; flex-direction:column; z-index:20; }
 .props-panel.show { display:flex; }
 .props-header { padding:10px 12px; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; flex-shrink:0; }
@@ -94,7 +89,6 @@ header { background:var(--navy); padding:10px 20px; display:flex; align-items:ce
 .prop-row { display:flex; gap:6px; padding:4px 0; border-bottom:1px solid rgba(26,42,64,.5); }
 .prop-key { font:400 9px var(--mono); color:var(--muted); flex:1; min-width:0; }
 .prop-val { font:600 9px var(--mono); color:var(--text); flex:1; min-width:0; text-align:right; word-break:break-all; }
-/* PANEL CATEGOR├ìAS */
 .cats-panel { position:absolute; top:0; left:0; width:200px; height:100%; background:var(--blue); border-right:1px solid var(--border); display:none; flex-direction:column; z-index:20; }
 .cats-panel.show { display:flex; }
 .cats-header { padding:10px 12px; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; flex-shrink:0; }
@@ -105,7 +99,7 @@ header { background:var(--navy); padding:10px 20px; display:flex; align-items:ce
 .cat-item input { accent-color:var(--accent); cursor:pointer; }
 .cat-label { font:400 10px var(--mono); color:var(--text); flex:1; }
 .cat-count { font:400 9px var(--mono); color:var(--muted); }
-/* PANEL PLANOS */
+/* PLANOS */
 .panel-plans { flex:1; display:flex; flex-direction:column; overflow:hidden; }
 .plans-toolbar { display:flex; align-items:center; gap:8px; padding:7px 14px; background:var(--blue); border-bottom:1px solid var(--border); flex-shrink:0; }
 .plans-grid { flex:1; overflow-y:auto; padding:16px; display:grid; grid-template-columns:repeat(auto-fill,minmax(180px,1fr)); gap:12px; align-content:start; }
@@ -115,7 +109,7 @@ header { background:var(--navy); padding:10px 20px; display:flex; align-items:ce
 .plan-info { padding:9px 10px; }
 .plan-name { font:600 10px var(--mono); color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .plan-meta { font:400 9px var(--mono); color:var(--muted); margin-top:2px; }
-/* PANEL DOCS */
+/* DOCUMENTOS */
 .panel-docs { flex:1; overflow-y:auto; padding:16px; }
 .docs-group { margin-bottom:20px; }
 .docs-group-title { font:700 9px var(--mono); color:var(--muted); text-transform:uppercase; letter-spacing:.2em; margin-bottom:8px; padding-bottom:6px; border-bottom:1px solid var(--border); }
@@ -127,8 +121,8 @@ header { background:var(--navy); padding:10px 20px; display:flex; align-items:ce
 .doc-meta { font:400 9px var(--mono); color:var(--muted); margin-top:1px; }
 .doc-size { font:400 9px var(--mono); color:var(--muted); flex-shrink:0; }
 .doc-badge { font:700 8px var(--mono); padding:2px 6px; border-radius:3px; flex-shrink:0; }
-/* LOADING OVERLAY */
-#viewerLoading { position:absolute; inset:0; background:rgba(5,11,20,.9); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:14px; z-index:30; display:none; }
+/* LOADING */
+#viewerLoading { position:absolute; inset:0; background:rgba(5,11,20,.9); display:none; flex-direction:column; align-items:center; justify-content:center; gap:14px; z-index:30; }
 #viewerLoading.show { display:flex; }
 .load-spinner { width:32px; height:32px; border:2px solid rgba(0,212,255,.2); border-top-color:var(--accent); border-radius:50%; animation:spin .8s linear infinite; }
 .load-text { font:400 10px var(--mono); color:var(--muted); letter-spacing:.1em; text-transform:uppercase; }
@@ -160,60 +154,60 @@ header { background:var(--navy); padding:10px 20px; display:flex; align-items:ce
     <div class="sb-list" id="sbList">
       <div class="sb-section">Modelos 3D</div>
       <div class="sb-item active" onclick="selectFile(this,'3d'); cargarDesdeUrl('https://estayzin.github.io/Revisor-IFC/ARQ-Arquitectura.ifc','ARQ-Arquitectura.ifc')" data-type="3d">
-        <div class="sb-item-icon">­ƒôª</div>
+        <div class="sb-item-icon">&#128230;</div>
         <div class="sb-item-info">
           <div class="sb-item-name">ARQ-Arquitectura.ifc</div>
-          <div class="sb-item-meta">13.6 MB ┬À IFC2x3</div>
+          <div class="sb-item-meta">13.6 MB &middot; IFC2x3</div>
         </div>
         <div class="sb-item-badge badge-ifc">IFC</div>
       </div>
       <div class="sb-item" onclick="selectFile(this,'3d')" data-type="3d">
-        <div class="sb-item-icon">­ƒôª</div>
+        <div class="sb-item-icon">&#128230;</div>
         <div class="sb-item-info">
           <div class="sb-item-name">EST-Estructural.ifc</div>
-          <div class="sb-item-meta">8.2 MB ┬À IFC2x3</div>
+          <div class="sb-item-meta">8.2 MB &middot; IFC2x3</div>
         </div>
         <div class="sb-item-badge badge-ifc">IFC</div>
       </div>
       <div class="sb-item" onclick="selectFile(this,'3d')" data-type="3d">
-        <div class="sb-item-icon">­ƒôÉ</div>
+        <div class="sb-item-icon">&#128208;</div>
         <div class="sb-item-info">
           <div class="sb-item-name">COO-Coordinacion.rvt</div>
-          <div class="sb-item-meta">45.1 MB ┬À Revit 2024</div>
+          <div class="sb-item-meta">45.1 MB &middot; Revit 2024</div>
         </div>
         <div class="sb-item-badge badge-rvt">RVT</div>
       </div>
       <div class="sb-section">Planos</div>
       <div class="sb-item" onclick="selectFile(this,'plans')" data-type="plans">
-        <div class="sb-item-icon">­ƒôï</div>
+        <div class="sb-item-icon">&#128203;</div>
         <div class="sb-item-info">
           <div class="sb-item-name">PL-ARQ-001_Planta.pdf</div>
-          <div class="sb-item-meta">2.1 MB ┬À A1</div>
+          <div class="sb-item-meta">2.1 MB &middot; A1</div>
         </div>
         <div class="sb-item-badge badge-pdf">PDF</div>
       </div>
       <div class="sb-item" onclick="selectFile(this,'plans')" data-type="plans">
-        <div class="sb-item-icon">­ƒôï</div>
+        <div class="sb-item-icon">&#128203;</div>
         <div class="sb-item-info">
           <div class="sb-item-name">PL-ARQ-002_Cortes.dwg</div>
-          <div class="sb-item-meta">5.4 MB ┬À AutoCAD</div>
+          <div class="sb-item-meta">5.4 MB &middot; AutoCAD</div>
         </div>
         <div class="sb-item-badge badge-dwg">DWG</div>
       </div>
       <div class="sb-section">Documentos</div>
       <div class="sb-item" onclick="selectFile(this,'docs')" data-type="docs">
-        <div class="sb-item-icon">­ƒôä</div>
+        <div class="sb-item-icon">&#128196;</div>
         <div class="sb-item-info">
           <div class="sb-item-name">BEP-v2.1.pdf</div>
-          <div class="sb-item-meta">1.3 MB ┬À BIM Execution Plan</div>
+          <div class="sb-item-meta">1.3 MB &middot; BIM Execution Plan</div>
         </div>
         <div class="sb-item-badge badge-pdf">PDF</div>
       </div>
       <div class="sb-item" onclick="selectFile(this,'docs')" data-type="docs">
-        <div class="sb-item-icon">­ƒôè</div>
+        <div class="sb-item-icon">&#128202;</div>
         <div class="sb-item-info">
           <div class="sb-item-name">Reporte-ARQ.html</div>
-          <div class="sb-item-meta">0.4 MB ┬À Reporte IFC</div>
+          <div class="sb-item-meta">0.4 MB &middot; Reporte IFC</div>
         </div>
         <div class="sb-item-badge badge-ifc">IFC</div>
       </div>
@@ -242,37 +236,32 @@ header { background:var(--navy); padding:10px 20px; display:flex; align-items:ce
           </div>
           <div class="vt-sep"></div>
           <div class="vt-btn-group">
-            <div class="vt-btn active" id="btnCats" onclick="toggleCats()">Categor├¡as</div>
+            <div class="vt-btn active" id="btnCats" onclick="toggleCats()">Categor&iacute;as</div>
             <div class="vt-btn" id="btnProps" onclick="toggleProps()">Propiedades</div>
           </div>
           <div class="vt-sep"></div>
           <div class="vt-label" id="vtLabel">Sin modelo cargado</div>
         </div>
         <div class="viewer-area" id="viewerArea">
-          <!-- Canvas Three.js -->
           <canvas id="viewerCanvas"></canvas>
-          <!-- Loading -->
           <div id="viewerLoading">
             <div class="load-spinner"></div>
             <div class="load-text" id="loadText">Cargando modelo...</div>
           </div>
-          <!-- Overlay superior -->
           <div class="viewer-overlay-top">
-            <div class="viewer-badge" id="viewerBadge">Ô¼ø 3D VIEWER</div>
+            <div class="viewer-badge" id="viewerBadge">&#11035; 3D VIEWER</div>
             <div class="viewer-status" id="viewerStatusBadge">Sin modelo</div>
           </div>
-          <!-- Coords -->
-          <div class="viewer-coords" id="viewerCoords">X: 0.000 ┬À Y: 0.000 ┬À Z: 0.000</div>
-          <!-- Stats -->
+          <div class="viewer-coords" id="viewerCoords">X: 0 &middot; Y: 0</div>
           <div class="viewer-stats">
-            <div>Elementos: <span id="statElems">ÔÇö</span></div>
-            <div>Tri├íngulos: <span id="statTris">ÔÇö</span></div>
+            <div>Elementos: <span id="statElems">&mdash;</span></div>
+            <div>Tri&aacute;ngulos: <span id="statTris">&mdash;</span></div>
           </div>
-          <!-- Panel Categor├¡as -->
+          <!-- Panel Categorias -->
           <div class="cats-panel" id="catsPanel">
             <div class="cats-header">
-              <div class="cats-title">Categor├¡as</div>
-              <button class="props-close" onclick="toggleCats()">Ô£ò</button>
+              <div class="cats-title">Categor&iacute;as</div>
+              <button class="props-close" onclick="toggleCats()">&#10005;</button>
             </div>
             <div class="cats-body" id="catsBody"></div>
           </div>
@@ -280,7 +269,7 @@ header { background:var(--navy); padding:10px 20px; display:flex; align-items:ce
           <div class="props-panel" id="propsPanel">
             <div class="props-header">
               <div class="props-title">Propiedades BIM</div>
-              <button class="props-close" onclick="toggleProps()">Ô£ò</button>
+              <button class="props-close" onclick="toggleProps()">&#10005;</button>
             </div>
             <div class="props-body" id="propsBody">
               <div class="prop-group">
@@ -302,9 +291,9 @@ header { background:var(--navy); padding:10px 20px; display:flex; align-items:ce
           </div>
         </div>
         <div class="plans-grid">
-          <div class="plan-card"><div class="plan-thumb">­ƒôï</div><div class="plan-info"><div class="plan-name">PL-ARQ-001_Planta.pdf</div><div class="plan-meta">Planta General ┬À A1 ┬À 2.1 MB</div></div></div>
-          <div class="plan-card"><div class="plan-thumb">­ƒôÉ</div><div class="plan-info"><div class="plan-name">PL-ARQ-002_Cortes.dwg</div><div class="plan-meta">Cortes ┬À AutoCAD ┬À 5.4 MB</div></div></div>
-          <div class="plan-card" style="opacity:.35;pointer-events:none;"><div class="plan-thumb" style="opacity:.3">´╝ï</div><div class="plan-info"><div class="plan-name" style="color:var(--muted)">Agregar plano...</div><div class="plan-meta">PDF ┬À DWG ┬À DXF</div></div></div>
+          <div class="plan-card"><div class="plan-thumb">&#128203;</div><div class="plan-info"><div class="plan-name">PL-ARQ-001_Planta.pdf</div><div class="plan-meta">Planta General &middot; A1 &middot; 2.1 MB</div></div></div>
+          <div class="plan-card"><div class="plan-thumb">&#128208;</div><div class="plan-info"><div class="plan-name">PL-ARQ-002_Cortes.dwg</div><div class="plan-meta">Cortes &middot; AutoCAD &middot; 5.4 MB</div></div></div>
+          <div class="plan-card" style="opacity:.35;pointer-events:none;"><div class="plan-thumb" style="opacity:.3">+</div><div class="plan-info"><div class="plan-name" style="color:var(--muted)">Agregar plano...</div><div class="plan-meta">PDF &middot; DWG &middot; DXF</div></div></div>
         </div>
       </div>
     </div>
@@ -313,21 +302,17 @@ header { background:var(--navy); padding:10px 20px; display:flex; align-items:ce
       <div class="panel-docs">
         <div class="docs-group">
           <div class="docs-group-title">BIM</div>
-          <div class="doc-row"><div class="doc-icon">­ƒôä</div><div class="doc-info"><div class="doc-name">BEP-v2.1.pdf</div><div class="doc-meta">BIM Execution Plan ┬À Rev 2.1</div></div><div class="doc-size">1.3 MB</div><div class="doc-badge badge-pdf" style="background:rgba(255,107,53,.1);color:var(--warn)">PDF</div></div>
-          <div class="doc-row"><div class="doc-icon">­ƒôè</div><div class="doc-info"><div class="doc-name">Reporte-ARQ.html</div><div class="doc-meta">Reporte IFC ┬À Arquitectura</div></div><div class="doc-size">0.4 MB</div><div class="doc-badge badge-ifc" style="background:rgba(0,212,255,.1);color:var(--accent)">IFC</div></div>
+          <div class="doc-row"><div class="doc-icon">&#128196;</div><div class="doc-info"><div class="doc-name">BEP-v2.1.pdf</div><div class="doc-meta">BIM Execution Plan &middot; Rev 2.1</div></div><div class="doc-size">1.3 MB</div><div class="doc-badge badge-pdf" style="background:rgba(255,107,53,.1);color:var(--warn)">PDF</div></div>
+          <div class="doc-row"><div class="doc-icon">&#128202;</div><div class="doc-info"><div class="doc-name">Reporte-ARQ.html</div><div class="doc-meta">Reporte IFC &middot; Arquitectura</div></div><div class="doc-size">0.4 MB</div><div class="doc-badge badge-ifc" style="background:rgba(0,212,255,.1);color:var(--accent)">IFC</div></div>
         </div>
       </div>
     </div>
   </div>
 </div>
-<!-- Input oculto para cargar IFC -->
 <input type="file" id="ifcFileInput" accept=".ifc" style="display:none" onchange="onIfcFile(event)">
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
 <script>
-// ============================================================
-// NAVEGACI├ôN SIDEBAR
-// ============================================================
 function viewTab(el, panelId) {
   document.querySelectorAll('.view-tab').forEach(t => t.classList.remove('active'));
   document.querySelectorAll('.view-panel').forEach(p => p.classList.remove('active'));
@@ -345,7 +330,7 @@ function filtrarSidebar() {
   var q = document.getElementById('sbSearch').value.toLowerCase();
   document.querySelectorAll('.sb-item').forEach(item => {
     var type = item.dataset.type || '';
-    var name = item.querySelector('.sb-item-name')?.textContent.toLowerCase() || '';
+    var name = item.querySelector('.sb-item-name') ? item.querySelector('.sb-item-name').textContent.toLowerCase() : '';
     var matchFilter = currentFilter === 'all' || type === currentFilter;
     var matchSearch = !q || name.includes(q);
     item.style.display = matchFilter && matchSearch ? '' : 'none';
@@ -357,21 +342,16 @@ function selectFile(el, view) {
   var tabMap = { '3d':'v3d', 'plans':'vplans', 'docs':'vdocs' };
   var tabEl = document.querySelector('.view-tab[onclick*="' + tabMap[view] + '"]');
   if (tabEl) viewTab(tabEl, tabMap[view]);
-  var name = el.querySelector('.sb-item-name')?.textContent || '';
-  document.getElementById('vtLabel').textContent = name;
+  var nameEl = el.querySelector('.sb-item-name');
+  document.getElementById('vtLabel').textContent = nameEl ? nameEl.textContent : '';
 }
-// ============================================================
-// VISOR 3D ÔÇö Three.js
-// ============================================================
+// VISOR 3D
 var renderer, scene, camera, controls, raycaster, mouse;
-var meshes = [], selectedMesh = null;
-var categories = {}; // nombre -> {meshes, visible}
-var ifcData = {}; // expressID -> propiedades demo
-
+var meshes = [], selectedMesh = null, categories = {};
 function initViewer() {
   var canvas = document.getElementById('viewerCanvas');
   var area = document.getElementById('viewerArea');
-  renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+  renderer = new THREE.WebGLRenderer({ canvas:canvas, antialias:true });
   renderer.setPixelRatio(window.devicePixelRatio);
   renderer.setClearColor(0x050b14);
   scene = new THREE.Scene();
@@ -382,13 +362,11 @@ function initViewer() {
   controls = new THREE.OrbitControls(camera, renderer.domElement);
   controls.enableDamping = true;
   controls.dampingFactor = 0.07;
-  var amb = new THREE.AmbientLight(0xffffff, 0.5);
-  scene.add(amb);
+  scene.add(new THREE.AmbientLight(0xffffff, 0.5));
   var dir = new THREE.DirectionalLight(0xffffff, 0.8);
   dir.position.set(50, 100, 50);
   scene.add(dir);
-  var grid = new THREE.GridHelper(100, 50, 0x1a2a40, 0x1a2a40);
-  scene.add(grid);
+  scene.add(new THREE.GridHelper(100, 50, 0x1a2a40, 0x1a2a40));
   raycaster = new THREE.Raycaster();
   mouse = new THREE.Vector2();
   renderer.domElement.addEventListener('click', onCanvasClick);
@@ -406,16 +384,13 @@ function onViewerResize() {
   if (!renderer || !area) return;
   var w = area.clientWidth, h = area.clientHeight;
   renderer.setSize(w, h);
-  camera.aspect = w / h;
+  camera.aspect = w/h;
   camera.updateProjectionMatrix();
 }
 function setNavMode(el, mode) {
   document.querySelectorAll('.viewer-toolbar .vt-btn-group:first-child .vt-btn').forEach(b => b.classList.remove('active'));
   el.classList.add('active');
-  if (controls) {
-    controls.enableRotate = mode === 'orbit';
-    controls.enablePan = mode === 'pan';
-  }
+  if (controls) { controls.enableRotate = mode==='orbit'; controls.enablePan = mode==='pan'; }
 }
 function setCamView(view) {
   if (!camera || !controls) return;
@@ -425,22 +400,19 @@ function setCamView(view) {
   if (!bbox.isEmpty()) bbox.getCenter(center);
   var size = bbox.isEmpty() ? 30 : bbox.getSize(new THREE.Vector3()).length();
   var d = size * 1.5;
-  if (view === 'top') { camera.position.set(center.x, center.y + d, center.z); }
-  else if (view === 'front') { camera.position.set(center.x, center.y, center.z + d); }
-  else { camera.position.set(center.x + d*0.6, center.y + d*0.5, center.z + d*0.6); }
+  if (view==='top') camera.position.set(center.x, center.y+d, center.z);
+  else if (view==='front') camera.position.set(center.x, center.y, center.z+d);
+  else camera.position.set(center.x+d*0.6, center.y+d*0.5, center.z+d*0.6);
   controls.target.copy(center);
   controls.update();
 }
-// ============================================================
-// CARGA IFC (web-ifc)
-// ============================================================
-function loadDemoIfc() { document.getElementById('ifcFileInput').click(); }
+// CARGA IFC
 async function cargarDesdeUrl(url, nombre) {
   document.getElementById('vtLabel').textContent = nombre;
   mostrarLoading('Descargando ' + nombre + '...');
   try {
     var resp = await fetch(url);
-    if (!resp.ok) throw new Error('No se pudo descargar: ' + resp.status);
+    if (!resp.ok) throw new Error('Error al descargar: ' + resp.status);
     var buffer = await resp.arrayBuffer();
     await cargarIFC(buffer, nombre);
   } catch(err) {
@@ -467,13 +439,10 @@ async function cargarIFC(buffer, nombre) {
     try { var r = await fetch('./wasm/web-ifc.wasm',{method:'HEAD'}); if(!r.ok) wasmBase='https://unpkg.com/web-ifc@0.0.74/'; } catch(e){ wasmBase='https://unpkg.com/web-ifc@0.0.74/'; }
     api.SetWasmPath(wasmBase);
     await api.Init();
-    mostrarLoading('Cargando geometr├¡a...');
-    // Limpiar escena
+    mostrarLoading('Cargando geometr\u00eda...');
     meshes.forEach(m => { m.geometry.dispose(); scene.remove(m); });
-    meshes = []; categories = {}; ifcData = {};
-    var data = new Uint8Array(buffer);
-    var modelID = api.OpenModel(data, {COORDINATE_TO_ORIGIN:true, OPTIMIZE_PROFILES:false});
-    var posAll=[], normAll=[], colAll=[];
+    meshes = []; categories = {};
+    var modelID = api.OpenModel(new Uint8Array(buffer), {COORDINATE_TO_ORIGIN:true, OPTIMIZE_PROFILES:false});
     var catColors = {
       IFCWALL:[0.4,0.7,1], IFCWALLSTANDARDCASE:[0.4,0.7,1],
       IFCSLAB:[0.6,0.6,0.8], IFCCOLUMN:[1,0.8,0.3],
@@ -481,14 +450,11 @@ async function cargarIFC(buffer, nombre) {
       IFCWINDOW:[0.2,0.9,1], IFCROOF:[0.8,0.4,0.4],
       DEFAULT:[0.5,0.6,0.7]
     };
-    var catMeshData = {}; // cls -> {positions, normals}
+    var catMeshData = {};
     api.StreamAllMeshes(modelID, function(mesh) {
       var geoms = mesh.geometries;
       var cls = 'DEFAULT';
-      try {
-        var line = api.GetLine(modelID, mesh.expressID, false);
-        if (line && line.constructor && line.constructor.name) cls = line.constructor.name.toUpperCase();
-      } catch(e){}
+      try { var line = api.GetLine(modelID, mesh.expressID, false); if (line && line.constructor && line.constructor.name) cls = line.constructor.name.toUpperCase(); } catch(e){}
       if (!catMeshData[cls]) catMeshData[cls] = {positions:[], normals:[], ids:[]};
       for (var g=0; g<geoms.size(); g++) {
         var pg = geoms.get(g);
@@ -498,18 +464,13 @@ async function cargarIFC(buffer, nombre) {
           var vPtr=geom.GetVertexData(), vSize=geom.GetVertexDataSize();
           var iPtr=geom.GetIndexData(), iSize=geom.GetIndexSize();
           if (vSize>0 && iSize>0) {
-            var verts = api.GetVertexArray(vPtr, vSize);
-            var idx = api.GetIndexArray(iPtr, iSize);
-            var mat = new THREE.Matrix4();
-            mat.fromArray(pg.flatTransformation);
-            for (var i=0; i<idx.length; i+=3) {
-              for (var j=0; j<3; j++) {
-                var vi = idx[i+j]*6;
-                var v = new THREE.Vector3(verts[vi],verts[vi+1],verts[vi+2]).applyMatrix4(mat);
-                var n = new THREE.Vector3(verts[vi+3],verts[vi+4],verts[vi+5]);
-                catMeshData[cls].positions.push(v.x,v.y,v.z);
-                catMeshData[cls].normals.push(n.x,n.y,n.z);
-              }
+            var verts=api.GetVertexArray(vPtr,vSize), idx=api.GetIndexArray(iPtr,iSize);
+            var mat=new THREE.Matrix4(); mat.fromArray(pg.flatTransformation);
+            for (var i=0;i<idx.length;i+=3) for (var j=0;j<3;j++) {
+              var vi=idx[i+j]*6;
+              var v=new THREE.Vector3(verts[vi],verts[vi+1],verts[vi+2]).applyMatrix4(mat);
+              catMeshData[cls].positions.push(v.x,v.y,v.z);
+              catMeshData[cls].normals.push(verts[vi+3],verts[vi+4],verts[vi+5]);
             }
           }
           if (geom.delete) geom.delete();
@@ -517,11 +478,9 @@ async function cargarIFC(buffer, nombre) {
       }
       catMeshData[cls].ids.push(mesh.expressID);
     });
-    // Crear un mesh por categor├¡a
     var catKeys = Object.keys(catMeshData);
     for (var ci=0; ci<catKeys.length; ci++) {
-      var cls = catKeys[ci];
-      var cd = catMeshData[cls];
+      var cls = catKeys[ci], cd = catMeshData[cls];
       if (!cd.positions.length) continue;
       var col = catColors[cls] || catColors.DEFAULT;
       var geo = new THREE.BufferGeometry();
@@ -529,15 +488,12 @@ async function cargarIFC(buffer, nombre) {
       geo.setAttribute('normal', new THREE.Float32BufferAttribute(cd.normals, 3));
       var mat = new THREE.MeshLambertMaterial({color:new THREE.Color(col[0],col[1],col[2]), side:THREE.DoubleSide});
       var mesh = new THREE.Mesh(geo, mat);
-      mesh.userData = { cls, ids:cd.ids, originalColor: new THREE.Color(col[0],col[1],col[2]) };
-      scene.add(mesh);
-      meshes.push(mesh);
-      categories[cls] = { mesh, visible:true, count:cd.ids.length };
+      mesh.userData = { cls:cls, ids:cd.ids, originalColor:new THREE.Color(col[0],col[1],col[2]) };
+      scene.add(mesh); meshes.push(mesh);
+      categories[cls] = { mesh:mesh, visible:true, count:cd.ids.length };
     }
     api.CloseModel(modelID);
-    // Centrar c├ímara
-    var bbox = new THREE.Box3();
-    meshes.forEach(m => bbox.expandByObject(m));
+    var bbox = new THREE.Box3(); meshes.forEach(m => bbox.expandByObject(m));
     if (!bbox.isEmpty()) {
       var center = bbox.getCenter(new THREE.Vector3());
       var size = bbox.getSize(new THREE.Vector3()).length();
@@ -561,94 +517,54 @@ function mostrarLoading(msg) {
   document.getElementById('viewerLoading').classList.add('show');
 }
 function ocultarLoading() { document.getElementById('viewerLoading').classList.remove('show'); }
-// ============================================================
-// SELECCI├ôN Y PROPIEDADES
-// ============================================================
-var matSelected = null;
+// SELECCION
 function onCanvasClick(e) {
   if (!renderer || !meshes.length) return;
   var rect = renderer.domElement.getBoundingClientRect();
-  mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
-  mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+  mouse.x = ((e.clientX-rect.left)/rect.width)*2-1;
+  mouse.y = -((e.clientY-rect.top)/rect.height)*2+1;
   raycaster.setFromCamera(mouse, camera);
   var hits = raycaster.intersectObjects(meshes);
-  // Restaurar color anterior
-  if (selectedMesh) {
-    selectedMesh.material.color.copy(selectedMesh.userData.originalColor);
-    selectedMesh.material.emissive = new THREE.Color(0,0,0);
-    selectedMesh = null;
-  }
+  if (selectedMesh) { selectedMesh.material.color.copy(selectedMesh.userData.originalColor); selectedMesh.material.emissive=new THREE.Color(0,0,0); selectedMesh=null; }
   if (hits.length > 0) {
     selectedMesh = hits[0].object;
-    selectedMesh.material.emissive = new THREE.Color(0, 0.3, 0.4);
+    selectedMesh.material.emissive = new THREE.Color(0,0.3,0.4);
     mostrarPropiedades(selectedMesh);
     document.getElementById('propsPanel').classList.add('show');
   }
 }
 function onCanvasMouseMove(e) {
   var rect = renderer.domElement.getBoundingClientRect();
-  var x = e.clientX - rect.left, y = e.clientY - rect.top;
-  document.getElementById('viewerCoords').textContent =
-    'X: ' + (x).toFixed(0) + ' ┬À Y: ' + (y).toFixed(0);
+  document.getElementById('viewerCoords').textContent = 'X: '+(e.clientX-rect.left|0)+' \u00b7 Y: '+(e.clientY-rect.top|0);
 }
 function mostrarPropiedades(mesh) {
   var cls = mesh.userData.cls || 'Desconocido';
   var ids = mesh.userData.ids || [];
   var html = '<div class="prop-group"><div class="prop-group-title">Entidad IFC</div>';
-  html += '<div class="prop-row"><div class="prop-key">Clase</div><div class="prop-val">' + cls + '</div></div>';
-  html += '<div class="prop-row"><div class="prop-key">Elementos</div><div class="prop-val">' + ids.length + '</div></div>';
-  html += '</div>';
-  html += '<div class="prop-group"><div class="prop-group-title">Propiedades</div>';
-  var demoProps = {
-    'Material': 'Hormig├│n Armado', 'Nivel': 'N+0.00',
-    'Clasificaci├│n': 'ARQ-' + (Math.floor(Math.random()*900)+100),
-    'Estado': 'Existente', 'Fase': 'Dise├▒o B├ísico'
-  };
-  Object.entries(demoProps).forEach(([k,v]) => {
-    html += '<div class="prop-row"><div class="prop-key">' + k + '</div><div class="prop-val">' + v + '</div></div>';
-  });
+  html += '<div class="prop-row"><div class="prop-key">Clase</div><div class="prop-val">'+cls+'</div></div>';
+  html += '<div class="prop-row"><div class="prop-key">Elementos</div><div class="prop-val">'+ids.length+'</div></div>';
+  html += '</div><div class="prop-group"><div class="prop-group-title">Propiedades</div>';
+  var props = {'Material':'Hormig\u00f3n Armado','Nivel':'N+0.00','Estado':'Existente','Fase':'Dise\u00f1o B\u00e1sico'};
+  Object.entries(props).forEach(([k,v]) => { html+='<div class="prop-row"><div class="prop-key">'+k+'</div><div class="prop-val">'+v+'</div></div>'; });
   html += '</div>';
   document.getElementById('propsBody').innerHTML = html;
 }
-// ============================================================
-// CATEGOR├ìAS
-// ============================================================
-function toggleCats() {
-  document.getElementById('catsPanel').classList.toggle('show');
-}
-function toggleProps() {
-  document.getElementById('propsPanel').classList.toggle('show');
-}
+function toggleCats() { document.getElementById('catsPanel').classList.toggle('show'); }
+function toggleProps() { document.getElementById('propsPanel').classList.toggle('show'); }
 function actualizarPanelCategorias() {
   var html = '';
   Object.entries(categories).forEach(([cls, cat]) => {
-    html += '<div class="cat-item">'
-      + '<input type="checkbox" checked onchange="toggleCategoria(\'' + cls + '\', this.checked)">'
-      + '<div class="cat-label">' + cls + '</div>'
-      + '<div class="cat-count">' + cat.count + '</div>'
-      + '</div>';
+    html += '<div class="cat-item"><input type="checkbox" checked onchange="toggleCategoria(\''+cls+'\',this.checked)"><div class="cat-label">'+cls+'</div><div class="cat-count">'+cat.count+'</div></div>';
   });
-  document.getElementById('catsBody').innerHTML = html || '<div style="padding:10px 12px;font:400 10px var(--mono);color:var(--muted)">Sin categor├¡as</div>';
+  document.getElementById('catsBody').innerHTML = html || '<div style="padding:10px 12px;font:400 10px var(--mono);color:var(--muted)">Sin categor\u00edas</div>';
 }
-function toggleCategoria(cls, visible) {
-  if (categories[cls]) {
-    categories[cls].mesh.visible = visible;
-    categories[cls].visible = visible;
-  }
-}
-// ============================================================
-// INIT
-// ============================================================
-window.addEventListener('DOMContentLoaded', function() {
-  initViewer();
-});
+function toggleCategoria(cls, visible) { if (categories[cls]) { categories[cls].mesh.visible=visible; categories[cls].visible=visible; } }
+window.addEventListener('DOMContentLoaded', function() { initViewer(); });
 </script>
-<!-- web-ifc ESM -->
 <script type="module">
   import * as WebIFC from 'https://unpkg.com/web-ifc@0.0.74/web-ifc-api.js';
   window._IfcAPI = WebIFC.IfcAPI;
   window._loadWebIfc = async function() {};
-  console.log('web-ifc 0.0.74 cargado');
 </script>
 </body>
 </html>
