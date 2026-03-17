@@ -15,137 +15,111 @@
 *,*::before,*::after { box-sizing:border-box; margin:0; padding:0; }
 html,body { height:100%; overflow:hidden; }
 body { font-family:var(--sans); background:var(--bg); color:var(--text); display:flex; flex-direction:column; height:100vh; }
-
 /* HEADER */
-header { background:var(--navy); padding:10px 20px; display:flex; align-items:center; gap:12px;
-  border-bottom:2px solid var(--accent); flex-shrink:0; box-shadow:0 2px 20px rgba(0,212,255,.08); }
-.hicon { width:30px; height:30px; background:linear-gradient(135deg,var(--accent),var(--accent2));
-  border-radius:6px; display:flex; align-items:center; justify-content:center; font-size:14px; flex-shrink:0; }
+header { background:var(--navy); padding:10px 20px; display:flex; align-items:center; gap:12px; border-bottom:2px solid var(--accent); flex-shrink:0; }
+.hicon { width:30px; height:30px; background:linear-gradient(135deg,var(--accent),var(--accent2)); border-radius:6px; display:flex; align-items:center; justify-content:center; font-size:14px; flex-shrink:0; }
 .htitle { font:600 12px var(--mono); color:#e0f0ff; letter-spacing:.08em; text-transform:uppercase; }
 .hsub { font:400 10px var(--mono); color:var(--muted); margin-top:1px; letter-spacing:.05em; }
-.hback { margin-left:auto; padding:5px 12px; background:transparent; color:var(--muted);
-  border:1px solid var(--border); border-radius:4px; font:600 9px var(--mono); cursor:pointer;
-  text-transform:uppercase; letter-spacing:.1em; text-decoration:none; transition:all .15s; }
+.hback { margin-left:auto; padding:5px 12px; background:transparent; color:var(--muted); border:1px solid var(--border); border-radius:4px; font:600 9px var(--mono); cursor:pointer; text-transform:uppercase; letter-spacing:.1em; text-decoration:none; transition:all .15s; }
 .hback:hover { border-color:var(--accent); color:var(--accent); }
-
-/* LAYOUT PRINCIPAL */
+/* LAYOUT */
 .main { display:flex; flex:1; overflow:hidden; }
-
-/* SIDEBAR — navegador de archivos */
-.sidebar { width:260px; flex-shrink:0; background:var(--blue); border-right:1px solid var(--border);
-  display:flex; flex-direction:column; overflow:hidden; }
+/* SIDEBAR */
+.sidebar { width:260px; flex-shrink:0; background:var(--blue); border-right:1px solid var(--border); display:flex; flex-direction:column; overflow:hidden; }
 .sb-header { padding:12px 14px; border-bottom:1px solid var(--border); flex-shrink:0; }
 .sb-title { font:700 9px var(--mono); color:var(--muted); text-transform:uppercase; letter-spacing:.2em; }
 .sb-search { margin-top:8px; position:relative; }
-.sb-search input { width:100%; padding:6px 10px 6px 28px; background:var(--navy);
-  border:1px solid var(--border); border-radius:4px; font:400 11px var(--mono); color:var(--text); outline:none; }
+.sb-search input { width:100%; padding:6px 10px 6px 28px; background:var(--navy); border:1px solid var(--border); border-radius:4px; font:400 11px var(--mono); color:var(--text); outline:none; }
 .sb-search input:focus { border-color:var(--accent); }
-.sb-search::before { content:'⌕'; position:absolute; left:8px; top:6px;
-  font-size:13px; color:var(--muted); pointer-events:none; }
-
-/* TABS del sidebar */
+.sb-search::before { content:'⌕'; position:absolute; left:8px; top:6px; font-size:13px; color:var(--muted); pointer-events:none; }
 .sb-tabs { display:flex; border-bottom:1px solid var(--border); flex-shrink:0; }
-.sb-tab { flex:1; padding:8px 4px; text-align:center; font:600 9px var(--mono); color:var(--muted);
-  text-transform:uppercase; letter-spacing:.1em; cursor:pointer; border-bottom:2px solid transparent;
-  transition:all .15s; }
+.sb-tab { flex:1; padding:8px 4px; text-align:center; font:600 9px var(--mono); color:var(--muted); text-transform:uppercase; letter-spacing:.1em; cursor:pointer; border-bottom:2px solid transparent; transition:all .15s; }
 .sb-tab.active { color:var(--accent); border-bottom-color:var(--accent); }
-.sb-tab:hover:not(.active) { color:var(--text); }
-
-/* LISTA de archivos */
 .sb-list { flex:1; overflow-y:auto; padding:8px 0; }
-.sb-section { padding:6px 14px 3px; font:700 8px var(--mono); color:var(--muted);
-  text-transform:uppercase; letter-spacing:.2em; }
-.sb-item { display:flex; align-items:center; gap:8px; padding:7px 14px; cursor:pointer;
-  transition:background .12s; border-left:2px solid transparent; }
+.sb-section { padding:6px 14px 3px; font:700 8px var(--mono); color:var(--muted); text-transform:uppercase; letter-spacing:.2em; }
+.sb-item { display:flex; align-items:center; gap:8px; padding:7px 14px; cursor:pointer; transition:background .12s; border-left:2px solid transparent; }
 .sb-item:hover { background:rgba(0,212,255,.04); }
 .sb-item.active { background:rgba(0,212,255,.07); border-left-color:var(--accent); }
 .sb-item-icon { font-size:13px; flex-shrink:0; opacity:.7; }
 .sb-item-info { flex:1; min-width:0; }
-.sb-item-name { font:500 11px var(--mono); color:var(--text); white-space:nowrap;
-  overflow:hidden; text-overflow:ellipsis; }
+.sb-item-name { font:500 11px var(--mono); color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .sb-item-meta { font:400 9px var(--mono); color:var(--muted); margin-top:1px; }
-.sb-item-badge { font:700 8px var(--mono); padding:2px 5px; border-radius:3px;
-  text-transform:uppercase; letter-spacing:.06em; flex-shrink:0; }
+.sb-item-badge { font:700 8px var(--mono); padding:2px 5px; border-radius:3px; text-transform:uppercase; letter-spacing:.06em; flex-shrink:0; }
 .badge-ifc { background:rgba(0,212,255,.1); color:var(--accent); }
 .badge-pdf { background:rgba(255,107,53,.1); color:var(--warn); }
 .badge-dwg { background:rgba(124,77,255,.1); color:var(--accent2); }
 .badge-rvt { background:rgba(0,200,83,.1); color:var(--green); }
 </style>
-
-/* CONTENIDO PRINCIPAL */
+<style>
+/* CONTENIDO */
 .content { flex:1; display:flex; flex-direction:column; overflow:hidden; }
-
-/* TABS de vista: 3D / Planos / Documentos */
-.view-tabs { display:flex; align-items:center; padding:0 16px; background:var(--navy);
-  border-bottom:1px solid var(--border); flex-shrink:0; gap:2px; }
-.view-tab { display:flex; align-items:center; gap:6px; padding:10px 16px; font:600 10px var(--mono);
-  color:var(--muted); text-transform:uppercase; letter-spacing:.1em; cursor:pointer;
-  border-bottom:2px solid transparent; transition:all .15s; }
+/* VIEW TABS */
+.view-tabs { display:flex; align-items:center; padding:0 16px; background:var(--navy); border-bottom:1px solid var(--border); flex-shrink:0; gap:2px; }
+.view-tab { display:flex; align-items:center; gap:6px; padding:10px 16px; font:600 10px var(--mono); color:var(--muted); text-transform:uppercase; letter-spacing:.1em; cursor:pointer; border-bottom:2px solid transparent; transition:all .15s; }
 .view-tab.active { color:var(--accent); border-bottom-color:var(--accent); }
 .view-tab:hover:not(.active) { color:var(--text); }
-.view-tab .tab-icon { font-size:14px; }
-.view-tab .tab-count { font:600 8px var(--mono); background:rgba(0,212,255,.1);
-  color:var(--accent); padding:1px 5px; border-radius:10px; }
-
-/* PANELES de vista */
+.tab-count { font:600 8px var(--mono); background:rgba(0,212,255,.1); color:var(--accent); padding:1px 5px; border-radius:10px; }
+/* PANELES */
 .view-panel { display:none; flex:1; overflow:hidden; flex-direction:column; }
 .view-panel.active { display:flex; }
-
-/* === PANEL 3D === */
+/* PANEL 3D */
 .panel-3d { display:flex; flex-direction:column; flex:1; overflow:hidden; }
-.viewer-toolbar { display:flex; align-items:center; gap:8px; padding:7px 14px;
-  background:var(--blue); border-bottom:1px solid var(--border); flex-shrink:0; }
-.vt-btn-group { display:flex; gap:2px; background:rgba(0,212,255,.05);
-  border:1px solid var(--border); border-radius:4px; padding:2px; }
-.vt-btn { padding:4px 10px; border:none; border-radius:3px; font:600 9px var(--mono);
-  cursor:pointer; background:transparent; color:var(--muted); text-transform:uppercase;
-  letter-spacing:.08em; transition:all .15s; }
-.vt-btn.active,.vt-btn:hover { background:var(--accent); color:#000; }
+.viewer-toolbar { display:flex; align-items:center; gap:8px; padding:7px 14px; background:var(--blue); border-bottom:1px solid var(--border); flex-shrink:0; flex-wrap:wrap; }
+.vt-btn-group { display:flex; gap:2px; background:rgba(0,212,255,.05); border:1px solid var(--border); border-radius:4px; padding:2px; }
+.vt-btn { padding:4px 10px; border:none; border-radius:3px; font:600 9px var(--mono); cursor:pointer; background:transparent; color:var(--muted); text-transform:uppercase; letter-spacing:.08em; transition:all .15s; }
+.vt-btn.active { background:var(--accent); color:#000; }
+.vt-btn:hover:not(.active) { background:rgba(0,212,255,.1); color:var(--text); }
 .vt-sep { width:1px; background:var(--border); margin:0 4px; align-self:stretch; }
 .vt-label { font:400 10px var(--mono); color:var(--muted); margin-left:auto; }
-
-.viewer-area { flex:1; position:relative; background:#050b14; display:flex;
-  align-items:center; justify-content:center; overflow:hidden; }
-.viewer-placeholder { display:flex; flex-direction:column; align-items:center;
-  justify-content:center; gap:16px; opacity:.3; }
-.viewer-placeholder .big-icon { font-size:64px; }
-.viewer-placeholder p { font:400 11px var(--mono); color:var(--muted);
-  text-transform:uppercase; letter-spacing:.12em; }
-.viewer-badge { position:absolute; top:12px; right:12px; background:rgba(0,212,255,.1);
-  border:1px solid rgba(0,212,255,.2); border-radius:4px; padding:5px 10px;
-  font:600 9px var(--mono); color:var(--accent); letter-spacing:.1em; }
-.viewer-coords { position:absolute; bottom:12px; left:12px; background:rgba(6,13,24,.8);
-  border:1px solid var(--border); border-radius:4px; padding:5px 10px;
-  font:400 9px var(--mono); color:var(--muted); letter-spacing:.06em; }
-.viewer-stats { position:absolute; bottom:12px; right:12px; background:rgba(6,13,24,.8);
-  border:1px solid var(--border); border-radius:4px; padding:5px 10px; text-align:right; }
+/* AREA VISOR */
+.viewer-area { flex:1; position:relative; background:#050b14; overflow:hidden; }
+#viewerCanvas { width:100%; height:100%; display:block; }
+.viewer-overlay-top { position:absolute; top:12px; right:12px; display:flex; gap:6px; z-index:10; pointer-events:none; }
+.viewer-badge { background:rgba(0,212,255,.1); border:1px solid rgba(0,212,255,.2); border-radius:4px; padding:5px 10px; font:600 9px var(--mono); color:var(--accent); letter-spacing:.1em; }
+.viewer-status { background:rgba(6,13,24,.85); border:1px solid var(--border); border-radius:4px; padding:5px 10px; font:600 9px var(--mono); color:var(--muted); }
+.viewer-coords { position:absolute; bottom:12px; left:12px; background:rgba(6,13,24,.85); border:1px solid var(--border); border-radius:4px; padding:5px 10px; font:400 9px var(--mono); color:var(--muted); z-index:10; }
+.viewer-stats { position:absolute; bottom:12px; right:12px; background:rgba(6,13,24,.85); border:1px solid var(--border); border-radius:4px; padding:5px 10px; text-align:right; z-index:10; }
 .viewer-stats div { font:400 9px var(--mono); color:var(--muted); }
 .viewer-stats span { color:var(--accent); }
-
-/* === PANEL PLANOS === */
+/* PANEL PROPIEDADES */
+.props-panel { position:absolute; top:0; right:0; width:240px; height:100%; background:var(--blue); border-left:1px solid var(--border); display:none; flex-direction:column; z-index:20; }
+.props-panel.show { display:flex; }
+.props-header { padding:10px 12px; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; flex-shrink:0; }
+.props-title { font:600 9px var(--mono); color:var(--accent); text-transform:uppercase; letter-spacing:.15em; }
+.props-close { background:none; border:none; color:var(--muted); cursor:pointer; font-size:14px; padding:0; }
+.props-close:hover { color:var(--text); }
+.props-body { flex:1; overflow-y:auto; padding:10px 0; }
+.prop-group { padding:0 12px 10px; }
+.prop-group-title { font:700 8px var(--mono); color:var(--muted); text-transform:uppercase; letter-spacing:.15em; margin-bottom:6px; }
+.prop-row { display:flex; gap:6px; padding:4px 0; border-bottom:1px solid rgba(26,42,64,.5); }
+.prop-key { font:400 9px var(--mono); color:var(--muted); flex:1; min-width:0; }
+.prop-val { font:600 9px var(--mono); color:var(--text); flex:1; min-width:0; text-align:right; word-break:break-all; }
+/* PANEL CATEGORÍAS */
+.cats-panel { position:absolute; top:0; left:0; width:200px; height:100%; background:var(--blue); border-right:1px solid var(--border); display:none; flex-direction:column; z-index:20; }
+.cats-panel.show { display:flex; }
+.cats-header { padding:10px 12px; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; flex-shrink:0; }
+.cats-title { font:600 9px var(--mono); color:var(--accent); text-transform:uppercase; letter-spacing:.15em; }
+.cats-body { flex:1; overflow-y:auto; padding:8px 0; }
+.cat-item { display:flex; align-items:center; gap:8px; padding:6px 12px; cursor:pointer; transition:background .12s; }
+.cat-item:hover { background:rgba(0,212,255,.05); }
+.cat-item input { accent-color:var(--accent); cursor:pointer; }
+.cat-label { font:400 10px var(--mono); color:var(--text); flex:1; }
+.cat-count { font:400 9px var(--mono); color:var(--muted); }
+/* PANEL PLANOS */
 .panel-plans { flex:1; display:flex; flex-direction:column; overflow:hidden; }
-.plans-toolbar { display:flex; align-items:center; gap:8px; padding:7px 14px;
-  background:var(--blue); border-bottom:1px solid var(--border); flex-shrink:0; }
-.plans-grid { flex:1; overflow-y:auto; padding:16px; display:grid;
-  grid-template-columns:repeat(auto-fill,minmax(180px,1fr)); gap:12px; align-content:start; }
-.plan-card { background:var(--card); border:1px solid var(--border); border-radius:6px;
-  overflow:hidden; cursor:pointer; transition:all .15s; }
+.plans-toolbar { display:flex; align-items:center; gap:8px; padding:7px 14px; background:var(--blue); border-bottom:1px solid var(--border); flex-shrink:0; }
+.plans-grid { flex:1; overflow-y:auto; padding:16px; display:grid; grid-template-columns:repeat(auto-fill,minmax(180px,1fr)); gap:12px; align-content:start; }
+.plan-card { background:var(--card); border:1px solid var(--border); border-radius:6px; overflow:hidden; cursor:pointer; transition:all .15s; }
 .plan-card:hover { border-color:var(--accent); box-shadow:0 0 15px rgba(0,212,255,.1); }
-.plan-thumb { height:120px; background:linear-gradient(135deg,#0d1a2e,#0a1220);
-  display:flex; align-items:center; justify-content:center; font-size:36px; opacity:.4; }
+.plan-thumb { height:120px; background:linear-gradient(135deg,#0d1a2e,#0a1220); display:flex; align-items:center; justify-content:center; font-size:36px; opacity:.4; }
 .plan-info { padding:9px 10px; }
-.plan-name { font:600 10px var(--mono); color:var(--text); white-space:nowrap;
-  overflow:hidden; text-overflow:ellipsis; }
+.plan-name { font:600 10px var(--mono); color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .plan-meta { font:400 9px var(--mono); color:var(--muted); margin-top:2px; }
-
-/* === PANEL DOCUMENTOS === */
+/* PANEL DOCS */
 .panel-docs { flex:1; overflow-y:auto; padding:16px; }
 .docs-group { margin-bottom:20px; }
-.docs-group-title { font:700 9px var(--mono); color:var(--muted); text-transform:uppercase;
-  letter-spacing:.2em; margin-bottom:8px; padding-bottom:6px; border-bottom:1px solid var(--border); }
-.doc-row { display:flex; align-items:center; gap:10px; padding:8px 10px;
-  background:var(--card); border:1px solid var(--border); border-radius:5px;
-  margin-bottom:4px; cursor:pointer; transition:all .15s; }
+.docs-group-title { font:700 9px var(--mono); color:var(--muted); text-transform:uppercase; letter-spacing:.2em; margin-bottom:8px; padding-bottom:6px; border-bottom:1px solid var(--border); }
+.doc-row { display:flex; align-items:center; gap:10px; padding:8px 10px; background:var(--card); border:1px solid var(--border); border-radius:5px; margin-bottom:4px; cursor:pointer; transition:all .15s; }
 .doc-row:hover { border-color:var(--accent); background:rgba(0,212,255,.03); }
 .doc-icon { font-size:18px; flex-shrink:0; }
 .doc-info { flex:1; min-width:0; }
@@ -153,26 +127,29 @@ header { background:var(--navy); padding:10px 20px; display:flex; align-items:ce
 .doc-meta { font:400 9px var(--mono); color:var(--muted); margin-top:1px; }
 .doc-size { font:400 9px var(--mono); color:var(--muted); flex-shrink:0; }
 .doc-badge { font:700 8px var(--mono); padding:2px 6px; border-radius:3px; flex-shrink:0; }
+/* LOADING OVERLAY */
+#viewerLoading { position:absolute; inset:0; background:rgba(5,11,20,.9); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:14px; z-index:30; display:none; }
+#viewerLoading.show { display:flex; }
+.load-spinner { width:32px; height:32px; border:2px solid rgba(0,212,255,.2); border-top-color:var(--accent); border-radius:50%; animation:spin .8s linear infinite; }
+.load-text { font:400 10px var(--mono); color:var(--muted); letter-spacing:.1em; text-transform:uppercase; }
+@keyframes spin { to { transform:rotate(360deg); } }
 </style>
 </head>
 <body>
-<!-- HEADER -->
 <header>
   <div class="hicon">🏗️</div>
   <div>
     <div class="htitle">Explorador BIM</div>
-    <div class="hsub">Carlos Estay Ruggieri · c.estay@outlook.com</div>
+    <div class="hsub">Carlos Estay Ruggieri · c.estay [at] outlook.com</div>
   </div>
   <a href="index.html" class="hback">← Volver</a>
 </header>
-
 <div class="main">
-
   <!-- SIDEBAR -->
   <div class="sidebar">
     <div class="sb-header">
-      <div class="sb-title">Proyectos</div>
-      <div class="sb-search"><input type="text" placeholder="Buscar archivo..."></div>
+      <div class="sb-title">Archivos del Proyecto</div>
+      <div class="sb-search"><input type="text" id="sbSearch" placeholder="Buscar archivo..." oninput="filtrarSidebar()"></div>
     </div>
     <div class="sb-tabs">
       <div class="sb-tab active" onclick="sbTab(this,'all')">Todo</div>
@@ -182,7 +159,7 @@ header { background:var(--navy); padding:10px 20px; display:flex; align-items:ce
     </div>
     <div class="sb-list" id="sbList">
       <div class="sb-section">Modelos 3D</div>
-      <div class="sb-item active" onclick="selectFile(this,'3d')">
+      <div class="sb-item active" onclick="selectFile(this,'3d')" data-type="3d">
         <div class="sb-item-icon">📦</div>
         <div class="sb-item-info">
           <div class="sb-item-name">ARQ-Arquitectura.ifc</div>
@@ -190,7 +167,7 @@ header { background:var(--navy); padding:10px 20px; display:flex; align-items:ce
         </div>
         <div class="sb-item-badge badge-ifc">IFC</div>
       </div>
-      <div class="sb-item" onclick="selectFile(this,'3d')">
+      <div class="sb-item" onclick="selectFile(this,'3d')" data-type="3d">
         <div class="sb-item-icon">📦</div>
         <div class="sb-item-info">
           <div class="sb-item-name">EST-Estructural.ifc</div>
@@ -198,7 +175,7 @@ header { background:var(--navy); padding:10px 20px; display:flex; align-items:ce
         </div>
         <div class="sb-item-badge badge-ifc">IFC</div>
       </div>
-      <div class="sb-item" onclick="selectFile(this,'3d')">
+      <div class="sb-item" onclick="selectFile(this,'3d')" data-type="3d">
         <div class="sb-item-icon">📐</div>
         <div class="sb-item-info">
           <div class="sb-item-name">COO-Coordinacion.rvt</div>
@@ -207,7 +184,7 @@ header { background:var(--navy); padding:10px 20px; display:flex; align-items:ce
         <div class="sb-item-badge badge-rvt">RVT</div>
       </div>
       <div class="sb-section">Planos</div>
-      <div class="sb-item" onclick="selectFile(this,'plans')">
+      <div class="sb-item" onclick="selectFile(this,'plans')" data-type="plans">
         <div class="sb-item-icon">📋</div>
         <div class="sb-item-info">
           <div class="sb-item-name">PL-ARQ-001_Planta.pdf</div>
@@ -215,7 +192,7 @@ header { background:var(--navy); padding:10px 20px; display:flex; align-items:ce
         </div>
         <div class="sb-item-badge badge-pdf">PDF</div>
       </div>
-      <div class="sb-item" onclick="selectFile(this,'plans')">
+      <div class="sb-item" onclick="selectFile(this,'plans')" data-type="plans">
         <div class="sb-item-icon">📋</div>
         <div class="sb-item-info">
           <div class="sb-item-name">PL-ARQ-002_Cortes.dwg</div>
@@ -224,7 +201,7 @@ header { background:var(--navy); padding:10px 20px; display:flex; align-items:ce
         <div class="sb-item-badge badge-dwg">DWG</div>
       </div>
       <div class="sb-section">Documentos</div>
-      <div class="sb-item" onclick="selectFile(this,'docs')">
+      <div class="sb-item" onclick="selectFile(this,'docs')" data-type="docs">
         <div class="sb-item-icon">📄</div>
         <div class="sb-item-info">
           <div class="sb-item-name">BEP-v2.1.pdf</div>
@@ -232,8 +209,8 @@ header { background:var(--navy); padding:10px 20px; display:flex; align-items:ce
         </div>
         <div class="sb-item-badge badge-pdf">PDF</div>
       </div>
-      <div class="sb-item" onclick="selectFile(this,'docs')">
-        <div class="sb-item-icon">📄</div>
+      <div class="sb-item" onclick="selectFile(this,'docs')" data-type="docs">
+        <div class="sb-item-icon">📊</div>
         <div class="sb-item-info">
           <div class="sb-item-name">Reporte-ARQ.html</div>
           <div class="sb-item-meta">0.4 MB · Reporte IFC</div>
@@ -242,60 +219,82 @@ header { background:var(--navy); padding:10px 20px; display:flex; align-items:ce
       </div>
     </div>
   </div>
-
   <!-- CONTENIDO -->
   <div class="content">
-
-    <!-- TABS 3D / PLANOS / DOCUMENTOS -->
     <div class="view-tabs">
-      <div class="view-tab active" onclick="viewTab(this,'v3d')">
-        <span class="tab-icon">⬛</span> 3D <span class="tab-count">3</span>
-      </div>
-      <div class="view-tab" onclick="viewTab(this,'vplans')">
-        <span class="tab-icon">📋</span> Planos <span class="tab-count">2</span>
-      </div>
-      <div class="view-tab" onclick="viewTab(this,'vdocs')">
-        <span class="tab-icon">📁</span> Documentos <span class="tab-count">2</span>
-      </div>
+      <div class="view-tab active" onclick="viewTab(this,'v3d')">⬛ 3D <span class="tab-count">3</span></div>
+      <div class="view-tab" onclick="viewTab(this,'vplans')">📋 Planos <span class="tab-count">2</span></div>
+      <div class="view-tab" onclick="viewTab(this,'vdocs')">📁 Documentos <span class="tab-count">2</span></div>
     </div>
-
     <!-- PANEL 3D -->
     <div class="view-panel active" id="v3d">
       <div class="panel-3d">
         <div class="viewer-toolbar">
           <div class="vt-btn-group">
-            <div class="vt-btn active">Orbitar</div>
-            <div class="vt-btn">Pan</div>
-            <div class="vt-btn">Zoom</div>
+            <div class="vt-btn active" onclick="setNavMode(this,'orbit')">Orbitar</div>
+            <div class="vt-btn" onclick="setNavMode(this,'pan')">Pan</div>
           </div>
           <div class="vt-sep"></div>
           <div class="vt-btn-group">
-            <div class="vt-btn">Planta</div>
-            <div class="vt-btn">Norte</div>
-            <div class="vt-btn">Isométrico</div>
+            <div class="vt-btn" onclick="setCamView('top')">Planta</div>
+            <div class="vt-btn" onclick="setCamView('front')">Frente</div>
+            <div class="vt-btn" onclick="setCamView('iso')">Iso</div>
           </div>
           <div class="vt-sep"></div>
           <div class="vt-btn-group">
-            <div class="vt-btn">Sólido</div>
-            <div class="vt-btn">Bordes</div>
+            <div class="vt-btn active" id="btnCats" onclick="toggleCats()">Categorías</div>
+            <div class="vt-btn" id="btnProps" onclick="toggleProps()">Propiedades</div>
           </div>
-          <div class="vt-label" id="vtLabel">ARQ-Arquitectura.ifc · IFC2x3</div>
+          <div class="vt-sep"></div>
+          <div class="vt-btn-group">
+            <div class="vt-btn" onclick="loadDemoIfc()">📂 Cargar IFC</div>
+          </div>
+          <div class="vt-label" id="vtLabel">Sin modelo cargado</div>
         </div>
-        <div class="viewer-area" id="viewer">
-          <div class="viewer-placeholder">
-            <div class="big-icon">⬛</div>
-            <p>Visor 3D — En desarrollo</p>
+        <div class="viewer-area" id="viewerArea">
+          <!-- Canvas Three.js -->
+          <canvas id="viewerCanvas"></canvas>
+          <!-- Loading -->
+          <div id="viewerLoading">
+            <div class="load-spinner"></div>
+            <div class="load-text" id="loadText">Cargando modelo...</div>
           </div>
-          <div class="viewer-badge">⬛ 3D VIEWER</div>
-          <div class="viewer-coords">X: 0.000 · Y: 0.000 · Z: 0.000</div>
+          <!-- Overlay superior -->
+          <div class="viewer-overlay-top">
+            <div class="viewer-badge" id="viewerBadge">⬛ 3D VIEWER</div>
+            <div class="viewer-status" id="viewerStatusBadge">Sin modelo</div>
+          </div>
+          <!-- Coords -->
+          <div class="viewer-coords" id="viewerCoords">X: 0.000 · Y: 0.000 · Z: 0.000</div>
+          <!-- Stats -->
           <div class="viewer-stats">
-            <div>Vértices: <span>—</span></div>
-            <div>Elementos: <span>—</span></div>
+            <div>Elementos: <span id="statElems">—</span></div>
+            <div>Triángulos: <span id="statTris">—</span></div>
+          </div>
+          <!-- Panel Categorías -->
+          <div class="cats-panel" id="catsPanel">
+            <div class="cats-header">
+              <div class="cats-title">Categorías</div>
+              <button class="props-close" onclick="toggleCats()">✕</button>
+            </div>
+            <div class="cats-body" id="catsBody"></div>
+          </div>
+          <!-- Panel Propiedades -->
+          <div class="props-panel" id="propsPanel">
+            <div class="props-header">
+              <div class="props-title">Propiedades BIM</div>
+              <button class="props-close" onclick="toggleProps()">✕</button>
+            </div>
+            <div class="props-body" id="propsBody">
+              <div class="prop-group">
+                <div class="prop-group-title">Selecciona un elemento</div>
+                <div style="font:400 10px var(--mono);color:var(--muted);padding:4px 0;">Haz clic sobre un elemento del modelo para ver sus propiedades BIM.</div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
     </div>
-
     <!-- PANEL PLANOS -->
     <div class="view-panel" id="vplans">
       <div class="panel-plans">
@@ -304,217 +303,340 @@ header { background:var(--navy); padding:10px 20px; display:flex; align-items:ce
             <div class="vt-btn active">Grilla</div>
             <div class="vt-btn">Lista</div>
           </div>
-          <div class="vt-sep"></div>
-          <div class="vt-btn-group">
-            <div class="vt-btn">A0</div>
-            <div class="vt-btn">A1</div>
-            <div class="vt-btn">A3</div>
-          </div>
         </div>
         <div class="plans-grid">
-          <div class="plan-card">
-            <div class="plan-thumb">📋</div>
-            <div class="plan-info">
-              <div class="plan-name">PL-ARQ-001_Planta.pdf</div>
-              <div class="plan-meta">Planta General · A1 · 2.1 MB</div>
-            </div>
-          </div>
-          <div class="plan-card">
-            <div class="plan-thumb">📐</div>
-            <div class="plan-info">
-              <div class="plan-name">PL-ARQ-002_Cortes.dwg</div>
-              <div class="plan-meta">Cortes · AutoCAD · 5.4 MB</div>
-            </div>
-          </div>
-          <div class="plan-card" style="opacity:.35;pointer-events:none;">
-            <div class="plan-thumb" style="opacity:.3">＋</div>
-            <div class="plan-info">
-              <div class="plan-name" style="color:var(--muted)">Agregar plano...</div>
-              <div class="plan-meta">PDF · DWG · DXF</div>
-            </div>
-          </div>
+          <div class="plan-card"><div class="plan-thumb">📋</div><div class="plan-info"><div class="plan-name">PL-ARQ-001_Planta.pdf</div><div class="plan-meta">Planta General · A1 · 2.1 MB</div></div></div>
+          <div class="plan-card"><div class="plan-thumb">📐</div><div class="plan-info"><div class="plan-name">PL-ARQ-002_Cortes.dwg</div><div class="plan-meta">Cortes · AutoCAD · 5.4 MB</div></div></div>
+          <div class="plan-card" style="opacity:.35;pointer-events:none;"><div class="plan-thumb" style="opacity:.3">＋</div><div class="plan-info"><div class="plan-name" style="color:var(--muted)">Agregar plano...</div><div class="plan-meta">PDF · DWG · DXF</div></div></div>
         </div>
       </div>
     </div>
-
-    <!-- PANEL DOCUMENTOS -->
+    <!-- PANEL DOCS -->
     <div class="view-panel" id="vdocs">
       <div class="panel-docs">
         <div class="docs-group">
           <div class="docs-group-title">BIM</div>
-          <div class="doc-row">
-            <div class="doc-icon">📄</div>
-            <div class="doc-info">
-              <div class="doc-name">BEP-v2.1.pdf</div>
-              <div class="doc-meta">BIM Execution Plan · Rev 2.1 · Mar 2026</div>
-            </div>
-            <div class="doc-size">1.3 MB</div>
-            <div class="doc-badge badge-pdf" style="background:rgba(255,107,53,.1);color:var(--warn)">PDF</div>
-          </div>
-          <div class="doc-row">
-            <div class="doc-icon">📊</div>
-            <div class="doc-info">
-              <div class="doc-name">Reporte-ARQ.html</div>
-              <div class="doc-meta">Reporte IFC · Arquitectura · Mar 2026</div>
-            </div>
-            <div class="doc-size">0.4 MB</div>
-            <div class="doc-badge badge-ifc" style="background:rgba(0,212,255,.1);color:var(--accent)">IFC</div>
-          </div>
-        </div>
-        <div class="docs-group">
-          <div class="docs-group-title">Contratos y Bases</div>
-          <div class="doc-row" style="opacity:.4;pointer-events:none;">
-            <div class="doc-icon">📁</div>
-            <div class="doc-info">
-              <div class="doc-name">Sin documentos</div>
-              <div class="doc-meta">Arrastra archivos aquí para agregarlos</div>
-            </div>
-          </div>
+          <div class="doc-row"><div class="doc-icon">📄</div><div class="doc-info"><div class="doc-name">BEP-v2.1.pdf</div><div class="doc-meta">BIM Execution Plan · Rev 2.1</div></div><div class="doc-size">1.3 MB</div><div class="doc-badge badge-pdf" style="background:rgba(255,107,53,.1);color:var(--warn)">PDF</div></div>
+          <div class="doc-row"><div class="doc-icon">📊</div><div class="doc-info"><div class="doc-name">Reporte-ARQ.html</div><div class="doc-meta">Reporte IFC · Arquitectura</div></div><div class="doc-size">0.4 MB</div><div class="doc-badge badge-ifc" style="background:rgba(0,212,255,.1);color:var(--accent)">IFC</div></div>
         </div>
       </div>
     </div>
-
-  </div><!-- /content -->
-</div><!-- /main -->
-
+  </div>
+</div>
+<!-- Input oculto para cargar IFC -->
+<input type="file" id="ifcFileInput" accept=".ifc" style="display:none" onchange="onIfcFile(event)">
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
 <script>
+// ============================================================
+// NAVEGACIÓN SIDEBAR
+// ============================================================
 function viewTab(el, panelId) {
   document.querySelectorAll('.view-tab').forEach(t => t.classList.remove('active'));
   document.querySelectorAll('.view-panel').forEach(p => p.classList.remove('active'));
   el.classList.add('active');
   document.getElementById(panelId).classList.add('active');
 }
-
 function sbTab(el, filter) {
   document.querySelectorAll('.sb-tab').forEach(t => t.classList.remove('active'));
   el.classList.add('active');
-  // Filtro visual (demo)
+  currentFilter = filter;
+  filtrarSidebar();
+}
+var currentFilter = 'all';
+function filtrarSidebar() {
+  var q = document.getElementById('sbSearch').value.toLowerCase();
   document.querySelectorAll('.sb-item').forEach(item => {
-    if (filter === 'all') { item.style.display = ''; return; }
-    const badge = item.querySelector('.sb-item-badge');
-    if (!badge) { item.style.display = ''; return; }
-    const cls = badge.className;
-    if (filter === '3d' && (cls.includes('ifc') || cls.includes('rvt'))) item.style.display = '';
-    else if (filter === 'plans' && (cls.includes('pdf') || cls.includes('dwg'))) item.style.display = '';
-    else if (filter === 'docs' && cls.includes('pdf')) item.style.display = '';
-    else item.style.display = 'none';
+    var type = item.dataset.type || '';
+    var name = item.querySelector('.sb-item-name')?.textContent.toLowerCase() || '';
+    var matchFilter = currentFilter === 'all' || type === currentFilter;
+    var matchSearch = !q || name.includes(q);
+    item.style.display = matchFilter && matchSearch ? '' : 'none';
   });
 }
-
 function selectFile(el, view) {
   document.querySelectorAll('.sb-item').forEach(i => i.classList.remove('active'));
   el.classList.add('active');
-  const tabMap = { '3d':'v3d', 'plans':'vplans', 'docs':'vdocs' };
-  const tabEl = document.querySelector(`.view-tab[onclick*="${tabMap[view]}"]`);
+  var tabMap = { '3d':'v3d', 'plans':'vplans', 'docs':'vdocs' };
+  var tabEl = document.querySelector('.view-tab[onclick*="' + tabMap[view] + '"]');
   if (tabEl) viewTab(tabEl, tabMap[view]);
-  const name = el.querySelector('.sb-item-name')?.textContent || '';
-  const meta = el.querySelector('.sb-item-meta')?.textContent || '';
-  const lbl = document.getElementById('vtLabel');
-  if (lbl) lbl.textContent = name + (meta ? ' · ' + meta : '');
+  var name = el.querySelector('.sb-item-name')?.textContent || '';
+  document.getElementById('vtLabel').textContent = name;
 }
-</script>
-<script src="https://unpkg.com/three@0.160.0/build/three.min.js"></script>
-<script src="https://unpkg.com/three@0.160.0/examples/js/controls/OrbitControls.js"></script>
-<script src="https://unpkg.com/web-ifc-three@0.0.126/IFCLoader.js"></script>
-<script>
+// ============================================================
+// VISOR 3D — Three.js
+// ============================================================
+var renderer, scene, camera, controls, raycaster, mouse;
+var meshes = [], selectedMesh = null;
+var categories = {}; // nombre -> {meshes, visible}
+var ifcData = {}; // expressID -> propiedades demo
 
-const container = document.getElementById("viewer");
-
-/* SCENE */
-
-const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x050b14);
-
-/* CAMERA */
-
-const camera = new THREE.PerspectiveCamera(
-60,
-container.clientWidth / container.clientHeight,
-0.1,
-1000
-);
-
-camera.position.set(8,6,8);
-
-/* RENDERER */
-
-const renderer = new THREE.WebGLRenderer({antialias:true});
-renderer.setSize(container.clientWidth, container.clientHeight);
-renderer.setPixelRatio(window.devicePixelRatio);
-
-container.appendChild(renderer.domElement);
-
-/* CONTROLS */
-
-const controls = new THREE.OrbitControls(camera, renderer.domElement);
-controls.enableDamping = true;
-
-/* LIGHTS */
-
-const light1 = new THREE.DirectionalLight(0xffffff,1);
-light1.position.set(5,10,5);
-scene.add(light1);
-
-const light2 = new THREE.AmbientLight(0x404040);
-scene.add(light2);
-
-/* GRID */
-
-const grid = new THREE.GridHelper(50,50);
-scene.add(grid);
-
-/* IFC LOADER */
-
-const loader = new IFCLoader();
-
-loader.load(
-"ARQ-Arquitectura.ifc",
-
-function(model){
-
-scene.add(model);
-
-},
-
-function(progress){
-
-console.log("loading", progress);
-
-},
-
-function(error){
-
-console.log(error);
-
+function initViewer() {
+  var canvas = document.getElementById('viewerCanvas');
+  var area = document.getElementById('viewerArea');
+  renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+  renderer.setPixelRatio(window.devicePixelRatio);
+  renderer.setClearColor(0x050b14);
+  scene = new THREE.Scene();
+  var w = area.clientWidth, h = area.clientHeight;
+  renderer.setSize(w, h);
+  camera = new THREE.PerspectiveCamera(45, w/h, 0.1, 5000);
+  camera.position.set(20, 15, 20);
+  controls = new THREE.OrbitControls(camera, renderer.domElement);
+  controls.enableDamping = true;
+  controls.dampingFactor = 0.07;
+  var amb = new THREE.AmbientLight(0xffffff, 0.5);
+  scene.add(amb);
+  var dir = new THREE.DirectionalLight(0xffffff, 0.8);
+  dir.position.set(50, 100, 50);
+  scene.add(dir);
+  var grid = new THREE.GridHelper(100, 50, 0x1a2a40, 0x1a2a40);
+  scene.add(grid);
+  raycaster = new THREE.Raycaster();
+  mouse = new THREE.Vector2();
+  renderer.domElement.addEventListener('click', onCanvasClick);
+  renderer.domElement.addEventListener('mousemove', onCanvasMouseMove);
+  window.addEventListener('resize', onViewerResize);
+  animate();
 }
-
-);
-
-/* RESIZE */
-
-window.addEventListener("resize", () => {
-
-camera.aspect = container.clientWidth / container.clientHeight;
-camera.updateProjectionMatrix();
-
-renderer.setSize(container.clientWidth, container.clientHeight);
-
+function animate() {
+  requestAnimationFrame(animate);
+  if (controls) controls.update();
+  if (renderer && scene && camera) renderer.render(scene, camera);
+}
+function onViewerResize() {
+  var area = document.getElementById('viewerArea');
+  if (!renderer || !area) return;
+  var w = area.clientWidth, h = area.clientHeight;
+  renderer.setSize(w, h);
+  camera.aspect = w / h;
+  camera.updateProjectionMatrix();
+}
+function setNavMode(el, mode) {
+  document.querySelectorAll('.viewer-toolbar .vt-btn-group:first-child .vt-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  if (controls) {
+    controls.enableRotate = mode === 'orbit';
+    controls.enablePan = mode === 'pan';
+  }
+}
+function setCamView(view) {
+  if (!camera || !controls) return;
+  var bbox = new THREE.Box3();
+  meshes.forEach(m => bbox.expandByObject(m));
+  var center = new THREE.Vector3();
+  if (!bbox.isEmpty()) bbox.getCenter(center);
+  var size = bbox.isEmpty() ? 30 : bbox.getSize(new THREE.Vector3()).length();
+  var d = size * 1.5;
+  if (view === 'top') { camera.position.set(center.x, center.y + d, center.z); }
+  else if (view === 'front') { camera.position.set(center.x, center.y, center.z + d); }
+  else { camera.position.set(center.x + d*0.6, center.y + d*0.5, center.z + d*0.6); }
+  controls.target.copy(center);
+  controls.update();
+}
+// ============================================================
+// CARGA IFC (web-ifc)
+// ============================================================
+function loadDemoIfc() { document.getElementById('ifcFileInput').click(); }
+function onIfcFile(e) {
+  var file = e.target.files[0]; if (!file) return;
+  document.getElementById('vtLabel').textContent = file.name;
+  var reader = new FileReader();
+  reader.onload = async function(ev) { await cargarIFC(ev.target.result, file.name); };
+  reader.readAsArrayBuffer(file);
+  e.target.value = '';
+}
+async function cargarIFC(buffer, nombre) {
+  mostrarLoading('Inicializando web-ifc...');
+  try {
+    if (!window._IfcAPI && window._loadWebIfc) await window._loadWebIfc();
+    if (!window._IfcAPI) throw new Error('web-ifc no disponible');
+    var api = new window._IfcAPI();
+    var wasmBase = './wasm/';
+    try { var r = await fetch('./wasm/web-ifc.wasm',{method:'HEAD'}); if(!r.ok) wasmBase='https://cdn.jsdelivr.net/npm/web-ifc@0.0.68/'; } catch(e){ wasmBase='https://cdn.jsdelivr.net/npm/web-ifc@0.0.68/'; }
+    api.SetWasmPath(wasmBase);
+    await api.Init();
+    mostrarLoading('Cargando geometría...');
+    // Limpiar escena
+    meshes.forEach(m => { m.geometry.dispose(); scene.remove(m); });
+    meshes = []; categories = {}; ifcData = {};
+    var data = new Uint8Array(buffer);
+    var modelID = api.OpenModel(data, {COORDINATE_TO_ORIGIN:true, OPTIMIZE_PROFILES:false});
+    var posAll=[], normAll=[], colAll=[];
+    var catColors = {
+      IFCWALL:[0.4,0.7,1], IFCWALLSTANDARDCASE:[0.4,0.7,1],
+      IFCSLAB:[0.6,0.6,0.8], IFCCOLUMN:[1,0.8,0.3],
+      IFCBEAM:[1,0.6,0.2], IFCDOOR:[0.3,1,0.6],
+      IFCWINDOW:[0.2,0.9,1], IFCROOF:[0.8,0.4,0.4],
+      DEFAULT:[0.5,0.6,0.7]
+    };
+    var catMeshData = {}; // cls -> {positions, normals}
+    api.StreamAllMeshes(modelID, function(mesh) {
+      var geoms = mesh.geometries;
+      var cls = 'DEFAULT';
+      try {
+        var line = api.GetLine(modelID, mesh.expressID, false);
+        if (line && line.constructor && line.constructor.name) cls = line.constructor.name.toUpperCase();
+      } catch(e){}
+      if (!catMeshData[cls]) catMeshData[cls] = {positions:[], normals:[], ids:[]};
+      for (var g=0; g<geoms.size(); g++) {
+        var pg = geoms.get(g);
+        if (!pg || !pg.geometryExpressID) continue;
+        try {
+          var geom = api.GetGeometry(modelID, pg.geometryExpressID);
+          var vPtr=geom.GetVertexData(), vSize=geom.GetVertexDataSize();
+          var iPtr=geom.GetIndexData(), iSize=geom.GetIndexSize();
+          if (vSize>0 && iSize>0) {
+            var verts = api.GetVertexArray(vPtr, vSize);
+            var idx = api.GetIndexArray(iPtr, iSize);
+            var mat = new THREE.Matrix4();
+            mat.fromArray(pg.flatTransformation);
+            for (var i=0; i<idx.length; i+=3) {
+              for (var j=0; j<3; j++) {
+                var vi = idx[i+j]*6;
+                var v = new THREE.Vector3(verts[vi],verts[vi+1],verts[vi+2]).applyMatrix4(mat);
+                var n = new THREE.Vector3(verts[vi+3],verts[vi+4],verts[vi+5]);
+                catMeshData[cls].positions.push(v.x,v.y,v.z);
+                catMeshData[cls].normals.push(n.x,n.y,n.z);
+              }
+            }
+          }
+          if (geom.delete) geom.delete();
+        } catch(e){}
+      }
+      catMeshData[cls].ids.push(mesh.expressID);
+    });
+    // Crear un mesh por categoría
+    var catKeys = Object.keys(catMeshData);
+    for (var ci=0; ci<catKeys.length; ci++) {
+      var cls = catKeys[ci];
+      var cd = catMeshData[cls];
+      if (!cd.positions.length) continue;
+      var col = catColors[cls] || catColors.DEFAULT;
+      var geo = new THREE.BufferGeometry();
+      geo.setAttribute('position', new THREE.Float32BufferAttribute(cd.positions, 3));
+      geo.setAttribute('normal', new THREE.Float32BufferAttribute(cd.normals, 3));
+      var mat = new THREE.MeshLambertMaterial({color:new THREE.Color(col[0],col[1],col[2]), side:THREE.DoubleSide});
+      var mesh = new THREE.Mesh(geo, mat);
+      mesh.userData = { cls, ids:cd.ids, originalColor: new THREE.Color(col[0],col[1],col[2]) };
+      scene.add(mesh);
+      meshes.push(mesh);
+      categories[cls] = { mesh, visible:true, count:cd.ids.length };
+    }
+    api.CloseModel(modelID);
+    // Centrar cámara
+    var bbox = new THREE.Box3();
+    meshes.forEach(m => bbox.expandByObject(m));
+    if (!bbox.isEmpty()) {
+      var center = bbox.getCenter(new THREE.Vector3());
+      var size = bbox.getSize(new THREE.Vector3()).length();
+      controls.target.copy(center);
+      camera.position.set(center.x+size*0.7, center.y+size*0.5, center.z+size*0.7);
+      controls.update();
+    }
+    document.getElementById('statElems').textContent = meshes.length;
+    document.getElementById('statTris').textContent = meshes.reduce((s,m)=>s+(m.geometry.attributes.position.count/3|0),0).toLocaleString();
+    document.getElementById('viewerStatusBadge').textContent = nombre;
+    actualizarPanelCategorias();
+    ocultarLoading();
+  } catch(err) {
+    ocultarLoading();
+    document.getElementById('viewerStatusBadge').textContent = 'Error: ' + err.message;
+    console.error(err);
+  }
+}
+function mostrarLoading(msg) {
+  document.getElementById('loadText').textContent = msg || 'Cargando...';
+  document.getElementById('viewerLoading').classList.add('show');
+}
+function ocultarLoading() { document.getElementById('viewerLoading').classList.remove('show'); }
+// ============================================================
+// SELECCIÓN Y PROPIEDADES
+// ============================================================
+var matSelected = null;
+function onCanvasClick(e) {
+  if (!renderer || !meshes.length) return;
+  var rect = renderer.domElement.getBoundingClientRect();
+  mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+  mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+  raycaster.setFromCamera(mouse, camera);
+  var hits = raycaster.intersectObjects(meshes);
+  // Restaurar color anterior
+  if (selectedMesh) {
+    selectedMesh.material.color.copy(selectedMesh.userData.originalColor);
+    selectedMesh.material.emissive = new THREE.Color(0,0,0);
+    selectedMesh = null;
+  }
+  if (hits.length > 0) {
+    selectedMesh = hits[0].object;
+    selectedMesh.material.emissive = new THREE.Color(0, 0.3, 0.4);
+    mostrarPropiedades(selectedMesh);
+    document.getElementById('propsPanel').classList.add('show');
+  }
+}
+function onCanvasMouseMove(e) {
+  var rect = renderer.domElement.getBoundingClientRect();
+  var x = e.clientX - rect.left, y = e.clientY - rect.top;
+  document.getElementById('viewerCoords').textContent =
+    'X: ' + (x).toFixed(0) + ' · Y: ' + (y).toFixed(0);
+}
+function mostrarPropiedades(mesh) {
+  var cls = mesh.userData.cls || 'Desconocido';
+  var ids = mesh.userData.ids || [];
+  var html = '<div class="prop-group"><div class="prop-group-title">Entidad IFC</div>';
+  html += '<div class="prop-row"><div class="prop-key">Clase</div><div class="prop-val">' + cls + '</div></div>';
+  html += '<div class="prop-row"><div class="prop-key">Elementos</div><div class="prop-val">' + ids.length + '</div></div>';
+  html += '</div>';
+  html += '<div class="prop-group"><div class="prop-group-title">Propiedades</div>';
+  var demoProps = {
+    'Material': 'Hormigón Armado', 'Nivel': 'N+0.00',
+    'Clasificación': 'ARQ-' + (Math.floor(Math.random()*900)+100),
+    'Estado': 'Existente', 'Fase': 'Diseño Básico'
+  };
+  Object.entries(demoProps).forEach(([k,v]) => {
+    html += '<div class="prop-row"><div class="prop-key">' + k + '</div><div class="prop-val">' + v + '</div></div>';
+  });
+  html += '</div>';
+  document.getElementById('propsBody').innerHTML = html;
+}
+// ============================================================
+// CATEGORÍAS
+// ============================================================
+function toggleCats() {
+  document.getElementById('catsPanel').classList.toggle('show');
+}
+function toggleProps() {
+  document.getElementById('propsPanel').classList.toggle('show');
+}
+function actualizarPanelCategorias() {
+  var html = '';
+  Object.entries(categories).forEach(([cls, cat]) => {
+    html += '<div class="cat-item">'
+      + '<input type="checkbox" checked onchange="toggleCategoria(\'' + cls + '\', this.checked)">'
+      + '<div class="cat-label">' + cls + '</div>'
+      + '<div class="cat-count">' + cat.count + '</div>'
+      + '</div>';
+  });
+  document.getElementById('catsBody').innerHTML = html || '<div style="padding:10px 12px;font:400 10px var(--mono);color:var(--muted)">Sin categorías</div>';
+}
+function toggleCategoria(cls, visible) {
+  if (categories[cls]) {
+    categories[cls].mesh.visible = visible;
+    categories[cls].visible = visible;
+  }
+}
+// ============================================================
+// INIT
+// ============================================================
+window.addEventListener('DOMContentLoaded', function() {
+  initViewer();
 });
-
-/* LOOP */
-
-function animate(){
-
-requestAnimationFrame(animate);
-
-controls.update();
-
-renderer.render(scene,camera);
-
-}
-
-animate();
-
+</script>
+<!-- web-ifc ESM -->
+<script type="module">
+  import * as WebIFC from 'https://cdn.jsdelivr.net/npm/web-ifc@0.0.68/web-ifc-api.js';
+  window._IfcAPI = WebIFC.IfcAPI;
+  window._loadWebIfc = async function() {};
 </script>
 </body>
 </html>

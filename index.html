@@ -158,8 +158,9 @@ header p  { font-size:10px; color:#4a6080; margin-top:1px; font-weight:400; font
 .login-field input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(0,212,255,.08);}
 .login-btn{width:100%;padding:11px;margin-top:8px;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#000;border:none;border-radius:5px;font:700 11px var(--mono);cursor:pointer;letter-spacing:.12em;text-transform:uppercase;transition:all .15s;box-shadow:0 0 20px rgba(0,212,255,.2);}
 .login-btn:hover{box-shadow:0 0 35px rgba(0,212,255,.45);transform:translateY(-1px);}
-.login-error{font:400 10px var(--mono);color:#ff3d57;text-align:center;margin-top:12px;letter-spacing:.05em;display:none;}
+.login-error{font:400 10px var(--mono);color:#ff3d57;text-align:center;margin-top:12px;letter-spacing:.05em;display:none;animation:shake .4s ease;}
 .login-error.show{display:block;}
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-8px)}40%{transform:translateX(8px)}60%{transform:translateX(-5px)}80%{transform:translateX(5px)}}
 .login-footer-txt{font:400 9px var(--mono);color:var(--muted);text-align:center;margin-top:28px;letter-spacing:.06em;opacity:.35;}
 /* Sección próximamente */
 .login-coming{margin-top:28px;padding-top:20px;border-top:1px solid var(--border);}
@@ -211,7 +212,7 @@ header p  { font-size:10px; color:#4a6080; margin-top:1px; font-weight:400; font
       </div>
       <div class="login-author">
         <div class="author-name">Carlos Estay Ruggieri</div>
-        <div class="author-email">c.estay@outlook.com</div>
+        <div class="author-email">c.estay [at] outlook.com</div>
         <div class="author-role">Coordinación BIM · MOP Chile</div>
       </div>
     </div>
@@ -401,7 +402,10 @@ async function doLogin() {
     document.getElementById('loginScreen').classList.add('hidden');
     document.getElementById('loginError').classList.remove('show');
   } else {
-    document.getElementById('loginError').classList.add('show');
+    var errEl = document.getElementById('loginError');
+    errEl.classList.remove('show');
+    void errEl.offsetWidth; // forzar reflow para reiniciar animación
+    errEl.classList.add('show');
     document.getElementById('loginPass').value = '';
     document.getElementById('loginPass').focus();
   }
@@ -469,7 +473,7 @@ function detectarCodigo(nombre) {
 // LISTAS DE CLASES IFC
 // ============================================================
 var IGNORAR = {
-  IFCPROJECT:1,IFCSITE:1,IFCBUILDING:1,IFCBUILDINGSTOREY:1,
+  IFCPROJECT:1,
   IFCRELAGGREGATES:1,IFCRELCONTAINEDINSPATIALSTRUCTURE:1,
   IFCRELASSOCIATESMATERIAL:1,IFCRELDEFINESBYPROPERTIES:1,
   IFCRELDEFINESBYTYPE:1,IFCRELCONNECTSPATHELEMENTS:1,
