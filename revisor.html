@@ -1541,12 +1541,11 @@ function mostrarReporte(rep) {
 <script>
 // web-ifc 0.0.44 UMD — exponer IfcAPI globalmente
 (function() {
-  // En 0.0.44 UMD, la API queda en WebIFCWasm global
-  if (typeof WebIFCWasm !== 'undefined') {
-    window._IfcAPI = WebIFCWasm.IfcAPI || WebIFCWasm;
-    console.log('web-ifc 0.0.44 UMD cargado. IfcAPI:', !!window._IfcAPI);
+  if (typeof WebIFC !== 'undefined' && WebIFC.IfcAPI) {
+    window._IfcAPI = WebIFC.IfcAPI;
+    console.log('web-ifc 0.0.68 IIFE cargado. IfcAPI:', !!window._IfcAPI);
   } else {
-    console.warn('WebIFCWasm no encontrado en scope global');
+    console.warn('WebIFC no encontrado — revisar js/web-ifc-api.js');
   }
 })();
 </script>
