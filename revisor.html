@@ -1152,11 +1152,8 @@ var viewer3D = {
         }
         var api = new window._IfcAPI();
         // WASM: intentar local primero, luego CDN
-        var wasmBase = './wasm/';
-        try {
-          var wr = await fetch('./wasm/web-ifc.wasm', {method:'HEAD'});
-          if (!wr.ok) wasmBase = 'https://unpkg.com/web-ifc@0.0.44/';
-        } catch(e) { wasmBase = 'https://unpkg.com/web-ifc@0.0.44/'; }
+        // Usar ruta absoluta para que el IIFE no resuelva relativo a /js/
+        var wasmBase = window.location.origin + '/wasm/';
         api.SetWasmPath(wasmBase);
         await api.Init();
         this.ifcAPI = api;
