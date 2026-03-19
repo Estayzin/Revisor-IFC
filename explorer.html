@@ -60,8 +60,7 @@ header{background:var(--navy);padding:10px 20px;display:flex;align-items:center;
 .sb-item:hover .sb-item-del{display:block}
 .sb-item-del:hover{color:var(--red);background:rgba(255,61,87,.1)}
 .badge-ifc{background:rgba(0,212,255,.1);color:var(--accent)}
-.badge-pdf{background:rgba(255,107,53,.1);color:var(--warn)}
-.badge-dwg{background:rgba(124,77,255,.1);color:var(--accent2)}
+
 </style>
 <style>
 /* CONTENIDO CENTRAL */
@@ -114,12 +113,7 @@ header{background:var(--navy);padding:10px 20px;display:flex;align-items:center;
 .meta-chips{display:flex;gap:3px;flex-wrap:nowrap}
 .chip{padding:2px 6px;border-radius:3px;background:rgba(0,212,255,.06);border:1px solid var(--border);font:400 9px var(--mono);color:var(--text);white-space:nowrap}
 .chip b{color:var(--accent)}
-/* Docs */
-.docs-panel{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:5px}
-.doc-row{display:flex;align-items:center;gap:10px;padding:8px 12px;background:var(--card);border:1px solid var(--border);border-radius:5px;cursor:pointer;transition:all .15s}
-.doc-row:hover{border-color:var(--accent)}
-.doc-name{font:500 11px var(--mono);color:var(--text)}
-.doc-meta{font:400 9px var(--mono);color:var(--muted);margin-top:1px}
+
 </style>
 <style>
 /* ══ PANEL REPORTE LATERAL ══ */
@@ -156,8 +150,51 @@ header{background:var(--navy);padding:10px 20px;display:flex;align-items:center;
 .rp-msg{padding:8px 10px;font:400 10px var(--mono);color:var(--muted);line-height:1.5}
 .rp-msg.ok{color:#00c853}.rp-msg.err{color:var(--red)}.rp-msg.warn{color:var(--warn)}
 </style>
+<style>
+/* ══ PANTALLA BIENVENIDA ══ */
+#welcomeScreen{
+  position:fixed;inset:0;z-index:999;
+  background:var(--navy);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:32px;
+}
+#welcomeScreen.hidden{display:none}
+.wc-logo{width:56px;height:56px;background:linear-gradient(135deg,var(--accent),var(--accent2));border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:26px;box-shadow:0 0 40px rgba(0,212,255,.25)}
+.wc-title{font:700 22px var(--mono);color:#e0f0ff;letter-spacing:.06em;text-transform:uppercase;text-align:center}
+.wc-sub{font:400 11px var(--mono);color:var(--muted);text-align:center;margin-top:-20px;letter-spacing:.08em}
+.wc-btns{display:flex;gap:14px;flex-wrap:wrap;justify-content:center}
+.wc-btn{
+  padding:12px 28px;border-radius:7px;font:600 11px var(--mono);text-transform:uppercase;
+  letter-spacing:.12em;cursor:pointer;transition:all .18s;border:none;
+}
+.wc-btn-primary{
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  color:#060d18;box-shadow:0 0 24px rgba(0,212,255,.2);
+}
+.wc-btn-primary:hover{box-shadow:0 0 32px rgba(0,212,255,.4);transform:translateY(-1px)}
+.wc-btn-secondary{
+  background:transparent;color:var(--accent);
+  border:1px solid var(--accent);
+}
+.wc-btn-secondary:hover{background:rgba(0,212,255,.07);transform:translateY(-1px)}
+.wc-footer{font:400 9px var(--mono);color:var(--muted);letter-spacing:.1em}
+</style>
 </head>
 <body>
+<!-- PANTALLA DE BIENVENIDA -->
+<div id="welcomeScreen"
+     ondragover="event.preventDefault()"
+     ondrop="wcDrop(event)">
+  <div class="wc-logo">&#127959;</div>
+  <div>
+    <div class="wc-title">Explorador BIM</div>
+    <div class="wc-sub">Visor IFC · Carlos Estay Ruggieri</div>
+  </div>
+  <div class="wc-btns">
+    <button class="wc-btn wc-btn-secondary" onclick="welcomeDemo()">&#9654; Ver Demo</button>
+    <button class="wc-btn wc-btn-primary" onclick="welcomeUpload()">&#8593; Subir Archivo IFC</button>
+  </div>
+  <div class="wc-footer">Arrastra un archivo IFC para comenzar</div>
+</div>
 <header>
   <div class="hicon">&#127959;</div>
   <div>
@@ -175,7 +212,7 @@ header{background:var(--navy);padding:10px 20px;display:flex;align-items:center;
            onclick="document.getElementById('fileInput').click()"
            ondragover="sbDragOver(event)" ondragleave="sbDragLeave(event)" ondrop="sbDrop(event)">
         <div class="sb-dz-label">&#8593; Subir archivos</div>
-        <div class="sb-dz-sub">IFC &middot; PDF &middot; DWG &middot; DXF</div>
+        <div class="sb-dz-sub">IFC</div>
       </div>
       <div class="sb-search">
         <input type="text" id="sbSearch" placeholder="Buscar..." oninput="renderSidebar()">
@@ -184,8 +221,6 @@ header{background:var(--navy);padding:10px 20px;display:flex;align-items:center;
     <div class="sb-tabs">
       <div class="sb-tab active" onclick="sbTab(this,'all')">Todo</div>
       <div class="sb-tab" onclick="sbTab(this,'ifc')">IFC</div>
-      <div class="sb-tab" onclick="sbTab(this,'plan')">Planos</div>
-      <div class="sb-tab" onclick="sbTab(this,'doc')">Docs</div>
     </div>
     <div class="sb-list" id="sbList">
       <div class="sb-empty">
@@ -198,7 +233,6 @@ header{background:var(--navy);padding:10px 20px;display:flex;align-items:center;
   <div class="content">
     <div class="view-tabs">
       <div class="view-tab active" id="tab3d" onclick="viewTab('v3d')">&#11035; 3D</div>
-      <div class="view-tab" id="tabDocs" onclick="viewTab('vdocs')">&#128193; Documentos</div>
     </div>
     <!-- PANEL 3D -->
     <div class="view-panel active" id="v3d">
@@ -233,7 +267,7 @@ header{background:var(--navy);padding:10px 20px;display:flex;align-items:center;
           <div class="viewer-area" id="viewerArea"
                ondragover="vaDragOver(event)" ondragleave="vaDragLeave(event)" ondrop="vaDrop(event)">
             <canvas id="viewerCanvas"></canvas>
-            <div class="overlay" id="ovLoading">
+            <div class="overlay hidden" id="ovLoading">
               <div class="ov-spinner"></div>
               <div class="ov-text" id="ovLoadText">Cargando...</div>
             </div>
@@ -242,7 +276,7 @@ header{background:var(--navy);padding:10px 20px;display:flex;align-items:center;
               <div class="ov-title">Explorador BIM</div>
               <div class="ov-sub">Sube un archivo .ifc desde el panel izquierdo o arr&aacute;stralo aqu&iacute;.</div>
             </div>
-            <div class="overlay" id="ovError">
+            <div class="overlay hidden" id="ovError">
               <div style="font-size:26px">&#9888;&#65039;</div>
               <div class="ov-err-title">Error al cargar</div>
               <div class="ov-err-desc" id="ovErrDesc"></div>
@@ -280,18 +314,10 @@ header{background:var(--navy);padding:10px 20px;display:flex;align-items:center;
         </div>
       </div>
     </div>
-    <!-- PANEL DOCS -->
-    <div class="view-panel" id="vdocs">
-      <div class="docs-panel" id="docsPanel">
-        <div class="sb-empty" style="padding:40px;align-self:center">
-          <span class="sb-empty-icon">&#128196;</span>
-          <div class="sb-empty-text">Sube documentos PDF o DWG<br>desde el panel izquierdo.</div>
-        </div>
-      </div>
-    </div>
+
   </div>
 </div>
-<input type="file" id="fileInput" accept=".ifc,.pdf,.dwg,.dxf" multiple style="display:none" onchange="onFilesInput(event)">
+<input type="file" id="fileInput" accept=".ifc" multiple style="display:none" onchange="onFilesInput(event)">
 <footer style="text-align:center;padding:4px;font:400 9px var(--mono);color:var(--muted);border-top:1px solid var(--border);letter-spacing:.08em;flex-shrink:0">
   &copy; 2026 Carlos Estay Ruggieri &mdash; Coordinaci&oacute;n BIM &mdash; MIT License
 </footer>
@@ -307,22 +333,22 @@ var meshes = [], selectedMesh = null;
 
 /* ═══ UTILIDADES ═══ */
 function ext(n){ return (n.split('.').pop()||'').toLowerCase(); }
-function tipo(e){ return e==='ifc'?'ifc':['pdf','dwg','dxf'].includes(e)?'plan':'doc'; }
+function tipo(e){ return 'ifc'; }
 function fmtSize(b){ return b<1048576?(b/1024).toFixed(1)+' KB':(b/1048576).toFixed(1)+' MB'; }
 function esc(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-function badgeCls(e){ return e==='ifc'?'badge-ifc':e==='pdf'?'badge-pdf':'badge-dwg'; }
-function icon(e){ return e==='ifc'?'📦':e==='pdf'?'📄':['dwg','dxf'].includes(e)?'📐':'📋'; }
+function badgeCls(e){ return 'badge-ifc'; }
+function icon(e){ return '📦'; }
 
 /* ═══ ARCHIVOS ═══ */
 function agregarArchivos(list){
   Array.from(list).forEach(function(f){
     var e=ext(f.name);
-    if(!['ifc','pdf','dwg','dxf'].includes(e)) return;
+    if(e !== 'ifc') return;
     var idx=FILES.findIndex(function(x){return x.name===f.name});
     if(idx>=0){URL.revokeObjectURL(FILES[idx].url);FILES.splice(idx,1);}
     FILES.push({id:Date.now()+Math.random(),name:f.name,ext:e,tipo:tipo(e),size:f.size,url:URL.createObjectURL(f),file:f});
   });
-  renderSidebar(); renderDocs();
+  renderSidebar();
 }
 
 /* ═══ SIDEBAR ═══ */
@@ -332,7 +358,7 @@ function renderSidebar(){
   var list=document.getElementById('sbList');
   if(!shown.length){list.innerHTML='<div class="sb-empty"><span class="sb-empty-icon">📂</span><div class="sb-empty-text">'+(q?'Sin resultados.':'Sin archivos.')+'</div></div>';return;}
   var grupos={};
-  shown.forEach(function(f){var g=f.tipo==='ifc'?'Modelos 3D':f.tipo==='plan'?'Planos':'Documentos';if(!grupos[g])grupos[g]=[];grupos[g].push(f);});
+  shown.forEach(function(f){var g='Modelos 3D';if(!grupos[g])grupos[g]=[];grupos[g].push(f);});
   var html='';
   Object.keys(grupos).forEach(function(g){
     html+='<div class="sb-section">'+g+'</div>';
@@ -354,11 +380,11 @@ function eliminar(e,id){
   var f=FILES.find(function(x){return String(x.id)===String(id)});if(!f)return;
   URL.revokeObjectURL(f.url);FILES=FILES.filter(function(x){return String(x.id)!==String(id)});
   if(currentFile&&currentFile.id===f.id){currentFile=null;limpiarVisor();}
-  renderSidebar();renderDocs();
+  renderSidebar();
 }
 function selectFile(id){
   var f=FILES.find(function(x){return String(x.id)===String(id)});if(!f)return;
-  if(f.tipo==='ifc'){viewTab('v3d');cargarIFC(f);}else{viewTab('vdocs');}
+  viewTab('v3d');cargarIFC(f);
 }
 
 /* ═══ TABS ═══ */
@@ -366,7 +392,7 @@ function viewTab(id){
   document.querySelectorAll('.view-panel').forEach(function(p){p.classList.remove('active')});
   document.querySelectorAll('.view-tab').forEach(function(t){t.classList.remove('active')});
   document.getElementById(id).classList.add('active');
-  document.getElementById(id==='v3d'?'tab3d':'tabDocs').classList.add('active');
+  document.getElementById('tab3d').classList.add('active');
 }
 
 /* ═══ THREE.JS ═══ */
@@ -391,7 +417,6 @@ function initViewer(){
   canvas.addEventListener('click',onCanvasClick);
   window.addEventListener('resize',onResize);
   (function animate(){requestAnimationFrame(animate);controls.update();renderer3.render(scene,camera);})();
-  ovHide('ovLoading');ovShow('ovWelcome');
 }
 function onResize(){
   var area=document.getElementById('viewerArea');
@@ -714,7 +739,10 @@ function toggleGhost(){ghostMode=!ghostMode;document.getElementById('btnGhost').
 function ovShow(id){document.getElementById(id).classList.remove('hidden');}
 function ovHide(id){document.getElementById(id).classList.add('hidden');}
 function setLoadText(t){document.getElementById('ovLoadText').textContent=t;}
-function mostrarError(msg){document.getElementById('ovErrDesc').textContent=msg;ovShow('ovError');}
+function mostrarError(msg){
+  if(!document.getElementById('welcomeScreen').classList.contains('hidden')) return;
+  document.getElementById('ovErrDesc').textContent=msg;ovShow('ovError');
+}
 function cerrarError(){ovHide('ovError');ovShow('ovWelcome');}
 function limpiarVisor(){
   meshes.forEach(function(m){m.geometry.dispose();m.material.dispose();scene.remove(m)});
@@ -727,24 +755,26 @@ function limpiarVisor(){
   ovHide('ovLoading');ovHide('ovError');ovShow('ovWelcome');
 }
 
-/* ═══ DOCS ═══ */
-function renderDocs(){
-  var docs=FILES.filter(function(f){return f.tipo!=='ifc'});
-  var panel=document.getElementById('docsPanel');
-  if(!docs.length){panel.innerHTML='<div class="sb-empty" style="padding:40px;align-self:center"><span class="sb-empty-icon">📄</span><div class="sb-empty-text">Sube documentos PDF o DWG.</div></div>';return;}
-  panel.innerHTML=docs.map(function(f){
-    return '<div class="doc-row" onclick="window.open(\''+f.url+'\',\'_blank\')">'+
-      '<div style="font-size:18px">'+icon(f.ext)+'</div>'+
-      '<div style="flex:1;min-width:0"><div class="doc-name">'+esc(f.name)+'</div><div class="doc-meta">'+fmtSize(f.size)+'</div></div>'+
-      '<div class="sb-item-badge '+badgeCls(f.ext)+'">'+f.ext.toUpperCase()+'</div></div>';
-  }).join('');
-}
-
 /* ═══ DRAG & DROP ═══ */
 function onFilesInput(e){agregarArchivos(e.target.files);e.target.value='';}
 function sbDragOver(e){e.preventDefault();document.getElementById('sbDropzone').classList.add('drag-over');}
 function sbDragLeave(){document.getElementById('sbDropzone').classList.remove('drag-over');}
 function sbDrop(e){e.preventDefault();document.getElementById('sbDropzone').classList.remove('drag-over');agregarArchivos(e.dataTransfer.files);}
+
+/* ═══ BIENVENIDA ═══ */
+function welcomeUpload(){
+  document.getElementById('welcomeScreen').classList.add('hidden');
+  document.getElementById('fileInput').click();
+}
+function welcomeDemo(){
+  // Demo pendiente de implementar
+  document.getElementById('welcomeScreen').classList.add('hidden');
+}
+function wcDrop(e){
+  e.preventDefault();
+  document.getElementById('welcomeScreen').classList.add('hidden');
+  agregarArchivos(e.dataTransfer.files);
+}
 function vaDragOver(e){e.preventDefault();document.getElementById('viewerArea').style.outline='2px dashed #00d4ff';}
 function vaDragLeave(){document.getElementById('viewerArea').style.outline='';}
 function vaDrop(e){
@@ -757,7 +787,9 @@ function vaDrop(e){
 }
 
 /* ═══ INICIO ═══ */
-window.addEventListener('DOMContentLoaded',function(){initViewer();});
+window.addEventListener('DOMContentLoaded',function(){
+  try { initViewer(); } catch(e) { console.warn('initViewer:', e); }
+});
 </script>
 </body>
 </html>
