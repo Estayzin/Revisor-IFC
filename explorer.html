@@ -767,6 +767,7 @@ function toggleCat(uid){
 
 /* ── Destacar elementos en 3D ── */
 var _claseDestacada=null;
+var _clsSeleccionada=null;
 
 function destacar3D(clases){
   if(!meshes.length)return;
@@ -792,15 +793,42 @@ function destacar3D(clases){
 }
 
 function rpSelRow(tr,clases){
-  /* Marca fila activa y destaca en 3D; clic de nuevo resetea */
   var eraActiva=tr.classList.contains('rp-active');
   document.querySelectorAll('.rp-active').forEach(function(r){r.classList.remove('rp-active');});
   if(eraActiva){
+    _clsSeleccionada=null;
     destacar3D(null);
+    filtrarSec5(null);
   } else {
     tr.classList.add('rp-active');
+    _clsSeleccionada=clases&&clases.length===1?clases[0]:null;
     destacar3D(clases);
+    filtrarSec5(_clsSeleccionada);
   }
+}
+
+function filtrarSec5(cls){
+  /* Mostrar/ocultar grupos en sección 5 según la clase seleccionada */
+  var tabla=document.querySelector('#rpBody .rp-cat-hdr');
+  if(!tabla)return;
+  var todosHdr=document.querySelectorAll('#rpBody .rp-cat-hdr');
+  todosHdr.forEach(function(hdr){
+    var claseBase=hdr.getAttribute('data-cls');
+    if(!cls||claseBase===cls||!claseBase){
+      hdr.style.display='';
+    } else {
+      hdr.style.display='none';
+      /* ocultar sus tipos */
+      var i=0,uid=hdr.id.replace('hdr_','');
+      while(true){
+        var row=document.getElementById('tipo_'+uid+'_'+i);
+        if(!row)break;
+        row.classList.remove('visible');
+        i++;
+      }
+      hdr.classList.remove('open');
+    }
+  });
 }
 
 function renderReporte(est){
@@ -930,7 +958,7 @@ function renderReporte(est){
       var total=cat.tipos.reduce(function(s,t){return s+t.ids.length;},0);
       var nomLeg=IFC_NOM[claseBase]||'';
       var ico=IFC_ICO[claseBase]||'📦';
-      tiposHtml+='<tr class="rp-cat-hdr" id="hdr_'+uid+'" onclick="toggleCat(\''+uid+'\')">' +
+      tiposHtml+='<tr class="rp-cat-hdr" id="hdr_'+uid+'" data-cls="'+claseBase+'" onclick="toggleCat(\''+uid+'\')">' +
         '<td colspan="2">'+ico+' '+
         (nomLeg?nomLeg+'<div class="td-cls">'+claseBase+'</div>':claseBase)+
         ' <span style="color:var(--muted);font-weight:400">('+cat.tipos.length+' · '+total+' inst.)</span>'+
