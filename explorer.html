@@ -999,7 +999,7 @@ async function cargarIFC(f){
     setLoadText('Analizando IFC...');
     var est=parsearIFC(texto);
 
-    /* ── VISTA RADIAL PROPORCIONAL ── */
+    /* ── VISTA RADIAL POR TIPO ── */
     var CAT_DIMS={
       IFCWALL:[0.3,3.0,0.3],IFCWALLSTANDARDCASE:[0.3,3.0,0.3],IFCCURTAINWALL:[0.15,3.5,0.15],
       IFCSLAB:[1.0,0.2,1.0],IFCSLABSTANDARDCASE:[1.0,0.2,1.0],IFCROOF:[1.2,0.2,1.2],
@@ -1016,32 +1016,46 @@ async function cargarIFC(f){
       IFCFIRESUPPRESSIONTERMINAL:[0.08,0.4,0.08],IFCBUILDINGELEMENTPROXY:[0.8,0.8,0.8],
     };
     setLoadText('Construyendo visualización...');
-
-    /* Limpiar líneas anteriores */
     scene.children.filter(function(o){return o.userData&&o.userData.esLinea;}).forEach(function(o){scene.remove(o);});
 
-    var categorias=Object.keys(est.conteo).filter(function(c){return c.indexOf('IFC')===0 && PRODUCTOS[c] && est.conteo[c]>0;});
-    var totalElems=0;
-    var numCats=categorias.length;
-    var MARGEN=2.5;
+    /* Construir grupos: uno por tipo IFC, fallback por clase */
+    var grupos=[];
+    var instanciasConTipo={};
 
-    /* Pre-calcular tamaño real de cada grupo */
-    var grupos=categorias.map(function(cls){
-      var qty=est.conteo[cls];
-      var dims=CAT_DIMS[cls]||[0.6,0.6,0.6];
-      var base=Math.max(dims[0],dims[2]);
-      var cols_n=Math.ceil(Math.sqrt(Math.min(qty,200)));
-      var rows_n=Math.ceil(Math.min(qty,200)/cols_n);
-      var ancho=cols_n*base*1.4;
-      var prof=rows_n*base*1.4;
-      return{cls:cls,qty:qty,dims:dims,base:base,cols_n:cols_n,rows_n:rows_n,radio_grupo:Math.max(ancho,prof)/2};
+    /* 1. Un grupo por tipo */
+    est.tipos.forEach(function(t){
+      var claseBase=t.cls.replace(/TYPE[A-Z0-9]*$/,'');
+      if(!PRODUCTOS[claseBase])return;
+      var ids=(est.elemsPorTipo[t.id.replace('#','')]||[]).filter(function(id){return est.instancias[id]&&PRODUCTOS[est.instancias[id].cls];});
+      if(!ids.length)return;
+      ids.forEach(function(id){instanciasConTipo[id]=true;});
+      grupos.push({cls:claseBase,tipoId:t.id,tipoNombre:t.nombre,qty:ids.length});
     });
 
-    /* Radio del círculo basado en la circunferencia necesaria */
-    var circTotal=grupos.reduce(function(s,g){return s+g.radio_grupo*2+MARGEN;},0);
-    var RADIO_CIRCULO=Math.max(12, circTotal/(2*Math.PI));
+    /* 2. Instancias sin tipo → fallback por clase */
+    var sinTipo={};
+    Object.keys(est.instancias).forEach(function(id){
+      var cls=est.instancias[id].cls;
+      if(!PRODUCTOS[cls]||instanciasConTipo[id])return;
+      if(!sinTipo[cls])sinTipo[cls]={cls:cls,tipoId:null,tipoNombre:'(sin tipo)',qty:0};
+      sinTipo[cls].qty++;
+    });
+    Object.keys(sinTipo).forEach(function(cls){grupos.push(sinTipo[cls]);});
 
-    var angAcum=0;
+    /* 3. Calcular posición radial sin solapamiento */
+    var MARGEN=2.5;
+    grupos.forEach(function(g){
+      var dims=CAT_DIMS[g.cls]||[0.6,0.6,0.6];
+      var base=Math.max(dims[0],dims[2]);
+      var cols_n=Math.ceil(Math.sqrt(Math.min(g.qty,200)));
+      var rows_n=Math.ceil(Math.min(g.qty,200)/cols_n);
+      g.dims=dims;g.base=base;g.cols_n=cols_n;g.rows_n=rows_n;
+      g.radio_grupo=Math.max(cols_n*base*1.4,rows_n*base*1.4)/2;
+    });
+    var circTotal=grupos.reduce(function(s,g){return s+g.radio_grupo*2+MARGEN;},0);
+    var RADIO_CIRCULO=Math.max(12,circTotal/(2*Math.PI));
+
+    var totalElems=0,angAcum=0;
     grupos.forEach(function(g){
       var angSector=(g.radio_grupo*2+MARGEN)/RADIO_CIRCULO;
       var angCentro=angAcum+angSector/2;
@@ -1069,7 +1083,7 @@ async function cargarIFC(f){
       mg.setAttribute('normal',new THREE.Float32BufferAttribute(normals,3));
       var mat=new THREE.MeshLambertMaterial({color:new THREE.Color(col[0],col[1],col[2]),emissive:new THREE.Color(0,0,0),side:THREE.DoubleSide});
       var mesh=new THREE.Mesh(mg,mat);
-      mesh.userData={cls:g.cls,qty:g.qty,baseColor:new THREE.Color(col[0],col[1],col[2])};
+      mesh.userData={cls:g.cls,tipoId:g.tipoId,tipoNombre:g.tipoNombre,qty:g.qty,baseColor:new THREE.Color(col[0],col[1],col[2])};
       scene.add(mesh);meshes.push(mesh);
     });
 
