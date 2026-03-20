@@ -779,34 +779,16 @@ function destacar3D(clases){
     return;
   }
   _claseDestacada=clases;
-  var activosMeshes=[];
   meshes.forEach(function(m){
     var activo=clases.indexOf(m.userData.cls)>=0;
     if(activo){
       m.material.color.copy(m.userData.baseColor);
       m.material.opacity=1;m.material.transparent=false;
-      activosMeshes.push(m);
     } else {
       m.material.color.set(0x1a2a40);
       m.material.opacity=0.18;m.material.transparent=true;
     }
   });
-  /* Enfocar cámara en los meshes activos */
-  if(activosMeshes.length&&camera&&controls){
-    var bbox=new THREE.Box3();
-    activosMeshes.forEach(function(m){bbox.expandByObject(m);});
-    if(!bbox.isEmpty()){
-      var center=bbox.getCenter(new THREE.Vector3());
-      var size=bbox.getSize(new THREE.Vector3()).length();
-      controls.target.copy(center);
-      camera.position.set(
-        center.x+size*0.6,
-        center.y+size*0.5,
-        center.z+size*0.6
-      );
-      controls.update();
-    }
-  }
 }
 
 function rpSelRow(tr,clases){
@@ -901,28 +883,32 @@ function renderReporte(est){
 
   /* 4. Entidades IFC */
   var espEnts=ENTS_POR_ESP[_espActual]||ENTS_POR_ESP.ARQ;
-  var filas='',totalEnts=0,presentes=0;
+  var filasP='',filasA='',totalEnts=0,presentes=0;
   espEnts.forEach(function(e){
     var cls=e[0],nom=e[1],qty=conteo[cls]||0;
     if(qty>0)presentes++;
     totalEnts+=qty;
-    filas+='<tr class="rp-row-sel" onclick="rpSelRow(this,[\'' + cls + '\'])" title="Clic para destacar en 3D">'+
+    var fila='<tr class="rp-row-sel" onclick="rpSelRow(this,[\'' + cls + '\'])" title="Clic para destacar en 3D">'+
       '<td class="td-name">'+(IFC_ICO&&IFC_ICO[cls]?IFC_ICO[cls]+' ':'')+nom+'<div class="td-cls">'+cls.charAt(0)+cls.slice(1).toLowerCase()+'</div></td>'+
       '<td class="td-qty'+(qty===0?' zero':'')+'">'+qty+'</td>'+
       '<td class="td-ok">'+(qty>0?'<span class="ic-ok">✓</span>':'<span class="ic-err">✗</span>')+'</td>'+
       '</tr>';
+    if(qty>0) filasP+=fila; else filasA+=fila;
   });
-  var pctPres=espEnts.length?Math.round(presentes/espEnts.length*100):0;
-  var bCls=pctPres===100?'rp-ok':pctPres>50?'rp-warn':'rp-err';
-  /* Entidades sin clasificar: IFCBUILDINGELEMENTPROXY */
+  /* Proxy al final de presentes */
   var qtyProxy=conteo['IFCBUILDINGELEMENTPROXY']||0;
   if(qtyProxy>0){
-    filas+='<tr class="rp-row-sel" onclick="rpSelRow(this,[\'IFCBUILDINGELEMENTPROXY\'])" title="Elementos sin clasificar">'+
+    filasP+='<tr class="rp-row-sel" onclick="rpSelRow(this,[\'IFCBUILDINGELEMENTPROXY\'])" title="Elementos sin clasificar">'+
       '<td class="td-name" style="color:var(--warn)">⚠️ Sin clasificar<div class="td-cls">Ifcbuildingelementproxy</div></td>'+
       '<td class="td-qty" style="color:var(--warn)">'+qtyProxy+'</td>'+
       '<td class="td-ok"><span style="color:var(--warn)">⚠</span></td>'+
       '</tr>';
   }
+  var filas='';
+  if(filasP) filas+='<tr><td colspan="3" style="padding:3px 10px;font:700 8px var(--mono);color:#00c853;text-transform:uppercase;letter-spacing:.12em;background:rgba(0,200,83,.05)">✓ Presentes</td></tr>'+filasP;
+  if(filasA) filas+='<tr><td colspan="3" style="padding:3px 10px;font:700 8px var(--mono);color:var(--muted);text-transform:uppercase;letter-spacing:.12em;background:rgba(0,0,0,.15)">✗ Ausentes</td></tr>'+filasA;
+  var pctPres=espEnts.length?Math.round(presentes/espEnts.length*100):0;
+  var bCls=pctPres===100?'rp-ok':pctPres>50?'rp-warn':'rp-err';
   html+=rpSec('4.Entidades IFC',presentes+'/'+espEnts.length+' presentes',bCls,
     '<table class="rp-table">'+filas+'</table>',true);
 
