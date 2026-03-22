@@ -334,23 +334,24 @@ function extraerTiposDelIFC(est) {
     const attrs = splitAttrs(extraerRaw(est.texto, inst.pos));
     const nombre = strVal(attrs[2]) || strVal(attrs[1]) || '';
     if (!nombre || !nombre.includes(':')) continue;
-    const key = inst.cls + '||' + nombre;
+
+    const partes = nombre.split(':');
+    // Revit: "Familia:Tipo:IDinstancia" — agrupar por Familia+Tipo, ignorar ID
+    const familia = partes[0];
+    const tipo    = partes.length >= 3 ? partes.slice(1, -1).join(':') : partes[1];
+
+    const key = inst.cls + '||' + familia + '||' + tipo;
     conteoNombres[key] = (conteoNombres[key] || 0) + 1;
   }
 
   // Construir estructura por entidad
   for (const key in conteoNombres) {
-    const sep = key.indexOf('||');
-    const cls = key.slice(0, sep);
-    const nombre = key.slice(sep + 2);
-    const partes = nombre.split(':');
-    // Revit exporta "Familia:Tipo:IDinstancia" (3 partes) o "Familia:Tipo" (2 partes)
-    // El último segmento cuando hay 3+ es el ID único de instancia — ignorarlo
-    const fam = partes[0];
-    const tip = partes.length >= 3 ? partes.slice(1, -1).join(':') : (partes[1] || partes[0]);
+    const parts = key.split('||');
+    const cls = parts[0], fam = parts[1], tip = parts[2];
     if (!por[cls]) por[cls] = new Map();
     if (!por[cls].has(fam)) por[cls].set(fam, new Map());
-    por[cls].get(fam).set(tip, conteoNombres[key]);
+    const prev = por[cls].get(fam).get(tip) || 0;
+    por[cls].get(fam).set(tip, prev + conteoNombres[key]);
   }
 
   return por;
@@ -363,10 +364,11 @@ function renderSecTipos(est, filtrarCls) {
   let relevantes = Object.entries(_tiposCache).filter(([cls])=>espEnts.includes(cls));
   if (filtrarCls) relevantes = relevantes.filter(([cls])=>cls===filtrarCls);
   const tituloFiltro = filtrarCls ? ` — ${IFC_ICO[filtrarCls]||''} ${filtrarCls.charAt(0)+filtrarCls.slice(1).toLowerCase()}` : '';
+  const tituloSec = '5. Estructura y Denominación';
 
   if (!relevantes.length) return `<div class="rp-sec" id="sec5wrap">
     <div class="rp-sec-hdr" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'block':'none'">
-      <span class="rp-sec-title">5. Tipos de Elemento${tituloFiltro}</span><span class="rp-badge rp-info">Sin datos</span>
+      <span class="rp-sec-title">${tituloSec}${tituloFiltro}</span><span class="rp-badge rp-info">Sin datos</span>
     </div>
     <div class="rp-content" style="display:none"><div class="rp-msg">No se encontraron tipos.</div></div>
   </div>`;
@@ -391,7 +393,7 @@ function renderSecTipos(est, filtrarCls) {
             <span style="font:400 9px var(--mono);color:var(--muted);display:block;margin-bottom:1px">${esc(fam)}</span>
             <span style="font:600 10px var(--mono);color:var(--text)">${esc(tip)}</span>
           </td>
-          <td class="td-qty" style="text-align:right;min-width:28px;vertical-align:middle">${qty}</td>
+          <td class="td-qty" style="text-align:right;width:32px;min-width:32px;vertical-align:middle;font:700 10px var(--mono);color:var(--accent)">${qty}</td>
         </tr>`;
       });
     });
@@ -399,14 +401,14 @@ function renderSecTipos(est, filtrarCls) {
 
   return `<div class="rp-sec" id="sec5wrap">
     <div class="rp-sec-hdr" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'block':'none'">
-      <span class="rp-sec-title">5. Tipos de Elemento${tituloFiltro}</span>
+      <span class="rp-sec-title">${tituloSec}${tituloFiltro}</span>
       <span class="rp-badge rp-info">${totalTipos} tipos</span>
     </div>
     <div class="rp-content" style="display:${filtrarCls?'block':'none'}">
       <table class="rp-table">
         <tr style="background:rgba(0,0,0,.2)">
-          <td style="font:700 8px var(--mono);color:var(--muted);padding:3px 10px">FAMILIA / TIPO</td>
-          <td style="font:700 8px var(--mono);color:var(--muted);padding:3px 10px;text-align:right">N</td>
+          <td style="font:700 8px var(--mono);color:var(--muted);padding:3px 10px">ESTRUCTURA / DENOMINACIÓN</td>
+          <td style="font:700 8px var(--mono);color:var(--muted);padding:3px 10px;text-align:right;white-space:nowrap">N°</td>
         </tr>
         ${inner}
       </table>
