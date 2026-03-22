@@ -276,18 +276,18 @@ const isolatedCategories = new Set();
 
 document.getElementById("btnFit").addEventListener("click", () => world.camera.fitToItems());
 
-let _planMode = false;
 document.getElementById("btnPlan").addEventListener("click", () => {
-  _planMode = !_planMode;
-  if (_planMode) {
-    world.camera.set("Plan");
-    world.camera.projection.set("Orthographic");
-    document.getElementById("btnPlan").classList.add("active");
-  } else {
-    world.camera.set("Orbit");
-    world.camera.projection.set("Perspective");
-    document.getElementById("btnPlan").classList.remove("active");
-  }
+  world.camera.set("Plan");
+  world.camera.projection.set("Orthographic");
+  document.getElementById("btnPlan").classList.add("active");
+  document.getElementById("btn3D").classList.remove("active");
+});
+
+document.getElementById("btn3D").addEventListener("click", () => {
+  world.camera.set("Orbit");
+  world.camera.projection.set("Perspective");
+  document.getElementById("btn3D").classList.add("active");
+  document.getElementById("btnPlan").classList.remove("active");
 });
 
 document.getElementById("btnFitSb").addEventListener("click", () => world.camera.fitToItems());
