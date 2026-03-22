@@ -222,14 +222,68 @@ function renderProps(data) {
 
 highlighter.events.select.onHighlight.add(async (modelIdMap) => {
   try {
-    const [modelId, ids] = Object.entries(modelIdMap)[0];
-    const model = fragments.list.get(modelId);
-    if (!model) return;
-    const localId = [...ids][0];
-    const [data] = await model.getItemsData([localId]);
-    renderProps(data);
+    // Contar total de elementos seleccionados
+    let total = 0;
+    for (const ids of Object.values(modelIdMap)) total += ids.size;
+
+    if (total === 1) {
+      // Un solo elemento → mostrar sus propiedades
+      const [modelId, ids] = Object.entries(modelIdMap)[0];
+      const model = fragments.list.get(modelId);
+      if (!model) return;
+      const localId = [...ids][0];
+      const [data] = await model.getItemsData([localId]);
+      renderProps(data);
+    } else {
+      // Múltiples elementos → mostrar resumen por categoría
+      const cats = {};
+      for (const [modelId, ids] of Object.entries(modelIdMap)) {
+        const model = fragments.list.get(modelId);
+        if (!model) continue;
+        for (const localId of ids) {
+          try {
+            const [data] = await model.getItemsData([localId]);
+            const cls = data?._category?.value ?? 'Desconocido';
+            cats[cls] = (cats[cls] || 0) + 1;
+          } catch {}
+        }
+      }
+      renderPropsMulti(total, cats);
+    }
   } catch { renderProps(null); }
 });
+function renderPropsMulti(total, cats) {
+  const filas = Object.entries(cats)
+    .sort((a,b) => b[1]-a[1])
+    .map(([cls,qty]) => {
+      const ico = IFC_ICO[cls] || '▪';
+      const clsL = cls.charAt(0) + cls.slice(1).toLowerCase();
+      return `<div class="props-row">
+        <span class="props-key">${ico} ${esc(clsL)}</span>
+        <span class="props-val" style="color:var(--accent);font-weight:700">${qty}</span>
+      </div>`;
+    }).join('');
+
+  propsEmpty.style.display = 'none';
+  propsBody.innerHTML = `
+    <div class="props-elem-hdr">
+      <div class="props-elem-icon">📦</div>
+      <div class="props-elem-cls">Selección múltiple</div>
+      <div class="props-elem-name">${total} elementos seleccionados</div>
+    </div>
+    <div class="props-sec">
+      <div class="props-sec-hdr">
+        <span class="props-sec-title">Categorías</span>
+        <span class="rp-badge rp-info">${Object.keys(cats).length}</span>
+      </div>
+      <div class="props-sec-body">${filas}</div>
+    </div>
+    <div style="margin-top:6px;padding:8px 10px;background:rgba(0,212,255,.04);border:1px solid rgba(0,212,255,.1);border-radius:4px;font:400 8px var(--mono);color:var(--muted);line-height:1.6;">
+      ℹ️ Selecciona un único elemento para ver sus propiedades.
+    </div>`;
+  propsBody.style.display = 'block';
+}
+
 highlighter.events.select.onClear.add(() => renderProps(null));
 
 const hider = components.get(OBC.Hider);
