@@ -150,10 +150,12 @@ const propsPanel = document.getElementById("propsPanel");
 const propsBody  = document.getElementById("propsBody");
 const propsEmpty = document.getElementById("propsEmpty");
 
-function getNivelDeElemento(expressID) {
+function getNivelDeElemento(localId) {
   if (!_estActual) return null;
+  const sid = String(localId);
   for (const nivelId in _estActual.elemsPorNivel) {
-    if (_estActual.elemsPorNivel[nivelId].includes(String(expressID))) {
+    const elems = _estActual.elemsPorNivel[nivelId];
+    if (elems.includes(sid)) {
       const inst = _estActual.instancias[nivelId];
       if (!inst) continue;
       const attrs = splitAttrs(extraerRaw(_estActual.texto, inst.pos));
@@ -163,14 +165,14 @@ function getNivelDeElemento(expressID) {
   return null;
 }
 
-function renderProps(data) {
+function renderProps(data, localId) {
   if (!data) { propsEmpty.style.display = 'block'; propsBody.style.display = 'none'; return; }
   const cls  = data._category?.value ?? 'Desconocido';
   const ico  = IFC_ICO[cls] || '▪';
   const clsL = cls.charAt(0) + cls.slice(1).toLowerCase();
   const nom  = data.Name?.value ?? '—';
   const tag  = data.Tag?.value ?? '—';
-  const nivel = getNivelDeElemento(data.expressID) ?? '—';
+  const nivel = getNivelDeElemento(localId) ?? '—';
 
   const filas = [
     ['Nombre',    nom],
@@ -212,7 +214,7 @@ highlighter.events.select.onHighlight.add(async (modelIdMap) => {
       if (!model) return;
       const localId = [...ids][0];
       const [data] = await model.getItemsData([localId]);
-      renderProps(data);
+      renderProps(data, localId);
     } else {
       // Múltiples elementos → mostrar resumen por categoría
       const cats = {};
@@ -263,7 +265,7 @@ function renderPropsMulti(total, cats) {
   propsBody.style.display = 'block';
 }
 
-highlighter.events.select.onClear.add(() => renderProps(null));
+highlighter.events.select.onClear.add(() => renderProps(null, null));
 
 const hider = components.get(OBC.Hider);
 const isolatedCategories = new Set();
