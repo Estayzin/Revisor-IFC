@@ -177,11 +177,7 @@ function renderProps(data) {
     }
   }
 
-  let html = `<div style="margin-bottom:8px;padding:10px 12px;background:rgba(0,212,255,.05);border:1px solid rgba(0,212,255,.15);border-left:3px solid var(--accent);border-radius:5px;">
-    <div style="font:700 9px var(--mono);color:var(--accent);text-transform:uppercase;letter-spacing:.15em;margin-bottom:4px;">📋 Propiedades IFC</div>
-    <div style="font:400 9px var(--mono);color:var(--muted);line-height:1.7;">Solo se muestran propiedades básicas del elemento para reducir la carga del modelo.</div>
-  </div>
-  <div class="props-elem-hdr">
+  let html = `<div class="props-elem-hdr">
     <div class="props-elem-icon">${ico}</div>
     <div class="props-elem-cls">${esc(clsL)}</div>
     <div class="props-elem-name">${esc(nom)}</div>

@@ -336,8 +336,12 @@ body.light-mode .viewer-wrap { background:#c8d8e8; }
 
       <!-- PROPIEDADES -->
       <div id="propsPanel">
-        <div class="pp-header">
+        <div class="pp-header" style="border-top:2px solid var(--accent);">
           <div class="pp-title">Propiedades</div>
+        </div>
+        <div style="margin:8px;padding:10px 12px;background:rgba(0,212,255,.05);border:1px solid rgba(0,212,255,.15);border-left:3px solid var(--accent);border-radius:5px;flex-shrink:0;">
+          <div style="font:700 9px var(--mono);color:var(--accent);text-transform:uppercase;letter-spacing:.15em;margin-bottom:4px;">📋 Propiedades IFC</div>
+          <div style="font:400 9px var(--mono);color:var(--muted);line-height:1.7;">Solo se muestran propiedades básicas del elemento para reducir la carga del modelo.</div>
         </div>
         <div class="pp-empty" id="propsEmpty">Selecciona un elemento<br>en el modelo</div>
         <div class="pp-body" id="propsBody"></div>
@@ -347,7 +351,7 @@ body.light-mode .viewer-wrap { background:#c8d8e8; }
 
     <!-- PANEL REPORTE (aparece al hacer clic en Reporte) -->
     <div id="reportePanel" style="position:relative;">
-      <div class="rp-header">
+      <div class="rp-header" style="border-top:2px solid var(--accent);">
         <div class="rp-title">Reporte BIM</div>
         <button class="pp-close" id="reporteClose">✕</button>
       </div>
