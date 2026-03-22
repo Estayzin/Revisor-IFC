@@ -286,6 +286,10 @@ document.getElementById("btnProps").addEventListener("click", () => {
   propsPanel.classList.toggle("show");
   document.getElementById("btnProps").classList.toggle("active", propsPanel.classList.contains("show"));
 });
+document.getElementById("propsClose").addEventListener("click", () => {
+  propsPanel.classList.remove("show");
+  document.getElementById("btnProps").classList.remove("active");
+});
 document.getElementById("btnClip").addEventListener("click", () => {});
 document.getElementById("btnMeasure").addEventListener("click", () => {});
 

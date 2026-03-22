@@ -129,7 +129,7 @@ body.light-mode .viewer-wrap { background:#c8d8e8; }
 /* PANEL PROPIEDADES — consistente con reporte BIM */
 #propsPanel { display:flex; flex-direction:column; overflow:hidden; flex:1; border-bottom:1px solid var(--border); min-height:0; }
 .pp-header { padding:9px 12px 8px; border-bottom:1px solid var(--border); flex-shrink:0; display:flex; align-items:center; gap:8px; }
-.pp-title { font:700 9px var(--mono); color:var(--accent); text-transform:uppercase; letter-spacing:.18em; flex:1; }
+.pp-title { font:700 9px var(--mono); color:var(--accent); text-transform:uppercase; letter-spacing:.12em; flex:1; }
 .pp-close { background:none; border:none; color:var(--muted); cursor:pointer; font-size:13px; padding:2px 5px; border-radius:3px; line-height:1; }
 .pp-close:hover { color:var(--text); background:rgba(255,255,255,.05); }
 .pp-empty { padding:20px 12px; font:400 9px var(--mono); color:var(--muted); text-align:center; line-height:1.7; text-transform:uppercase; letter-spacing:.08em; opacity:.6; }
@@ -185,7 +185,7 @@ body.light-mode .viewer-wrap { background:#c8d8e8; }
 #reportePanel { width:270px; flex-shrink:0; background:var(--blue); border-left:1px solid var(--border); display:none; flex-direction:column; overflow:hidden; position:absolute; top:0; right:0; bottom:0; z-index:5; }
 #reportePanel.show { display:flex; }
 .rp-header { padding:9px 12px 8px; border-bottom:1px solid var(--border); flex-shrink:0; display:flex; align-items:center; gap:8px; }
-.rp-title { font:700 9px var(--mono); color:var(--accent); text-transform:uppercase; letter-spacing:.18em; flex:1; }
+.rp-title { font:700 9px var(--mono); color:var(--accent); text-transform:uppercase; letter-spacing:.12em; flex:1; }
 .rp-esp-row { padding:7px 12px; border-bottom:1px solid var(--border); display:flex; align-items:center; gap:7px; flex-shrink:0; }
 .rp-esp-label { font:400 9px var(--mono); color:var(--muted); white-space:nowrap; }
 .rp-esp-sel { flex:1; background:var(--navy); color:var(--text); border:1px solid var(--border); border-radius:4px; font:500 10px var(--mono); padding:4px 8px; cursor:pointer; outline:none; }
@@ -338,6 +338,7 @@ body.light-mode .viewer-wrap { background:#c8d8e8; }
       <div id="propsPanel">
         <div class="pp-header" style="border-top:2px solid var(--accent);">
           <div class="pp-title">Propiedades</div>
+          <button class="pp-close" id="propsClose">✕</button>
         </div>
         <div style="margin:8px;padding:10px 12px;background:rgba(0,212,255,.05);border:1px solid rgba(0,212,255,.15);border-left:3px solid var(--accent);border-radius:5px;flex-shrink:0;">
           <div style="font:700 9px var(--mono);color:var(--accent);text-transform:uppercase;letter-spacing:.15em;margin-bottom:4px;">📋 Propiedades IFC</div>
