@@ -876,9 +876,14 @@ Object.keys(ESP).forEach(k => {
 
 // Abrir modal al hacer clic en Reporte (solo si hay modelo cargado)
 document.getElementById('btnReporte').addEventListener('click', () => {
+  if (reportePanel.classList.contains('show')) {
+    reportePanel.classList.remove('show');
+    document.getElementById('btnReporte').classList.remove('active');
+    return;
+  }
   if (!_estActual) {
-    reportePanel.classList.toggle('show');
-    document.getElementById('btnReporte').classList.toggle('active', reportePanel.classList.contains('show'));
+    reportePanel.classList.add('show');
+    document.getElementById('btnReporte').classList.add('active');
     return;
   }
   // Precargar valores detectados
