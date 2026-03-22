@@ -17,26 +17,46 @@ html,body { height:100%; overflow:hidden; }
 body { font-family:var(--sans); background:var(--bg); color:var(--text); display:flex; flex-direction:column; height:100vh; font-size:13px; }
 
 /* HEADER */
-header { background:var(--navy); padding:10px 20px; display:flex; align-items:center; gap:12px; border-bottom:2px solid var(--accent); flex-shrink:0; box-shadow:0 2px 20px rgba(0,212,255,.08); }
-.hicon { width:30px; height:30px; background:linear-gradient(135deg,var(--accent),var(--accent2)); border-radius:6px; display:flex; align-items:center; justify-content:center; font-size:14px; flex-shrink:0; }
-.htitle { font:600 12px var(--mono); color:#e0f0ff; letter-spacing:.08em; text-transform:uppercase; }
-.hsub { font:400 10px var(--mono); color:var(--muted); margin-top:1px; }
-.hback { margin-left:auto; padding:5px 12px; background:transparent; color:var(--muted); border:1px solid var(--border); border-radius:4px; font:600 9px var(--mono); text-transform:uppercase; letter-spacing:.1em; text-decoration:none; transition:all .15s; cursor:pointer; }
+header { background:var(--navy); padding:8px 16px; display:flex; align-items:center; gap:10px; border-bottom:2px solid var(--accent); flex-shrink:0; box-shadow:0 2px 20px rgba(0,212,255,.08); }
+.hicon { width:28px; height:28px; background:linear-gradient(135deg,var(--accent),var(--accent2)); border-radius:6px; display:flex; align-items:center; justify-content:center; font-size:13px; flex-shrink:0; }
+.htitle { font:600 11px var(--mono); color:#e0f0ff; letter-spacing:.08em; text-transform:uppercase; }
+.hsub { font:400 9px var(--mono); color:var(--muted); margin-top:1px; }
+.hback { padding:4px 10px; background:transparent; color:var(--muted); border:1px solid var(--border); border-radius:4px; font:600 9px var(--mono); text-transform:uppercase; letter-spacing:.1em; text-decoration:none; transition:all .15s; cursor:pointer; white-space:nowrap; }
 .hback:hover { border-color:var(--accent); color:var(--accent); }
 
+/* TOOLBAR SUPERIOR */
+.header-toolbar { display:flex; align-items:center; gap:4px; margin-left:12px; padding-left:12px; border-left:1px solid var(--border); }
+.header-toolbar-sep { width:1px; height:20px; background:var(--border); margin:0 4px; }
+.hbar-btn { padding:5px 10px; background:transparent; color:var(--muted); border:1px solid var(--border); border-radius:4px; font:600 9px var(--mono); cursor:pointer; transition:all .15s; text-transform:uppercase; letter-spacing:.07em; display:flex; align-items:center; gap:5px; white-space:nowrap; }
+.hbar-btn:hover { border-color:var(--accent); color:var(--accent); background:rgba(0,212,255,.05); }
+.hbar-btn.active { border-color:var(--accent); color:#000; background:var(--accent); }
+.hbar-btn.disabled { opacity:.4; cursor:not-allowed; }
+.hbar-btn.disabled:hover { border-color:var(--border); color:var(--muted); background:transparent; }
+.hbar-btn .hb-icon { font-size:12px; }
+.hbar-tag { font:600 7px var(--mono); padding:1px 4px; border-radius:2px; background:rgba(255,107,53,.15); color:var(--warn); letter-spacing:.08em; margin-left:3px; }
+
+/* Modo claro */
+body.light-mode {
+  --navy:#f0f4f8; --blue:#e4eaf0; --accent:#0077aa; --green:#00804d;
+  --bg:#dce3ea; --card:#f5f8fb; --text:#1a2a3a; --muted:#6a8aaa;
+  --border:#b0c4d8; --accent2:#5533aa; --warn:#cc4400; --red:#cc0022;
+}
+body.light-mode .viewer-wrap { background:#c8d8e8; }
+</style>
+<style>
 /* LAYOUT */
 .main { display:flex; flex:1; overflow:hidden; }
 
 /* SIDEBAR */
-.sidebar { width:260px; flex-shrink:0; background:var(--blue); border-right:1px solid var(--border); display:flex; flex-direction:column; overflow:hidden; }
-.sb-header { padding:12px; border-bottom:1px solid var(--border); flex-shrink:0; display:flex; flex-direction:column; gap:10px; }
-.sb-title { font:700 9px var(--mono); color:var(--muted); text-transform:uppercase; letter-spacing:.2em; }
+.sidebar { width:240px; flex-shrink:0; background:var(--blue); border-right:1px solid var(--border); display:flex; flex-direction:column; overflow:hidden; }
+.sb-header { padding:10px 12px; border-bottom:1px solid var(--border); flex-shrink:0; display:flex; flex-direction:column; gap:8px; }
+.sb-title { font:700 8px var(--mono); color:var(--muted); text-transform:uppercase; letter-spacing:.2em; }
 
 /* Dropzone */
-.dropzone { border:1px dashed var(--border); border-radius:6px; padding:16px 12px; text-align:center; cursor:pointer; transition:all .2s; background:rgba(0,212,255,.02); }
+.dropzone { border:1px dashed var(--border); border-radius:6px; padding:12px 10px; text-align:center; cursor:pointer; transition:all .2s; background:rgba(0,212,255,.02); }
 .dropzone:hover,.dropzone.over { border-color:var(--accent); background:rgba(0,212,255,.06); }
-.dz-icon { font-size:24px; opacity:.5; margin-bottom:4px; }
-.dz-label { font:600 10px var(--mono); color:var(--text); text-transform:uppercase; letter-spacing:.08em; }
+.dz-icon { font-size:20px; opacity:.5; margin-bottom:3px; }
+.dz-label { font:600 9px var(--mono); color:var(--text); text-transform:uppercase; letter-spacing:.08em; }
 .dz-sub { font:400 9px var(--mono); color:var(--muted); margin-top:2px; }
 
 /* Progreso */
@@ -45,23 +65,37 @@ header { background:var(--navy); padding:10px 20px; display:flex; align-items:ce
 .progress-label { font:400 9px var(--mono); color:var(--accent); letter-spacing:.05em; }
 .progress-bar-bg { height:3px; background:rgba(255,255,255,.08); border-radius:2px; }
 .progress-bar-fill { height:100%; background:linear-gradient(90deg,var(--accent),#00bcd4); width:0%; transition:width .3s ease; border-radius:2px; }
+
+/* INFO MODELO */
+.model-info { display:none; background:var(--card); border-radius:5px; border-left:3px solid var(--accent); padding:6px 10px; }
+.model-info.show { display:block; }
+.mi-name { font:600 9px var(--mono); color:var(--accent); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.mi-meta { font:400 8px var(--mono); color:var(--muted); margin-top:2px; }
 </style>
 <style>
-/* INFO MODELO */
-.model-info { display:none; background:var(--card); border-radius:5px; border-left:3px solid var(--accent); padding:8px 10px; }
-.model-info.show { display:block; }
-.mi-name { font:600 10px var(--mono); color:var(--accent); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-.mi-meta { font:400 9px var(--mono); color:var(--muted); margin-top:2px; }
+/* LISTA DE MODELOS */
+.sb-models-section { padding:8px 12px; border-bottom:1px solid var(--border); flex-shrink:0; }
+.sb-models-title { font:700 8px var(--mono); color:var(--muted); text-transform:uppercase; letter-spacing:.2em; margin-bottom:6px; }
+.models-list { display:flex; flex-direction:column; gap:3px; max-height:120px; overflow-y:auto; }
+.model-item { display:flex; align-items:center; gap:7px; padding:5px 8px; background:var(--card); border:1px solid var(--border); border-radius:4px; transition:all .15s; }
+.model-item:hover { border-color:var(--accent); }
+.model-item-name { font:500 9px var(--mono); color:var(--text); flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.model-item-toggle { background:none; border:none; cursor:pointer; font-size:13px; padding:0 2px; transition:opacity .15s; line-height:1; }
+.model-item-toggle.hidden { opacity:.3; }
+.models-empty { font:400 9px var(--mono); color:var(--muted); text-align:center; padding:8px 0; opacity:.6; }
 
-/* CONTROLES */
-.sb-controls { padding:10px 12px; display:flex; flex-direction:column; gap:8px; flex:1; overflow-y:auto; }
-.ctrl-title { font:700 9px var(--mono); color:var(--muted); text-transform:uppercase; letter-spacing:.15em; margin-bottom:2px; }
-.ctrl-btn { width:100%; padding:7px 10px; background:transparent; color:var(--text); border:1px solid var(--border); border-radius:4px; font:600 10px var(--mono); cursor:pointer; transition:all .15s; text-align:left; text-transform:uppercase; letter-spacing:.08em; display:flex; align-items:center; gap:7px; }
+/* CONTROLES SIDEBAR */
+.sb-controls { padding:8px 12px; display:flex; flex-direction:column; gap:6px; flex:1; overflow-y:auto; }
+.ctrl-title { font:700 8px var(--mono); color:var(--muted); text-transform:uppercase; letter-spacing:.15em; margin-bottom:1px; }
+.ctrl-btn { width:100%; padding:6px 10px; background:transparent; color:var(--text); border:1px solid var(--border); border-radius:4px; font:600 9px var(--mono); cursor:pointer; transition:all .15s; text-align:left; text-transform:uppercase; letter-spacing:.08em; display:flex; align-items:center; gap:7px; }
 .ctrl-btn:hover { border-color:var(--accent); color:var(--accent); background:rgba(0,212,255,.04); }
 .ctrl-btn.active { border-color:var(--accent); color:#000; background:var(--accent); }
-.ctrl-btn .icon { font-size:14px; }
-.ctrl-sep { height:1px; background:var(--border); margin:4px 0; }
-
+.ctrl-btn .icon { font-size:13px; }
+.ctrl-sep { height:1px; background:var(--border); margin:3px 0; }
+/* Oculto visualmente pero funcional */
+.ctrl-btn.nav-hidden { display:none; }
+</style>
+<style>
 /* TOOLTIP */
 #tooltip { display:none; position:fixed; pointer-events:none; z-index:9999;
   background:rgba(6,13,24,.92); border:1px solid var(--accent); border-radius:5px;
@@ -73,11 +107,25 @@ header { background:var(--navy); padding:10px 20px; display:flex; align-items:ce
 .viewer-wrap { flex:1; position:relative; background:#050b14; overflow:hidden; }
 #container { position:absolute; inset:0; width:100%; height:100%; }
 
+/* GIZMO */
+#gizmo { position:absolute; bottom:16px; left:16px; width:70px; height:70px; z-index:10; pointer-events:none; }
+#gizmo canvas { width:100%; height:100%; }
+
 /* OVERLAY WELCOME */
 #overlay { position:absolute; inset:0; background:#050b14; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:14px; z-index:20; pointer-events:none; }
 #overlay.hidden { display:none; }
 .ov-icon { font-size:40px; opacity:.15; }
 .ov-text { font:400 10px var(--mono); color:var(--muted); letter-spacing:.1em; text-transform:uppercase; }
+
+/* PANEL PROPIEDADES — consistente con reporte BIM */
+#propsPanel { width:270px; flex-shrink:0; background:var(--blue); border-left:1px solid var(--border); display:none; flex-direction:column; overflow:hidden; }
+#propsPanel.show { display:flex; }
+.pp-header { padding:9px 12px 8px; border-bottom:1px solid var(--border); flex-shrink:0; display:flex; align-items:center; gap:8px; }
+.pp-title { font:700 9px var(--mono); color:var(--accent); text-transform:uppercase; letter-spacing:.18em; flex:1; }
+.pp-close { background:none; border:none; color:var(--muted); cursor:pointer; font-size:13px; padding:2px 5px; border-radius:3px; line-height:1; }
+.pp-close:hover { color:var(--text); background:rgba(255,255,255,.05); }
+.pp-empty { padding:20px 12px; font:400 9px var(--mono); color:var(--muted); text-align:center; line-height:1.7; text-transform:uppercase; letter-spacing:.08em; opacity:.6; }
+.pp-body { flex:1; overflow-y:auto; padding:8px; max-height:calc(100vh - 60px); }
 
 /* PANEL REPORTE */
 #reportePanel { width:290px; flex-shrink:0; background:var(--blue); border-left:1px solid var(--border); display:none; flex-direction:column; overflow:hidden; }
@@ -109,12 +157,21 @@ header { background:var(--navy); padding:10px 20px; display:flex; align-items:ce
 .td-ok { text-align:center; width:24px; }
 .ic-ok { color:#00c853; } .ic-err { color:#ff3d57; }
 .rp-msg { padding:8px 10px; font:400 10px var(--mono); color:var(--muted); line-height:1.5; }
-.rp-arr { font-size:10px; color:var(--muted); transition:transform .15s; }
-.rp-arr.open { transform:rotate(90deg); }
-/* Botón hider por fila */
 .btn-hide-row { padding:2px 6px; background:transparent; border:1px solid var(--border); border-radius:3px; font:600 8px var(--mono); color:var(--muted); cursor:pointer; transition:all .15s; white-space:nowrap; }
 .btn-hide-row:hover { border-color:var(--accent); color:var(--accent); }
 .btn-hide-row.isolated { border-color:var(--green); color:var(--green); background:rgba(0,200,83,.08); }
+
+/* Filas clickeables — sección 4 */
+.rp-table tr.ent-row { transition:background .12s; cursor:pointer; }
+.rp-table tr.ent-row:hover td { background:rgba(0,212,255,.07); }
+.rp-table tr.ent-row.ent-active td { background:rgba(0,212,255,.15); color:var(--accent); }
+.rp-table tr.ent-row.ent-active .td-cls { color:var(--accent); opacity:.8; }
+.rp-table tr.ent-row.ent-active .td-qty { color:var(--accent); }
+/* Filas clickeables — sección 5 */
+.rp-table tr.tipo-row { transition:background .12s; cursor:pointer; }
+.rp-table tr.tipo-row:hover td { background:rgba(0,212,255,.07); }
+.rp-table tr.tipo-row.tipo-active td { background:rgba(0,212,255,.15); color:var(--accent); }
+.rp-table tr.tipo-row.tipo-active .td-cls { color:var(--accent); opacity:.8; }
 </style>
 </head>
 <body>
@@ -124,48 +181,72 @@ header { background:var(--navy); padding:10px 20px; display:flex; align-items:ce
       <div class="htitle">Visor BIM</div>
       <div class="hsub">Carlos Estay Ruggieri · v1.0 | 2026</div>
     </div>
-    <a class="hback" href="../explorer.html">← Volver al Revisor</a>
+
+    <!-- TOOLBAR SUPERIOR: Navegación -->
+    <div class="header-toolbar">
+      <button class="hbar-btn" id="btnFit"><span class="hb-icon">🎯</span> Centrar</button>
+      <button class="hbar-btn" id="btnOrbit"><span class="hb-icon">🔄</span> Órbita</button>
+      <button class="hbar-btn" id="btnPlan"><span class="hb-icon">📐</span> Planta</button>
+    </div>
+
+    <div class="header-toolbar-sep"></div>
+
+    <!-- TOOLBAR SUPERIOR: Herramientas -->
+    <div class="header-toolbar">
+      <button class="hbar-btn disabled" id="btnClip" title="Próximamente"><span class="hb-icon">✂️</span> Corte <span class="hbar-tag">PRÓX.</span></button>
+      <button class="hbar-btn disabled" id="btnMeasure" title="Próximamente"><span class="hb-icon">📏</span> Medir <span class="hbar-tag">PRÓX.</span></button>
+      <button class="hbar-btn" id="btnProps"><span class="hb-icon">📋</span> Propiedades</button>
+      <button class="hbar-btn" id="btnReporte"><span class="hb-icon">📊</span> Reporte</button>
+    </div>
+
+    <div class="header-toolbar-sep"></div>
+
+    <!-- TOOLBAR SUPERIOR: Vista -->
+    <div class="header-toolbar">
+      <button class="hbar-btn" id="btnLightMode" title="Modo claro/oscuro"><span class="hb-icon">🌓</span> Modo claro</button>
+      <button class="hbar-btn" id="btnToggleGrid" title="Mostrar/ocultar grilla"><span class="hb-icon">⊞</span> Grilla</button>
+    </div>
+
+    <a class="hback" href="../explorer.html" style="margin-left:auto;">← Revisor</a>
   </header>
 
   <div class="main">
     <!-- SIDEBAR -->
     <div class="sidebar">
       <div class="sb-header">
-        <div class="sb-title">Modelo IFC</div>
-
+        <div class="sb-title">Cargar modelo</div>
         <div class="dropzone" id="dropzone">
           <input type="file" id="fileInput" accept=".ifc" style="display:none">
           <div class="dz-icon">📂</div>
           <div class="dz-label">Arrastra tu IFC aquí</div>
           <div class="dz-sub">o haz clic para seleccionar</div>
         </div>
-
         <div class="progress-wrap" id="progressWrap">
           <div class="progress-label" id="progressLabel">Convirtiendo IFC... 0%</div>
           <div class="progress-bar-bg"><div class="progress-bar-fill" id="progressFill"></div></div>
         </div>
-
         <div class="model-info" id="modelInfo">
           <div class="mi-name" id="modelName">—</div>
           <div class="mi-meta" id="modelMeta">—</div>
         </div>
       </div>
 
+      <!-- LISTA DE MODELOS CARGADOS -->
+      <div class="sb-models-section">
+        <div class="sb-models-title">Modelos cargados</div>
+        <div class="models-list" id="modelsList">
+          <div class="models-empty" id="modelsEmpty">Sin modelos cargados</div>
+        </div>
+      </div>
+
       <div class="sb-controls">
-        <div class="ctrl-title">Navegación</div>
-        <button class="ctrl-btn" id="btnFit"><span class="icon">🎯</span> Centrar modelo</button>
-        <button class="ctrl-btn" id="btnOrbit"><span class="icon">🔄</span> Modo órbita</button>
-        <button class="ctrl-btn" id="btnPlan"><span class="icon">📐</span> Vista planta</button>
-
-        <div class="ctrl-sep"></div>
-        <div class="ctrl-title">Herramientas</div>
-        <button class="ctrl-btn" id="btnProps"><span class="icon">📋</span> Propiedades</button>
-        <button class="ctrl-btn" id="btnClip"><span class="icon">✂️</span> Plano de corte</button>
-        <button class="ctrl-btn" id="btnMeasure"><span class="icon">📏</span> Medir distancia</button>
-
-        <div class="ctrl-sep"></div>
         <div class="ctrl-title">Visibilidad</div>
         <button class="ctrl-btn" id="btnResetVis"><span class="icon">👁️</span> Mostrar todo</button>
+
+        <!-- Botones de navegación ocultos visualmente pero funcionales -->
+        <button class="ctrl-btn nav-hidden" id="btnFitSb"></button>
+        <button class="ctrl-btn nav-hidden" id="btnOrbitSb"></button>
+        <button class="ctrl-btn nav-hidden" id="btnPlanSb"></button>
       </div>
     </div>
 
@@ -177,6 +258,8 @@ header { background:var(--navy); padding:10px 20px; display:flex; align-items:ce
         <div class="ov-text">Carga un archivo IFC para comenzar</div>
       </div>
       <div id="tooltip"><div id="tt-class"></div><div class="tt-sub" id="tt-name"></div></div>
+      <!-- GIZMO de orientación -->
+      <canvas id="gizmo" width="70" height="70"></canvas>
     </div>
 
     <!-- PANEL PROPIEDADES -->
@@ -185,7 +268,23 @@ header { background:var(--navy); padding:10px 20px; display:flex; align-items:ce
         <div class="pp-title">Propiedades</div>
         <button class="pp-close" id="propsClose">✕</button>
       </div>
+      <div class="pp-empty" id="propsEmpty">Selecciona un elemento<br>en el modelo</div>
       <div class="pp-body" id="propsBody"></div>
+    </div>
+
+    <!-- PANEL REPORTE -->
+    <div id="reportePanel">
+      <div class="rp-header">
+        <div class="rp-title">Reporte BIM</div>
+        <button class="pp-close" id="reporteClose">✕</button>
+      </div>
+      <div class="rp-esp-row">
+        <span class="rp-esp-label">Especialidad:</span>
+        <select class="rp-esp-sel" id="espSel"></select>
+      </div>
+      <div class="rp-body" id="rpBody">
+        <div class="rp-msg">Carga un modelo IFC para ver el reporte.</div>
+      </div>
     </div>
   </div>
 

@@ -2,16 +2,15 @@ import * as OBC from "@thatopen/components";
 import * as OBF from "@thatopen/components-front";
 import * as BUI from "@thatopen/ui";
 import * as BUIC from "@thatopen/ui-obc";
+import * as THREE from "three";
 import Stats from "stats.js";
 
 BUI.Manager.init();
 
-// Escena
 const components = new OBC.Components();
 const worlds = components.get(OBC.Worlds);
 const world = worlds.create();
 world.name = "main";
-
 world.scene = new OBC.SimpleScene(components);
 world.scene.setup();
 world.scene.three.background = null;
@@ -21,11 +20,14 @@ world.renderer = new OBF.PostproductionRenderer(components, container);
 world.camera = new OBC.OrthoPerspectiveCamera(components);
 await world.camera.controls.setLookAt(50, 30, 50, 0, 0, 0);
 components.init();
-
 world.renderer.postproduction.enabled = true;
-components.get(OBC.Grids).create(world);
 
-// FragmentsManager
+const grid = components.get(OBC.Grids).create(world);
+grid.config.color.set(0x0a1e2a);
+grid.config.primarySize = 1;
+grid.config.secondarySize = 10;
+grid.config.visible = false;
+
 const githubUrl = "https://thatopen.github.io/engine_fragment/resources/worker.mjs";
 const fetchedUrl = await fetch(githubUrl);
 const workerBlob = await fetchedUrl.blob();
@@ -43,6 +45,10 @@ fragments.list.onItemSet.add(({ value: model }) => {
   model.useCamera(world.camera.three);
   world.scene.three.add(model.object);
   fragments.core.update(true);
+  try {
+    const bbox = new THREE.Box3().setFromObject(model.object);
+    if (isFinite(bbox.min.y)) grid.three.position.y = bbox.min.y;
+  } catch(e) {}
 });
 fragments.core.models.materials.list.onItemSet.add(({ value: material }) => {
   if (!("isLodMaterial" in material && material.isLodMaterial)) {
@@ -52,11 +58,9 @@ fragments.core.models.materials.list.onItemSet.add(({ value: material }) => {
   }
 });
 
-// IfcLoader
 const ifcLoader = components.get(OBC.IfcLoader);
 await ifcLoader.setup({ autoSetWasm: false, wasm: { path: "/web-ifc/", absolute: true } });
 
-// UI elementos
 const overlay = document.getElementById("overlay");
 const progressWrap = document.getElementById("progressWrap");
 const progressFill = document.getElementById("progressFill");
@@ -67,6 +71,10 @@ const modelMeta = document.getElementById("modelMeta");
 const tooltip = document.getElementById("tooltip");
 const ttClass = document.getElementById("tt-class");
 const ttName = document.getElementById("tt-name");
+let _tiposCache = null;
+let _clsFiltroActiva = null;
+let _espActual = 'ARQ';
+let _estActual = null;
 
 const setProgress = (v) => {
   const pct = Math.round(v * 100);
@@ -75,21 +83,25 @@ const setProgress = (v) => {
   if (pct >= 100) setTimeout(() => progressWrap.classList.remove("show"), 800);
 };
 
-// Cargar IFC
 const loadIfc = async (file) => {
   overlay.classList.add("hidden");
   progressWrap.classList.add("show");
   modelName.textContent = file.name;
-  modelMeta.textContent = `${(file.size / 1024 / 1024).toFixed(1)} MB`;
+  modelMeta.textContent = `${(file.size/1024/1024).toFixed(1)} MB`;
   modelInfo.classList.add("show");
   const buffer = await file.arrayBuffer();
-  await ifcLoader.load(new Uint8Array(buffer), false, file.name, {
-    processData: { progressCallback: setProgress }
-  });
-  await world.camera.fitToItems ? world.camera.fitToItems() : null;
+  const texto = new TextDecoder('utf-8').decode(buffer);
+  const est = parsearIFC(texto);
+  _tiposCache = null;
+  _clsFiltroActiva = null;
+  _espActual = detectarEspecialidad(file.name);
+  espSel.value = _espActual;
+  renderReporte(est);
+  reportePanel.classList.add('show');
+  await ifcLoader.load(new Uint8Array(buffer), false, file.name, { processData: { progressCallback: setProgress } });
+  if (world.camera.fitToItems) await world.camera.fitToItems();
 };
 
-// Dropzone
 const dropzone = document.getElementById("dropzone");
 const fileInput = document.getElementById("fileInput");
 dropzone.addEventListener("click", () => fileInput.click());
@@ -101,7 +113,6 @@ dropzone.addEventListener("drop", (e) => {
   if (e.dataTransfer.files[0]) loadIfc(e.dataTransfer.files[0]);
 });
 
-// Raycaster — tooltip hover
 const casters = components.get(OBC.Raycasters);
 const caster = casters.get(world);
 container.addEventListener("mousemove", async (e) => {
@@ -121,214 +132,350 @@ container.addEventListener("mousemove", async (e) => {
 });
 container.addEventListener("mouseleave", () => { tooltip.style.display = "none"; });
 
-// Highlighter + Propiedades
 const highlighter = components.get(OBF.Highlighter);
 highlighter.setup({ world });
-
 const propsPanel = document.getElementById("propsPanel");
 const propsBody = document.getElementById("propsBody");
-document.getElementById("propsClose").addEventListener("click", () => propsPanel.classList.remove("show"));
-
+const propsEmpty = document.getElementById("propsEmpty");
+document.getElementById("propsClose").addEventListener("click", () => {
+  propsPanel.classList.remove("show");
+  document.getElementById("btnProps").classList.remove("active");
+});
 const [propsTable, updateProps] = BUIC.tables.itemsData({ components, modelIdMap: {} });
 propsTable.preserveStructureOnFilter = true;
 propsBody.append(propsTable);
+propsBody.style.display = 'none';
+highlighter.events.select.onHighlight.add((modelIdMap) => {
+  updateProps({ modelIdMap });
+  if (propsEmpty) propsEmpty.style.display = 'none';
+  propsBody.style.display = 'block';
+});
+highlighter.events.select.onClear.add(() => {
+  updateProps({ modelIdMap: {} });
+  if (propsEmpty) propsEmpty.style.display = 'block';
+  propsBody.style.display = 'none';
+});
 
-highlighter.events.select.onHighlight.add((modelIdMap) => updateProps({ modelIdMap }));
-highlighter.events.select.onClear.add(() => updateProps({ modelIdMap: {} }));
-
-// Hider
 const hider = components.get(OBC.Hider);
+const isolatedCategories = new Set();
 
-// Botones de control
+const _setOrbit = () => { world.camera.set("Orbit"); world.camera.projection.set("Perspective"); document.getElementById("btnOrbit").classList.add("active"); document.getElementById("btnPlan").classList.remove("active"); };
+const _setPlan = () => { world.camera.set("Plan"); world.camera.projection.set("Orthographic"); document.getElementById("btnPlan").classList.add("active"); document.getElementById("btnOrbit").classList.remove("active"); };
 document.getElementById("btnFit").addEventListener("click", () => world.camera.fitToItems());
-document.getElementById("btnOrbit").addEventListener("click", () => {
-  world.camera.set("Orbit");
-  document.getElementById("btnOrbit").classList.add("active");
-  document.getElementById("btnPlan").classList.remove("active");
-});
-document.getElementById("btnPlan").addEventListener("click", () => {
-  world.camera.set("Plan");
-  world.camera.projection.set("Orthographic");
-  document.getElementById("btnPlan").classList.add("active");
-  document.getElementById("btnOrbit").classList.remove("active");
-});
+document.getElementById("btnOrbit").addEventListener("click", _setOrbit);
+document.getElementById("btnPlan").addEventListener("click", _setPlan);
+document.getElementById("btnFitSb").addEventListener("click", () => world.camera.fitToItems());
+document.getElementById("btnOrbitSb").addEventListener("click", _setOrbit);
+document.getElementById("btnPlanSb").addEventListener("click", _setPlan);
 document.getElementById("btnProps").addEventListener("click", () => {
   propsPanel.classList.toggle("show");
+  document.getElementById("btnProps").classList.toggle("active", propsPanel.classList.contains("show"));
 });
+document.getElementById("btnClip").addEventListener("click", () => {});
+document.getElementById("btnMeasure").addEventListener("click", () => {});
+
+let lightMode = false;
+document.getElementById("btnLightMode").addEventListener("click", () => {
+  lightMode = !lightMode;
+  document.body.classList.toggle("light-mode", lightMode);
+  document.getElementById("btnLightMode").classList.toggle("active", lightMode);
+  document.getElementById("btnLightMode").querySelector(".hb-icon").textContent = lightMode ? "🌕" : "🌓";
+  world.scene.three.background = lightMode ? new THREE.Color(0xc8d8e8) : null;
+  grid.config.color.set(lightMode ? 0x8aaabb : 0x0a1e2a);
+});
+
+let gridVisible = false;
+document.getElementById("btnToggleGrid").addEventListener("click", () => {
+  gridVisible = !gridVisible;
+  grid.config.visible = gridVisible;
+  document.getElementById("btnToggleGrid").classList.toggle("active", gridVisible);
+  document.getElementById("btnToggleGrid").querySelector(".hb-icon").textContent = gridVisible ? "⊞" : "⊟";
+});
+
 document.getElementById("btnResetVis").addEventListener("click", async () => {
   await hider.set(true);
+  isolatedCategories.clear();
+  _clsFiltroActiva = null;
+  document.querySelectorAll('.ent-row.ent-active').forEach(r => r.classList.remove('ent-active'));
+  document.querySelectorAll('.tipo-row.tipo-active').forEach(r => { r.classList.remove('tipo-active'); r._tipoActivo = false; });
+  actualizarSec5(null);
 });
 
-// Clipper
-const clipper = components.get(OBC.Clipper);
-let clipperActive = false;
-document.getElementById("btnClip").addEventListener("click", () => {
-  clipperActive = !clipperActive;
-  clipper.enabled = clipperActive;
-  document.getElementById("btnClip").classList.toggle("active", clipperActive);
-  if (!clipperActive) clipper.deleteAll();
-});
-container.addEventListener("dblclick", () => {
-  if (clipperActive) clipper.create(world);
-});
-window.addEventListener("keydown", (e) => {
-  if ((e.code === "Delete" || e.code === "Backspace") && clipperActive) clipper.delete(world);
-});
+const modelsListEl = document.getElementById("modelsList");
+const modelsEmptyEl = document.getElementById("modelsEmpty");
+const loadedModels = new Map();
+async function getAllIds(model) {
+  const cats = await model.getItemsWithGeometryCategories();
+  const all = await model.getItemsOfCategories(cats.filter(Boolean).map(c => new RegExp(`^${c}$`)));
+  return Object.values(all).flat();
+}
+function updateModelsList() {
+  modelsListEl.innerHTML = '';
+  if (fragments.list.size === 0) { modelsListEl.append(modelsEmptyEl); return; }
+  modelsEmptyEl.style.display = 'none';
+  for (const [id, model] of fragments.list) {
+    const item = document.createElement('div'); item.className = 'model-item';
+    const name = document.createElement('span'); name.className = 'model-item-name'; name.textContent = id; name.title = id;
+    const toggle = document.createElement('button'); toggle.className = 'model-item-toggle';
+    const isVis = loadedModels.get(id)?.visible !== false;
+    toggle.textContent = isVis ? '👁' : '🙈';
+    toggle.addEventListener('click', async () => {
+      const cur = loadedModels.get(id) || { visible: true }; cur.visible = !cur.visible; loadedModels.set(id, cur);
+      await hider.set(cur.visible, { [id]: new Set(await getAllIds(model)) });
+      toggle.textContent = cur.visible ? '👁' : '🙈';
+    });
+    item.append(name, toggle); modelsListEl.append(item);
+  }
+}
+fragments.list.onItemSet.add(({ key }) => { loadedModels.set(key, { visible: true }); updateModelsList(); });
+fragments.list.onItemDeleted.add(({ key }) => { loadedModels.delete(key); updateModelsList(); });
 
-// Medición
-const measurer = components.get(OBF.LengthMeasurement);
-measurer.world = world;
-let measureActive = false;
-document.getElementById("btnMeasure").addEventListener("click", () => {
-  measureActive = !measureActive;
-  measurer.enabled = measureActive;
-  document.getElementById("btnMeasure").classList.toggle("active", measureActive);
-  if (!measureActive) measurer.list.clear();
-});
-container.addEventListener("click", () => { if (measureActive) measurer.create(); });
-
-// Stats
-const stats = new Stats();
-stats.showPanel(2);
-document.body.append(stats.dom);
-stats.dom.style.left = "0px";
-stats.dom.style.zIndex = "unset";
-const sl = stats.dom.querySelector("div:last-child");
-if (sl) sl.style.display = "none";
+const stats = new Stats(); stats.showPanel(2); document.body.append(stats.dom);
+stats.dom.style.left = "0px"; stats.dom.style.zIndex = "unset";
+const sl = stats.dom.querySelector("div:last-child"); if (sl) sl.style.display = "none";
 world.renderer.onBeforeUpdate.add(() => stats.begin());
 world.renderer.onAfterUpdate.add(() => stats.end());
 
-// ══════════════════════════════════════════
-// SISTEMA DE REPORTE BIM (adaptado de explorer.html)
-// ══════════════════════════════════════════
+const gizmoCanvas = document.getElementById("gizmo");
+const gizmoCtx = gizmoCanvas.getContext("2d");
+const gizmoSize = 26, gizmoCX = 35, gizmoCY = 35;
+function drawGizmo() {
+  if (!gizmoCtx) return;
+  gizmoCtx.clearRect(0, 0, 70, 70);
+  const m = world.camera.three.matrixWorldInverse.elements;
+  const axes = [{d:[1,0,0],label:'X',color:'#ff4444'},{d:[0,1,0],label:'Y',color:'#44cc44'},{d:[0,0,1],label:'Z',color:'#4488ff'}];
+  const proj = axes.map(a => ({...a, px:(a.d[0]*m[0]+a.d[1]*m[4]+a.d[2]*m[8])*gizmoSize, py:-(a.d[0]*m[1]+a.d[1]*m[5]+a.d[2]*m[9])*gizmoSize}));
+  proj.sort((a,b)=>(a.px*a.px+a.py*a.py)-(b.px*b.px+b.py*b.py));
+  proj.forEach(ax => {
+    gizmoCtx.beginPath(); gizmoCtx.moveTo(gizmoCX,gizmoCY); gizmoCtx.lineTo(gizmoCX+ax.px,gizmoCY+ax.py);
+    gizmoCtx.strokeStyle=ax.color; gizmoCtx.lineWidth=2; gizmoCtx.stroke();
+    gizmoCtx.fillStyle=ax.color; gizmoCtx.font='bold 9px monospace';
+    gizmoCtx.fillText(ax.label,gizmoCX+ax.px*1.3-4,gizmoCY+ax.py*1.3+4);
+  });
+  gizmoCtx.beginPath(); gizmoCtx.arc(gizmoCX,gizmoCY,3,0,Math.PI*2); gizmoCtx.fillStyle='rgba(255,255,255,0.7)'; gizmoCtx.fill();
+}
+world.renderer.onAfterUpdate.add(drawGizmo);
 
+// ══ REPORTE BIM ══
 const ESP = {
-  "Arquitectura":        {cod:"ARQ",ents:[["IFCGRID","Grilla"],["IFCWALL","Muro"],["IFCCURTAINWALL","Muro Cortina"],["IFCWINDOW","Ventana"],["IFCDOOR","Puerta"],["IFCROOF","Cubierta"],["IFCCOVERING","Cielo / Piso"],["IFCSANITARYTERMINAL","Aparato Sanitario"],["IFCRAILING","Baranda"],["IFCFURNITURE","Mobiliario"],["IFCSPACE","Espacio"],["IFCZONE","Zona"]]},
-  "Estructural":         {cod:"EST",ents:[["IFCGRID","Grilla"],["IFCBEAM","Viga"],["IFCCOLUMN","Columna"],["IFCFOOTING","Fundacion"],["IFCSLAB","Losa"],["IFCWALL","Muro"]]},
-  "Coordinacion":        {cod:"COO",ents:[["IFCGRID","Grilla"],["IFCSITE","Sitio"],["IFCBUILDING","Edificio"],["IFCBUILDINGSTOREY","Nivel"],["IFCSPACE","Espacio"],["IFCWALL","Muro"],["IFCWINDOW","Ventana"],["IFCDOOR","Puerta"],["IFCBEAM","Viga"],["IFCCOLUMN","Columna"],["IFCSLAB","Losa"]]},
-  "Agua Potable":        {cod:"APO",ents:[["IFCGRID","Grilla"],["IFCPIPESEGMENT","Segmento Tuberia"],["IFCPIPEFITTING","Fitting Tuberia"],["IFCPUMP","Bomba"],["IFCTANK","Estanque"],["IFCVALVE","Valvula"]]},
-  "Climatizacion":       {cod:"CLI",ents:[["IFCGRID","Grilla"],["IFCAIRTERMINAL","Terminal Aire"],["IFCDAMPER","Compuerta"],["IFCDUCTFITTING","Fitting Ducto"],["IFCDUCTSEGMENT","Segmento Ducto"],["IFCUNITARYEQUIPMENT","Equipo Unitario"],["IFCPUMP","Bomba"],["IFCCHILLER","Enfriador"],["IFCVALVE","Valvula"]]},
-  "Electricidad":        {cod:"ELE",ents:[["IFCGRID","Grilla"],["IFCCABLECARRIERSEGMENT","Bandeja Cable"],["IFCELECTRICDISTRIBUTIONBOARD","Tablero Electrico"]]},
-  "Iluminacion":         {cod:"ILU",ents:[["IFCGRID","Grilla"],["IFCLIGHTFIXTURE","Luminaria"],["IFCSWITCHINGDEVICE","Interruptor"]]},
-  "Proteccion Incendios":{cod:"PCI",ents:[["IFCGRID","Grilla"],["IFCPIPESEGMENT","Segmento Tuberia"],["IFCSENSOR","Sensor"],["IFCPUMP","Bomba"],["IFCFIRESUPPRESSIONTERMINAL","Supresion Incendio"],["IFCALARM","Alarma"],["IFCVALVE","Valvula"]]},
-  "Alcantarillado":      {cod:"ALC",ents:[["IFCGRID","Grilla"],["IFCPIPESEGMENT","Segmento Tuberia"],["IFCPIPEFITTING","Fitting Tuberia"],["IFCDISTRIBUTIONCHAMBERELEME","Camara Distribucion"]]},
-  "Sitio":               {cod:"SIT",ents:[["IFCGRID","Grilla"],["IFCSITE","Sitio"],["IFCSLAB","Losa"],["IFCWALL","Muro"]]},
+  "Arquitectura":        {cod:"ARQ",ents:[["IFCGRID","Grilla"],["IFCWALL","Muro"],["IFCCURTAINWALL","Muro Cortina"],["IFCWINDOW","Ventana"],["IFCDOOR","Puerta"],["IFCROOF","Cubierta"],["IFCCOVERING","Cielo / Piso"],["IFCSANITARYTERMINAL","Aparato Sanitario"],["IFCRAILING","Baranda"],["IFCFURNITURE","Mobiliario"],["IFCSPACE","Espacio"],["IFCZONE","Zona"],["IFCBUILDINGELEMENTPROXY","Sin clasificar"]]},
+  "Estructural":         {cod:"EST",ents:[["IFCGRID","Grilla"],["IFCBEAM","Viga"],["IFCCOLUMN","Columna"],["IFCFOOTING","Fundacion"],["IFCSLAB","Losa"],["IFCWALL","Muro"],["IFCBUILDINGELEMENTPROXY","Sin clasificar"]]},
+  "Coordinacion":        {cod:"COO",ents:[["IFCGRID","Grilla"],["IFCSITE","Sitio"],["IFCBUILDING","Edificio"],["IFCBUILDINGSTOREY","Nivel"],["IFCSPACE","Espacio"],["IFCWALL","Muro"],["IFCWINDOW","Ventana"],["IFCDOOR","Puerta"],["IFCBEAM","Viga"],["IFCCOLUMN","Columna"],["IFCSLAB","Losa"],["IFCBUILDINGELEMENTPROXY","Sin clasificar"]]},
+  "Agua Potable":        {cod:"APO",ents:[["IFCGRID","Grilla"],["IFCPIPESEGMENT","Segmento Tuberia"],["IFCPIPEFITTING","Fitting Tuberia"],["IFCPUMP","Bomba"],["IFCTANK","Estanque"],["IFCVALVE","Valvula"],["IFCBUILDINGELEMENTPROXY","Sin clasificar"]]},
+  "Climatizacion":       {cod:"CLI",ents:[["IFCGRID","Grilla"],["IFCAIRTERMINAL","Terminal Aire"],["IFCDAMPER","Compuerta"],["IFCDUCTFITTING","Fitting Ducto"],["IFCDUCTSEGMENT","Segmento Ducto"],["IFCUNITARYEQUIPMENT","Equipo Unitario"],["IFCPUMP","Bomba"],["IFCCHILLER","Enfriador"],["IFCVALVE","Valvula"],["IFCBUILDINGELEMENTPROXY","Sin clasificar"]]},
+  "Electricidad":        {cod:"ELE",ents:[["IFCGRID","Grilla"],["IFCCABLECARRIERSEGMENT","Bandeja Cable"],["IFCELECTRICDISTRIBUTIONBOARD","Tablero Electrico"],["IFCBUILDINGELEMENTPROXY","Sin clasificar"]]},
+  "Iluminacion":         {cod:"ILU",ents:[["IFCGRID","Grilla"],["IFCLIGHTFIXTURE","Luminaria"],["IFCSWITCHINGDEVICE","Interruptor"],["IFCBUILDINGELEMENTPROXY","Sin clasificar"]]},
+  "Proteccion Incendios":{cod:"PCI",ents:[["IFCGRID","Grilla"],["IFCPIPESEGMENT","Segmento Tuberia"],["IFCSENSOR","Sensor"],["IFCPUMP","Bomba"],["IFCFIRESUPPRESSIONTERMINAL","Supresion Incendio"],["IFCALARM","Alarma"],["IFCVALVE","Valvula"],["IFCBUILDINGELEMENTPROXY","Sin clasificar"]]},
+  "Alcantarillado":      {cod:"ALC",ents:[["IFCGRID","Grilla"],["IFCPIPESEGMENT","Segmento Tuberia"],["IFCPIPEFITTING","Fitting Tuberia"],["IFCDISTRIBUTIONCHAMBERELEME","Camara Distribucion"],["IFCBUILDINGELEMENTPROXY","Sin clasificar"]]},
+  "Sitio":               {cod:"SIT",ents:[["IFCGRID","Grilla"],["IFCSITE","Sitio"],["IFCSLAB","Losa"],["IFCWALL","Muro"],["IFCBUILDINGELEMENTPROXY","Sin clasificar"]]},
 };
-
-const IFC_ICO = {IFCWALL:"🧱",IFCCURTAINWALL:"🪟",IFCSLAB:"⬜",IFCROOF:"🏠",IFCCOLUMN:"🏛️",IFCBEAM:"📐",IFCFOOTING:"⚓",IFCDOOR:"🚪",IFCWINDOW:"🪟",IFCRAILING:"🔩",IFCSTAIR:"🪜",IFCCOVERING:"🪵",IFCFURNITURE:"🪑",IFCPIPESEGMENT:"💧",IFCPIPEFITTING:"🔧",IFCDUCTSEGMENT:"💨",IFCDUCTFITTING:"🔧",IFCPUMP:"⚙️",IFCTANK:"🛢️",IFCVALVE:"🔩",IFCLIGHTFIXTURE:"💡",IFCSWITCHINGDEVICE:"🔌",IFCELECTRICDISTRIBUTIONBOARD:"⚡",IFCSENSOR:"📡",IFCALARM:"🚨",IFCFIRESUPPRESSIONTERMINAL:"🔥",IFCSITE:"🌍",IFCBUILDING:"🏢",IFCBUILDINGSTOREY:"📊",IFCGRID:"#",IFCSPACE:"🔵"};
+const IFC_ICO = {IFCWALL:"🧱",IFCCURTAINWALL:"🪟",IFCSLAB:"⬜",IFCROOF:"🏠",IFCCOLUMN:"🏛️",IFCBEAM:"📐",IFCFOOTING:"⚓",IFCDOOR:"🚪",IFCWINDOW:"🪟",IFCRAILING:"🔩",IFCSTAIR:"🪜",IFCCOVERING:"🪵",IFCFURNITURE:"🪑",IFCPIPESEGMENT:"💧",IFCPIPEFITTING:"🔧",IFCDUCTSEGMENT:"💨",IFCDUCTFITTING:"🔧",IFCPUMP:"⚙️",IFCTANK:"🛢️",IFCVALVE:"🔩",IFCLIGHTFIXTURE:"💡",IFCSWITCHINGDEVICE:"🔌",IFCELECTRICDISTRIBUTIONBOARD:"⚡",IFCSENSOR:"📡",IFCALARM:"🚨",IFCFIRESUPPRESSIONTERMINAL:"🔥",IFCSITE:"🌍",IFCBUILDING:"🏢",IFCBUILDINGSTOREY:"📊",IFCGRID:"#",IFCSPACE:"🔵",IFCBUILDINGELEMENTPROXY:"⚠️"};
 
 function esc(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
-
-function extraerRaw(texto,pos){var depth=1,i=pos,out='';while(i<texto.length&&depth>0){var c=texto[i];if(c==='(')depth++;else if(c===')'){depth--;if(!depth)break;}out+=c;i++;}return out;}
-function splitAttrs(raw){var attrs=[],depth=0,cur='';for(var i=0;i<raw.length;i++){var c=raw[i];if(c==='('||c==='['){depth++;cur+=c;}else if(c===')'||c===']'){depth--;cur+=c;}else if(c===','&&depth===0){attrs.push(cur.trim());cur='';}else cur+=c;}if(cur.trim())attrs.push(cur.trim());return attrs;}
-function strVal(a){if(!a||a==='$'||a==='*')return null;var m=a.match(/^'(.*)'$/);return m?m[1]:a;}
-function refId(a){if(!a)return null;var m=a.match(/^#(\d+)$/);return m?m[1]:null;}
+function extraerRaw(t,p){let d=1,i=p,o='';while(i<t.length&&d>0){const c=t[i];if(c==='(')d++;else if(c===')'){d--;if(!d)break;}o+=c;i++;}return o;}
+function splitAttrs(r){let a=[],d=0,c='';for(let i=0;i<r.length;i++){const ch=r[i];if(ch==='('||ch==='['){d++;c+=ch;}else if(ch===')'||ch===']'){d--;c+=ch;}else if(ch===','&&d===0){a.push(c.trim());c='';}else c+=ch;}if(c.trim())a.push(c.trim());return a;}
+function strVal(a){if(!a||a==='$'||a==='*')return null;const m=a.match(/^'(.*)'$/);return m?m[1]:a;}
+function refId(a){if(!a)return null;const m=a.match(/^#(\d+)$/);return m?m[1]:null;}
 
 function parsearIFC(texto) {
-  var conteo={},instancias={},schema='IFC2X3',proy='—';
-  var re=/#(\d+)\s*=\s*(IFC[A-Z0-9]+)\s*\(/g,m;
-  while((m=re.exec(texto))!==null){
-    var id=m[1],cls=m[2];
-    instancias[id]={cls:cls,pos:m.index+m[0].length};
-    conteo[cls]=(conteo[cls]||0)+1;
-  }
-  var ms=texto.match(/FILE_SCHEMA\s*\(\s*\(\s*'([^']+)'/);if(ms)schema=ms[1];
-  var mp=texto.match(/IFCPROJECT\s*\([^,]*,[^,]*,\s*'([^']*)'/);if(mp)proy=mp[1];
-  var tipos=[];
-  var reTipo=/#(\d+)\s*=\s*(IFC[A-Z0-9]*TYPE[A-Z0-9]*)\s*\(/g,mt;
-  while((mt=reTipo.exec(texto))!==null){
-    var tpos=mt.index+mt[0].length,traw=extraerRaw(texto,tpos),tattrs=splitAttrs(traw);
-    var nombre=strVal(tattrs[2])||strVal(tattrs[1])||'(sin nombre)';
-    tipos.push({id:'#'+mt[1],cls:mt[2],nombre:nombre});
-  }
-  var elemsPorNivel={};
-  var reRel=/#(\d+)\s*=\s*IFCRELCONTAINEDINSPATIALSTRUCTURE\s*\(/g,mr;
-  while((mr=reRel.exec(texto))!==null){
-    var rpos=mr.index+mr[0].length,rraw=extraerRaw(texto,rpos),rattrs=splitAttrs(rraw);
-    var nivelRef=refId(rattrs[5]);
-    if(!nivelRef)continue;
-    var ids=(rattrs[4]||'').replace(/[\(\)]/g,'').split(',').map(function(s){return refId(s.trim());}).filter(Boolean);
-    elemsPorNivel[nivelRef]=ids;
-  }
-  return{conteo,instancias,schema,proy,texto,tipos,elemsPorNivel};
+  let conteo={},instancias={},schema='IFC2X3',proy='—';
+  const re=/#(\d+)\s*=\s*(IFC[A-Z0-9]+)\s*\(/g; let m;
+  while((m=re.exec(texto))!==null){ instancias[m[1]]={cls:m[2],pos:m.index+m[0].length}; conteo[m[2]]=(conteo[m[2]]||0)+1; }
+  const ms=texto.match(/FILE_SCHEMA\s*\(\s*\(\s*'([^']+)'/); if(ms)schema=ms[1];
+  const mp=texto.match(/IFCPROJECT\s*\([^,]*,[^,]*,\s*'([^']*)'/); if(mp)proy=mp[1];
+  let tipos=[]; const reTipo=/#(\d+)\s*=\s*(IFC[A-Z0-9]*TYPE[A-Z0-9]*)\s*\(/g; let mt;
+  while((mt=reTipo.exec(texto))!==null){const traw=extraerRaw(texto,mt.index+mt[0].length),tattrs=splitAttrs(traw);tipos.push({id:'#'+mt[1],cls:mt[2],nombre:strVal(tattrs[2])||strVal(tattrs[1])||'(sin nombre)'});}
+  let elemsPorNivel={}; const reRel=/#(\d+)\s*=\s*IFCRELCONTAINEDINSPATIALSTRUCTURE\s*\(/g; let mr;
+  while((mr=reRel.exec(texto))!==null){const rattrs=splitAttrs(extraerRaw(texto,mr.index+mr[0].length));const nivelRef=refId(rattrs[5]);if(!nivelRef)continue;elemsPorNivel[nivelRef]=(rattrs[4]||'').replace(/[\(\)]/g,'').split(',').map(s=>refId(s.trim())).filter(Boolean);}
+  return {conteo,instancias,schema,proy,texto,tipos,elemsPorNivel};
 }
+function getPunto(r,inst,t){if(!r||!inst[r]||inst[r].cls!=='IFCCARTESIANPOINT')return null;const c=extraerRaw(t,inst[r].pos).replace(/[\(\)]/g,'').split(',').map(v=>parseFloat(v)||0);return{x:c[0]||0,y:c[1]||0,z:c[2]||0};}
+function getOffset(plRef,inst,t){if(!plRef||!inst[plRef])return null;const lp=splitAttrs(extraerRaw(t,inst[plRef].pos));let ap=null;for(let i=0;i<lp.length;i++){const r=refId(lp[i]);if(r&&inst[r]&&(inst[r].cls==='IFCAXIS2PLACEMENT3D'||inst[r].cls==='IFCAXIS2PLACEMENT2D')){ap=r;break;}}if(!ap)return null;return getPunto(refId(splitAttrs(extraerRaw(t,inst[ap].pos))[0]),inst,t);}
+function verificarOrigen(est){const res=[];['IFCSITE','IFCBUILDING'].forEach(tipo=>{for(const id in est.instancias){if(est.instancias[id].cls===tipo){const attrs=splitAttrs(extraerRaw(est.texto,est.instancias[id].pos));const nombre=strVal(attrs[2])||strVal(attrs[1])||'(sin nombre)';let plRef=null;for(let i=3;i<=8&&i<attrs.length;i++){const rid=refId(attrs[i]);if(rid&&est.instancias[rid]&&est.instancias[rid].cls==='IFCLOCALPLACEMENT'){plRef=rid;break;}}let x=null,y=null,z=null;if(plRef){const off=getOffset(plRef,est.instancias,est.texto);if(off){x=off.x;y=off.y;z=off.z;}}res.push({tipo,nombre,x,y,z,ok:x===null||(Math.abs(x)<0.001&&Math.abs(y)<0.001&&Math.abs(z)<0.001)});break;}}});return res;}
+function verificarNombres(est){const res=[];[{tipo:'IFCSITE',min:3},{tipo:'IFCBUILDING',min:2}].forEach(cfg=>{for(const id in est.instancias){if(est.instancias[id].cls===cfg.tipo){const attrs=splitAttrs(extraerRaw(est.texto,est.instancias[id].pos));const nombre=strVal(attrs[2])||strVal(attrs[1])||'';res.push({tipo:cfg.tipo,nombre,largo:nombre.length,ok:nombre.length>=cfg.min});break;}}});return res;}
+function verificarNiveles(est){const niveles=[];for(const id in est.instancias){if(est.instancias[id].cls==='IFCBUILDINGSTOREY'){const attrs=splitAttrs(extraerRaw(est.texto,est.instancias[id].pos));const nombre=strVal(attrs[2])||strVal(attrs[1])||'';niveles.push({id:'#'+id,nombre,largo:nombre.length,ok:nombre.length>=5});}}return niveles;}
+function rpSec(t,b,bc,inner,open){return`<div class="rp-sec"><div class="rp-sec-hdr" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'block':'none'"><span class="rp-sec-title">${t}</span><span class="rp-badge ${bc}">${b}</span></div><div class="rp-content" style="display:${open?'block':'none'}">${inner}</div></div>`;}
 
-function getPuntoCartesiano(ptRef,instancias,texto){
-  if(!ptRef||!instancias[ptRef]||instancias[ptRef].cls!=='IFCCARTESIANPOINT')return null;
-  var raw=extraerRaw(texto,instancias[ptRef].pos);
-  var coords=raw.replace(/[\(\)]/g,'').split(',').map(function(v){return parseFloat(v)||0;});
-  return{x:coords[0]||0,y:coords[1]||0,z:coords[2]||0};
-}
-
-function getPlacementOffset(plRef,instancias,texto){
-  if(!plRef||!instancias[plRef])return null;
-  var lpRaw=extraerRaw(texto,instancias[plRef].pos),lpAttrs=splitAttrs(lpRaw);
-  var ap3d=null;
-  for(var i=0;i<lpAttrs.length;i++){
-    var rid=refId(lpAttrs[i]);
-    if(rid&&instancias[rid]&&(instancias[rid].cls==='IFCAXIS2PLACEMENT3D'||instancias[rid].cls==='IFCAXIS2PLACEMENT2D')){ap3d=rid;break;}
-  }
-  if(!ap3d)return null;
-  var apRaw=extraerRaw(texto,instancias[ap3d].pos),apAttrs=splitAttrs(apRaw);
-  return getPuntoCartesiano(refId(apAttrs[0]),instancias,texto);
-}
-
-function verificarOrigen(est){
-  var res=[];
-  ['IFCSITE','IFCBUILDING'].forEach(function(tipo){
-    for(var id in est.instancias){
-      if(est.instancias[id].cls===tipo){
-        var raw=extraerRaw(est.texto,est.instancias[id].pos),attrs=splitAttrs(raw);
-        var nombre=strVal(attrs[2])||strVal(attrs[1])||'(sin nombre)';
-        var plRef=null;
-        for(var i=3;i<=8&&i<attrs.length;i++){var rid=refId(attrs[i]);if(rid&&est.instancias[rid]&&est.instancias[rid].cls==='IFCLOCALPLACEMENT'){plRef=rid;break;}}
-        var x=null,y=null,z=null;
-        if(plRef){
-          var offset=getPlacementOffset(plRef,est.instancias,est.texto);
-          if(offset){x=offset.x;y=offset.y;z=offset.z;}
-        }
-        var ok=x===null||(Math.abs(x)<0.001&&Math.abs(y)<0.001&&Math.abs(z)<0.001);
-        res.push({tipo,nombre,x,y,z,ok});break;
-      }
-    }
+function renderReporte(est) {
+  _estActual = est; let html = ''; const conteo = est.conteo;
+  const orig = verificarOrigen(est);
+  if (orig.length) { const ok=orig.every(r=>r.ok); const filas=orig.map(r=>{const c=r.x!==null?`(${[r.x,r.y,r.z].map(v=>(+v).toFixed(3)).join(', ')})`:'N/A';return`<tr><td class="td-name">${r.tipo.charAt(0)+r.tipo.slice(1).toLowerCase()}<div class="td-cls">${esc(r.nombre)}</div></td><td style="font:400 9px var(--mono);color:var(--muted)">${c}</td><td class="td-ok">${r.ok?'<span class="ic-ok">✓</span>':'<span class="ic-err">✗</span>'}</td></tr>`;}).join(''); html+=rpSec('1. Origen (0,0,0)',ok?'OK':'Error',ok?'rp-ok':'rp-err',`<table class="rp-table">${filas}</table>`,!ok); }
+  const noms = verificarNombres(est);
+  if (noms.length) { const ok=noms.every(r=>r.ok); const filas=noms.map(r=>`<tr><td class="td-name">${r.tipo.charAt(0)+r.tipo.slice(1).toLowerCase()}</td><td style="font:400 9px var(--mono)">"${esc(r.nombre)}" (${r.largo} car.)</td><td class="td-ok">${r.ok?'<span class="ic-ok">✓</span>':'<span class="ic-err">✗</span>'}</td></tr>`).join(''); html+=rpSec('2. Nombres Sitio/Edificio',ok?'OK':'Error',ok?'rp-ok':'rp-err',`<div class="rp-msg">Sitio: ≥3 car. · Edificio: ≥2 car.</div><table class="rp-table">${filas}</table>`,!ok); }
+  const nivs = verificarNiveles(est);
+  if (nivs.length) { const ok=nivs.every(r=>r.ok); const nOk=nivs.filter(r=>r.ok).length; const filas=nivs.map(r=>`<tr><td class="td-name">${esc(r.nombre||'(sin nombre)')}</td><td style="text-align:center;font:400 9px var(--mono);color:var(--muted)">${r.largo} car.</td><td class="td-ok">${r.ok?'<span class="ic-ok">✓</span>':'<span class="ic-err">✗</span>'}</td></tr>`).join(''); html+=rpSec(`3. Niveles (≥5 car.)`,`${nOk}/${nivs.length} OK`,ok?'rp-ok':nOk>0?'rp-warn':'rp-err',`<table class="rp-table">${filas}</table>`,!ok); }
+  const espKey=Object.keys(ESP).find(k=>ESP[k].cod===_espActual)||'Arquitectura'; const espEnts=ESP[espKey].ents;
+  let filasP='',filasA='',presentes=0;
+  espEnts.forEach(([cls,nom])=>{
+    const qty=conteo[cls]||0; if(qty>0)presentes++;
+    const ico=IFC_ICO[cls]||''; const isProxy=cls==='IFCBUILDINGELEMENTPROXY';
+    const fila=`<tr id="entrow_${cls}" class="ent-row${isProxy?' td-proxy':''}" onclick="window.onEntidadClick('${cls}')"><td class="td-name">${ico} ${nom}<div class="td-cls">${cls.charAt(0)+cls.slice(1).toLowerCase()}</div></td><td class="td-ok">${qty>0?(isProxy?'<span style="color:var(--warn)">⚠</span>':'<span class="ic-ok">✓</span>'):'<span class="ic-err">✗</span>'}</td><td class="td-qty${qty===0?' zero':''}" ${isProxy&&qty>0?'style="color:var(--warn)"':''}>${qty}</td></tr>`;
+    if(qty>0)filasP+=fila; else filasA+=fila;
   });
-  return res;
+  let filas='';
+  if(filasP)filas+=`<tr><td colspan="4" style="padding:3px 10px;font:700 8px var(--mono);color:#00c853;text-transform:uppercase;background:rgba(0,200,83,.05)">✓ Presentes</td></tr>${filasP}`;
+  if(filasA)filas+=`<tr><td colspan="4" style="padding:3px 10px;font:700 8px var(--mono);color:var(--muted);text-transform:uppercase;background:rgba(0,0,0,.15)">✗ Ausentes</td></tr>${filasA}`;
+  const pct=espEnts.length?Math.round(presentes/espEnts.length*100):0;
+  html+=rpSec(`4. Entidades IFC`,`${presentes}/${espEnts.length} presentes`,pct===100?'rp-ok':pct>50?'rp-warn':'rp-err',`<table class="rp-table">${filas}</table>`,true);
+  html+=renderSecTipos(est,null);
+  document.getElementById('rpBody').innerHTML=html;
 }
 
-function verificarNombres(est){
-  var res=[];
-  [{tipo:'IFCSITE',min:3},{tipo:'IFCBUILDING',min:2}].forEach(function(cfg){
-    for(var id in est.instancias){
-      if(est.instancias[id].cls===cfg.tipo){
-        var raw=extraerRaw(est.texto,est.instancias[id].pos),attrs=splitAttrs(raw);
-        var nombre=strVal(attrs[2])||strVal(attrs[1])||'';
-        res.push({tipo:cfg.tipo,nombre,largo:nombre.length,ok:nombre.length>=cfg.min});break;
-      }
-    }
-  });
-  return res;
-}
+function extraerTiposDelIFC(est) {
+  const por = {};
 
-function verificarNiveles(est){
-  var niveles=[];
-  for(var id in est.instancias){
-    if(est.instancias[id].cls==='IFCBUILDINGSTOREY'){
-      var raw=extraerRaw(est.texto,est.instancias[id].pos),attrs=splitAttrs(raw);
-      var nombre=strVal(attrs[2])||strVal(attrs[1])||'';
-      niveles.push({id:'#'+id,nombre,largo:nombre.length,ok:nombre.length>=5});
-    }
+  // Fuente principal: instancias reales — agrupar por cls → Name (Familia:Tipo)
+  // Contar cuántas instancias hay de cada Name
+  const conteoNombres = {}; // "cls||Familia:Tipo" → count
+  for (const id in est.instancias) {
+    const inst = est.instancias[id];
+    if (inst.cls.endsWith('TYPE') || inst.cls.startsWith('IFCREL') ||
+        inst.cls === 'IFCPROPERTYSET' || inst.cls === 'IFCPROPERTYSINGLEVALUE') continue;
+    const attrs = splitAttrs(extraerRaw(est.texto, inst.pos));
+    const nombre = strVal(attrs[2]) || strVal(attrs[1]) || '';
+    if (!nombre || !nombre.includes(':')) continue;
+    const key = inst.cls + '||' + nombre;
+    conteoNombres[key] = (conteoNombres[key] || 0) + 1;
   }
-  return niveles;
+
+  // Construir estructura por entidad
+  for (const key in conteoNombres) {
+    const sep = key.indexOf('||');
+    const cls = key.slice(0, sep);
+    const nombre = key.slice(sep + 2);
+    const partes = nombre.split(':');
+    // Familia = todo menos el último segmento, Tipo = último segmento
+    const fam = partes.slice(0, -1).join(':');
+    const tip = partes[partes.length - 1];
+    if (!por[cls]) por[cls] = new Map();
+    if (!por[cls].has(fam)) por[cls].set(fam, new Map());
+    por[cls].get(fam).set(tip, conteoNombres[key]);
+  }
+
+  return por;
 }
 
-function rpSec(titulo, badge, badgeCls, innerHtml, openDefault) {
-  const id = 'rps_' + Math.random().toString(36).slice(2);
-  return `
-    <div class="rp-sec">
-      <div class="rp-sec-hdr" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'block':'none'">
-        <span class="rp-sec-title">${titulo}</span>
-        <span class="rp-badge ${badgeCls}">${badge}</span>
-      </div>
-      <div class="rp-content" style="display:${openDefault?'block':'none'}">${innerHtml}</div>
-    </div>`;
+function renderSecTipos(est, filtrarCls) {
+  _tiposCache = _tiposCache || extraerTiposDelIFC(est);
+  const espKey = Object.keys(ESP).find(k=>ESP[k].cod===_espActual)||'Arquitectura';
+  const espEnts = ESP[espKey].ents.map(([cls])=>cls);
+  let relevantes = Object.entries(_tiposCache).filter(([cls])=>espEnts.includes(cls));
+  if (filtrarCls) relevantes = relevantes.filter(([cls])=>cls===filtrarCls);
+  const tituloFiltro = filtrarCls ? ` — ${IFC_ICO[filtrarCls]||''} ${filtrarCls.charAt(0)+filtrarCls.slice(1).toLowerCase()}` : '';
+
+  if (!relevantes.length) return `<div class="rp-sec" id="sec5wrap">
+    <div class="rp-sec-hdr" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'block':'none'">
+      <span class="rp-sec-title">5. Tipos de Elemento${tituloFiltro}</span><span class="rp-badge rp-info">Sin datos</span>
+    </div>
+    <div class="rp-content" style="display:none"><div class="rp-msg">No se encontraron tipos.</div></div>
+  </div>`;
+
+  // Construir índice de lookup: idx → {cls, fam, tip, nombre completo}
+  // Se usa para evitar problemas con caracteres especiales en onclick
+  if (!window._tiposIdx) window._tiposIdx = [];
+  window._tiposIdx = [];
+
+  let totalTipos=0, inner='';
+  relevantes.forEach(([cls, familias]) => {
+    const ico=IFC_ICO[cls]||''; const clsL=cls.charAt(0)+cls.slice(1).toLowerCase();
+    if (!filtrarCls) inner+=`<tr style="background:rgba(0,212,255,.05)"><td colspan="2" style="padding:4px 10px;font:700 9px var(--mono);color:var(--accent)">${ico} ${clsL}</td></tr>`;
+    familias.forEach((tipos, fam) => {
+      tipos.forEach((qty, tip) => {
+        totalTipos++;
+        const idx = window._tiposIdx.length;
+        window._tiposIdx.push({ cls, fam, tip, nombre: `${fam}:${tip}` });
+        const rowId = 'tr_' + idx;
+        inner += `<tr class="tipo-row" id="${rowId}" onclick="window.destacarTipo(${idx},this)" title="Clic para destacar en 3D">
+          <td class="td-name" style="padding-left:${filtrarCls?'10':'20'}px">
+            <span style="font:400 9px var(--mono);color:var(--muted);display:block;margin-bottom:1px">${esc(fam)}</span>
+            <span style="font:600 10px var(--mono);color:var(--text)">${esc(tip)}</span>
+          </td>
+          <td class="td-qty" style="text-align:right;min-width:28px;vertical-align:middle">${qty}</td>
+        </tr>`;
+      });
+    });
+  });
+
+  return `<div class="rp-sec" id="sec5wrap">
+    <div class="rp-sec-hdr" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'block':'none'">
+      <span class="rp-sec-title">5. Tipos de Elemento${tituloFiltro}</span>
+      <span class="rp-badge rp-info">${totalTipos} tipos</span>
+    </div>
+    <div class="rp-content" style="display:${filtrarCls?'block':'none'}">
+      <table class="rp-table">
+        <tr style="background:rgba(0,0,0,.2)">
+          <td style="font:700 8px var(--mono);color:var(--muted);padding:3px 10px">FAMILIA / TIPO</td>
+          <td style="font:700 8px var(--mono);color:var(--muted);padding:3px 10px;text-align:right">N</td>
+        </tr>
+        ${inner}
+      </table>
+    </div>
+  </div>`;
 }
+function actualizarSec5(filtrarCls) {
+  _clsFiltroActiva = filtrarCls;
+  if (!_estActual) return;
+  const sec5 = document.getElementById('sec5wrap');
+  if (!sec5) return;
+  const tmp = document.createElement('div');
+  tmp.innerHTML = renderSecTipos(_estActual, filtrarCls);
+  sec5.replaceWith(tmp.firstElementChild);
+}
+window.resetFiltroTipos = () => actualizarSec5(null);
+
+window.onEntidadClick = async (cls) => {
+  const rowEl = document.getElementById('entrow_' + cls);
+  const estaAislada = isolatedCategories.has(cls);
+  if (estaAislada) {
+    isolatedCategories.delete(cls);
+    await hider.set(true);
+    if (isolatedCategories.size > 0) {
+      const map = {};
+      for (const [,model] of fragments.list) { const items=await model.getItemsOfCategories([...isolatedCategories].map(c=>new RegExp(`^${c}$`))); map[model.modelId]=new Set(Object.values(items).flat()); }
+      await hider.isolate(map);
+    }
+    if (rowEl) rowEl.classList.remove('ent-active');
+    actualizarSec5(isolatedCategories.size > 0 ? [...isolatedCategories][0] : null);
+  } else {
+    isolatedCategories.add(cls);
+    const map = {};
+    for (const [,model] of fragments.list) { const items=await model.getItemsOfCategories([...isolatedCategories].map(c=>new RegExp(`^${c}$`))); map[model.modelId]=new Set(Object.values(items).flat()); }
+    await hider.isolate(map);
+    if (rowEl) rowEl.classList.add('ent-active');
+    actualizarSec5(cls);
+  }
+};
+
+window.destacarTipo = async (idx, rowEl) => {
+  document.querySelectorAll('.tipo-row.tipo-active').forEach(r => r.classList.remove('tipo-active'));
+  if (rowEl._tipoActivo) { rowEl._tipoActivo=false; try{await highlighter.clear('select');}catch(e){} return; }
+  document.querySelectorAll('.tipo-row').forEach(r => r._tipoActivo=false);
+  rowEl._tipoActivo = true;
+  rowEl.classList.add('tipo-active');
+  const info = window._tiposIdx?.[idx];
+  if (!info) return;
+  const { cls, fam, tip } = info;
+  const modelIdMap = {};
+  for (const [,model] of fragments.list) {
+    try {
+      const items=await model.getItemsOfCategories([new RegExp(`^${cls}$`)]);
+      const ids=Object.values(items).flat(); const matching=[];
+      for (const localId of ids) {
+        const [data]=await model.getItemsData([localId]); if(!data) continue;
+        if ((data.Name?.value||'') === `${fam}:${tip}`) matching.push(localId);
+      }
+      if (matching.length) modelIdMap[model.modelId]=new Set(matching);
+    } catch(e){}
+  }
+  if (Object.keys(modelIdMap).length) try{await highlighter.highlightByID('select',modelIdMap,true,true);}catch(e){}
+};
+
+const espSel = document.getElementById('espSel');
+Object.keys(ESP).forEach(k=>{ const opt=document.createElement('option'); opt.value=ESP[k].cod; opt.textContent=k; if(ESP[k].cod==='ARQ')opt.selected=true; espSel.append(opt); });
+espSel.addEventListener('change', () => { _espActual=espSel.value; _tiposCache=null; _clsFiltroActiva=null; if(_estActual)renderReporte(_estActual); });
+
+function detectarEspecialidad(nombre) { const u=(nombre||'').toUpperCase(); for(const k in ESP){if(u.indexOf(ESP[k].cod)!==-1)return ESP[k].cod;} return 'ARQ'; }
+
+const reportePanel = document.getElementById('reportePanel');
+document.getElementById('reporteClose').addEventListener('click', ()=>{ reportePanel.classList.remove('show'); document.getElementById('btnReporte').classList.remove('active'); });
+document.getElementById('btnReporte').addEventListener('click', ()=>{ reportePanel.classList.toggle('show'); document.getElementById('btnReporte').classList.toggle('active',reportePanel.classList.contains('show')); });
