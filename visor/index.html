@@ -240,9 +240,9 @@ body.light-mode .viewer-wrap { background:#c8d8e8; }
 </head>
 <body>
   <header>
-    <div class="hicon">🏗️</div>
+    <div class="hicon">⬡</div>
     <div>
-      <div class="htitle">Visor BIM</div>
+      <div class="htitle">VoxelBIM</div>
       <div class="hsub">Carlos Estay Ruggieri · v1.0 | 2026</div>
     </div>
 
@@ -326,8 +326,14 @@ body.light-mode .viewer-wrap { background:#c8d8e8; }
     <div class="viewer-wrap">
       <div id="container"></div>
       <div id="overlay">
-        <div class="ov-icon">🏗️</div>
-        <div class="ov-text">Carga un archivo IFC para comenzar</div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center;">
+          <div style="width:56px;height:56px;background:linear-gradient(135deg,var(--accent),var(--accent2));border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:26px;box-shadow:0 0 30px rgba(0,212,255,.3);opacity:.9;">⬡</div>
+          <div style="font:700 22px var(--mono);color:#e0f0ff;letter-spacing:.08em;text-transform:uppercase;margin-top:4px;">VoxelBIM</div>
+          <div style="font:400 10px var(--mono);color:var(--accent);letter-spacing:.2em;text-transform:uppercase;opacity:.7;">Visor & Revisor IFC</div>
+          <div style="width:40px;height:1px;background:var(--border);margin:4px 0;"></div>
+          <div style="font:400 10px var(--mono);color:var(--muted);letter-spacing:.08em;text-transform:uppercase;max-width:260px;line-height:1.8;">Carga un archivo IFC para comenzar la revisión</div>
+          <div style="font:400 9px var(--mono);color:var(--muted);opacity:.5;margin-top:2px;">Arrastra el archivo o usa el panel izquierdo</div>
+        </div>
       </div>
       <div id="tooltip">
         <div id="tt-header">
