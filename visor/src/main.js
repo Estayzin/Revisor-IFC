@@ -285,8 +285,9 @@ document.getElementById("btnFitSb").addEventListener("click", () => world.camera
 document.getElementById("btnOrbitSb").addEventListener("click", () => { world.camera.set("Orbit"); world.camera.projection.set("Perspective"); _planMode = false; document.getElementById("btnPlan").classList.remove("active"); });
 document.getElementById("btnPlanSb").addEventListener("click", () => { world.camera.set("Plan"); world.camera.projection.set("Orthographic"); _planMode = true; document.getElementById("btnPlan").classList.add("active"); });
 document.getElementById("btnProps").addEventListener("click", () => {
-  propsPanel.classList.toggle("show");
-  document.getElementById("btnProps").classList.toggle("active", propsPanel.classList.contains("show"));
+  const visible = document.getElementById("rightPanel").style.display !== 'none';
+  document.getElementById("rightPanel").style.display = visible ? 'none' : '';
+  document.getElementById("btnProps").classList.toggle("active", !visible);
 });
 document.getElementById("propsClose").addEventListener("click", () => {
   propsPanel.classList.remove("show");
