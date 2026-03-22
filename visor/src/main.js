@@ -100,8 +100,7 @@ const loadIfc = async (file) => {
   _nombreArchivoActual = file.name;
   _espActual = detectarEspecialidad(file.name);
   espSel.value = _espActual;
-  renderReporte(est);
-  reportePanel.classList.add('show');
+  renderNavegador(est);
   await ifcLoader.load(new Uint8Array(buffer), false, file.name, { processData: { progressCallback: setProgress } });
   if (world.camera.fitToItems) await world.camera.fitToItems();
 };
@@ -136,15 +135,9 @@ container.addEventListener("mousemove", async (e) => {
 });
 container.addEventListener("mouseleave", () => { tooltip.style.display = "none"; });
 
-const highlighter = components.get(OBF.Highlighter);
-highlighter.setup({ world });
 const propsPanel = document.getElementById("propsPanel");
 const propsBody = document.getElementById("propsBody");
 const propsEmpty = document.getElementById("propsEmpty");
-document.getElementById("propsClose").addEventListener("click", () => {
-  propsPanel.classList.remove("show");
-  document.getElementById("btnProps").classList.remove("active");
-});
 const [propsTable, updateProps] = BUIC.tables.itemsData({ components, modelIdMap: {} });
 propsTable.preserveStructureOnFilter = true;
 propsBody.append(propsTable);
@@ -259,6 +252,62 @@ function drawGizmo() {
   gizmoCtx.beginPath(); gizmoCtx.arc(gizmoCX,gizmoCY,3,0,Math.PI*2); gizmoCtx.fillStyle='rgba(255,255,255,0.7)'; gizmoCtx.fill();
 }
 world.renderer.onAfterUpdate.add(drawGizmo);
+
+// ══ NAVEGADOR DEL MODELO ══
+function renderNavegador(est) {
+  const navBody = document.getElementById('navBody');
+  if (!navBody) return;
+  const inst = est.instancias;
+  const conteo = est.conteo;
+  let html = '';
+
+  // Sitio
+  for (const id in inst) {
+    if (inst[id].cls !== 'IFCSITE') continue;
+    const attrs = splitAttrs(extraerRaw(est.texto, inst[id].pos));
+    const nombre = strVal(attrs[2]) || strVal(attrs[1]) || '(sin nombre)';
+    html += `<div class="nav-item"><span class="nav-item-icon">🌍</span><span class="nav-item-name">${esc(nombre)}</span><span class="nav-item-badge">Sitio</span></div>`;
+
+    // Edificio
+    for (const bid in inst) {
+      if (inst[bid].cls !== 'IFCBUILDING') continue;
+      const battrs = splitAttrs(extraerRaw(est.texto, inst[bid].pos));
+      const bnombre = strVal(battrs[2]) || strVal(battrs[1]) || '(sin nombre)';
+      html += `<div class="nav-item nav-indent-1"><span class="nav-item-icon">🏢</span><span class="nav-item-name">${esc(bnombre)}</span><span class="nav-item-badge">Edificio</span></div>`;
+
+      // Niveles
+      for (const nid in inst) {
+        if (inst[nid].cls !== 'IFCBUILDINGSTOREY') continue;
+        const nattrs = splitAttrs(extraerRaw(est.texto, inst[nid].pos));
+        const nnombre = strVal(nattrs[2]) || strVal(nattrs[1]) || '(sin nombre)';
+        const elemsNivel = (est.elemsPorNivel[nid] || []).length;
+        html += `<div class="nav-item nav-indent-2"><span class="nav-item-icon">📊</span><span class="nav-item-name">${esc(nnombre)}</span>${elemsNivel>0?`<span class="nav-item-badge">${elemsNivel}</span>`:''}</div>`;
+      }
+      break;
+    }
+    break;
+  }
+
+  // Separador y resumen de entidades presentes
+  if (Object.keys(conteo).length) {
+    html += `<div class="nav-sep"></div>`;
+    html += `<div style="padding:4px 8px;font:700 8px var(--mono);color:var(--muted);text-transform:uppercase;letter-spacing:.15em;">Entidades</div>`;
+    const entsCls = ['IFCWALL','IFCSLAB','IFCCOLUMN','IFCBEAM','IFCDOOR','IFCWINDOW','IFCROOF','IFCSTAIR','IFCPIPESEGMENT','IFCDUCTSEGMENT','IFCLIGHTFIXTURE','IFCBUILDINGELEMENTPROXY'];
+    entsCls.forEach(cls => {
+      const qty = conteo[cls] || 0;
+      if (!qty) return;
+      const ico = IFC_ICO[cls] || '▪';
+      const nom = cls.charAt(0) + cls.slice(1).toLowerCase();
+      html += `<div class="nav-item nav-indent-1"><span class="nav-item-icon">${ico}</span><span class="nav-item-name">${nom}</span><span class="nav-item-badge">${qty}</span></div>`;
+    });
+    // Resto de entidades no listadas
+    let otros = 0;
+    for (const cls in conteo) { if (!entsCls.includes(cls) && !['IFCSITE','IFCBUILDING','IFCBUILDINGSTOREY'].includes(cls)) otros += conteo[cls]; }
+    if (otros > 0) html += `<div class="nav-item nav-indent-1"><span class="nav-item-icon">📦</span><span class="nav-item-name" style="color:var(--muted)">Otros</span><span class="nav-item-badge">${otros}</span></div>`;
+  }
+
+  navBody.innerHTML = html || '<div class="nav-empty">Sin datos de estructura</div>';
+}
 
 // ══ REPORTE BIM ══
 const ESP = {
