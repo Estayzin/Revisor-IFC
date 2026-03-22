@@ -525,7 +525,7 @@ function renderReporte(est) {
   espEnts.forEach(([cls,nom])=>{
     const qty=conteo[cls]||0; if(qty>0)presentes++;
     const ico=IFC_ICO[cls]||''; const isProxy=cls==='IFCBUILDINGELEMENTPROXY';
-    const fila=`<tr id="entrow_${cls}" class="ent-row${isProxy?' td-proxy':''}" onclick="window.onEntidadClick('${cls}')"><td class="td-name">${ico} ${nom}<div class="td-cls">${cls.charAt(0)+cls.slice(1).toLowerCase()}</div></td><td class="td-ok">${qty>0?(isProxy?'<span style="color:var(--warn)">⚠</span>':'<span class="ic-ok">✓</span>'):'<span class="ic-err">✗</span>'}</td><td class="td-qty${qty===0?' zero':''}" ${isProxy&&qty>0?'style="color:var(--warn)"':''}>${qty}</td></tr>`;
+    const fila=`<tr id="entrow_${cls}" class="ent-row${isProxy?' td-proxy':''}" onclick="window.onEntidadClick('${cls}',event)"><td class="td-name">${ico} ${nom}<div class="td-cls">${cls.charAt(0)+cls.slice(1).toLowerCase()}</div></td><td class="td-ok">${qty>0?(isProxy?'<span style="color:var(--warn)">⚠</span>':'<span class="ic-ok">✓</span>'):'<span class="ic-err">✗</span>'}</td><td class="td-qty${qty===0?' zero':''}" ${isProxy&&qty>0?'style="color:var(--warn)"':''}>${qty}</td></tr>`;
     if(qty>0)filasP+=fila; else filasA+=fila;
   });
   let filas='';
@@ -642,27 +642,47 @@ function actualizarSec5(filtrarCls) {
 }
 window.resetFiltroTipos = () => actualizarSec5(null);
 
-window.onEntidadClick = async (cls) => {
+// Rastrear la fila del reporte y el evento de click con Ctrl
+const rpt_onclick = (cls, e) => window.onEntidadClick(cls, e);
+
+window.onEntidadClick = async (cls, e) => {
+  const ctrlPressed = e?.ctrlKey || e?.metaKey || false;
   const rowEl = document.getElementById('entrow_' + cls);
-  const estaAislada = isolatedCategories.has(cls);
-  if (estaAislada) {
-    isolatedCategories.delete(cls);
+
+  if (!ctrlPressed) {
+    // Sin Ctrl: deseleccionar todo y seleccionar solo esta categoría
+    isolatedCategories.clear();
+    document.querySelectorAll('.ent-row.ent-active').forEach(r => r.classList.remove('ent-active'));
     await hider.set(true);
-    if (isolatedCategories.size > 0) {
-      const map = {};
-      for (const [,model] of fragments.list) { const items=await model.getItemsOfCategories([...isolatedCategories].map(c=>new RegExp(`^${c}$`))); map[model.modelId]=new Set(Object.values(items).flat()); }
-      await hider.isolate(map);
-    }
-    if (rowEl) rowEl.classList.remove('ent-active');
-    actualizarSec5(isolatedCategories.size > 0 ? [...isolatedCategories][0] : null);
-  } else {
     isolatedCategories.add(cls);
-    const map = {};
-    for (const [,model] of fragments.list) { const items=await model.getItemsOfCategories([...isolatedCategories].map(c=>new RegExp(`^${c}$`))); map[model.modelId]=new Set(Object.values(items).flat()); }
-    await hider.isolate(map);
     if (rowEl) rowEl.classList.add('ent-active');
-    actualizarSec5(cls);
+  } else {
+    // Con Ctrl: toggle de esta categoría en la selección actual
+    if (isolatedCategories.has(cls)) {
+      isolatedCategories.delete(cls);
+      if (rowEl) rowEl.classList.remove('ent-active');
+    } else {
+      isolatedCategories.add(cls);
+      if (rowEl) rowEl.classList.add('ent-active');
+    }
   }
+
+  if (isolatedCategories.size === 0) {
+    await hider.set(true);
+    actualizarSec5(null);
+    renderProps(null, null);
+    return;
+  }
+
+  // Aislar elementos en el visor y seleccionarlos con el highlighter
+  const map = {};
+  for (const [,model] of fragments.list) {
+    const items = await model.getItemsOfCategories([...isolatedCategories].map(c => new RegExp(`^${c}$`)));
+    map[model.modelId] = new Set(Object.values(items).flat());
+  }
+  await hider.isolate(map);
+  try { await highlighter.highlightByID('select', map, true, true); } catch(e) {}
+  actualizarSec5(isolatedCategories.size === 1 ? [...isolatedCategories][0] : null);
 };
 
 window.destacarTipo = async (idx, rowEl) => {
