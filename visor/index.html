@@ -268,6 +268,16 @@ body.light-mode .viewer-wrap { background:#c8d8e8; }
         <button class="ctrl-btn nav-hidden" id="btnOrbitSb"></button>
         <button class="ctrl-btn nav-hidden" id="btnPlanSb"></button>
       </div>
+
+      <!-- NAVEGADOR DEL MODELO -->
+      <div id="navPanel" style="flex:1;display:flex;flex-direction:column;overflow:hidden;border-top:1px solid var(--border);min-height:0;">
+        <div class="nav-header">
+          <div class="nav-title">🗂 Navegador</div>
+        </div>
+        <div class="nav-body" id="navBody">
+          <div class="nav-empty">Carga un modelo IFC<br>para navegar su estructura</div>
+        </div>
+      </div>
     </div>
 
     <!-- VISOR 3D -->
@@ -292,16 +302,6 @@ body.light-mode .viewer-wrap { background:#c8d8e8; }
         </div>
         <div class="pp-empty" id="propsEmpty">Selecciona un elemento<br>en el modelo</div>
         <div class="pp-body" id="propsBody"></div>
-      </div>
-
-      <!-- NAVEGADOR DEL MODELO -->
-      <div id="navPanel">
-        <div class="nav-header">
-          <div class="nav-title">🗂 Navegador</div>
-        </div>
-        <div class="nav-body" id="navBody">
-          <div class="nav-empty">Carga un modelo IFC<br>para navegar su estructura</div>
-        </div>
       </div>
 
     </div>
