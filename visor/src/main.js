@@ -136,6 +136,9 @@ container.addEventListener("mousemove", async (e) => {
 });
 container.addEventListener("mouseleave", () => { tooltip.style.display = "none"; });
 
+const highlighter = components.get(OBF.Highlighter);
+highlighter.setup({ world });
+
 const propsPanel = document.getElementById("propsPanel");
 const propsBody = document.getElementById("propsBody");
 const propsEmpty = document.getElementById("propsEmpty");
