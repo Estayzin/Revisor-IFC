@@ -309,14 +309,21 @@ function rpSec(t,b,bc,inner,open){return`<div class="rp-sec"><div class="rp-sec-
 function renderReporte(est) {
   _estActual = est; let html = ''; const conteo = est.conteo;
 
-  // 0. Identificación del modelo
+  // Banner MEI
+  html += `<div style="margin-bottom:10px;padding:10px 12px;background:rgba(0,212,255,.05);border:1px solid rgba(0,212,255,.15);border-left:3px solid var(--accent);border-radius:5px;">
+    <div style="font:700 9px var(--mono);color:var(--accent);text-transform:uppercase;letter-spacing:.15em;margin-bottom:4px;">📋 Reporte MEI — Modelo de Entrega de Información</div>
+    <div style="font:400 9px var(--mono);color:var(--muted);line-height:1.7;">Este reporte ejecuta las pruebas definidas en el MEI, verificando que el modelo IFC cumpla con los requisitos de entrega según especialidad.</div>
+    <div style="font:400 9px var(--mono);color:var(--muted);line-height:1.7;">Las secciones 3.1 a 3.5 corresponden a los criterios de revisión establecidos en el estándar PlanBIM Chile.</div>
+  </div>`;
+
+  // 3.1 Identificación del modelo
   const espKey0 = Object.keys(ESP).find(k=>ESP[k].cod===_espActual)||'Arquitectura';
   const optsEsp = Object.keys(ESP).map(k =>
     `<option value="${ESP[k].cod}"${ESP[k].cod===_espActual?' selected':''}>${k} (${ESP[k].cod})</option>`
   ).join('');
   html += `<div class="rp-sec">
     <div class="rp-sec-hdr" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'block':'none'">
-      <span class="rp-sec-title">0. Identificación</span>
+      <span class="rp-sec-title">3.1 Nombre del Contenedor de la información</span>
       <span class="rp-badge rp-info">${espKey0}</span>
     </div>
     <div class="rp-content" style="display:block">
@@ -339,11 +346,11 @@ function renderReporte(est) {
 
   // 1. Origen
   const orig = verificarOrigen(est);
-  if (orig.length) { const ok=orig.every(r=>r.ok); const filas=orig.map(r=>{const c=r.x!==null?`(${[r.x,r.y,r.z].map(v=>(+v).toFixed(3)).join(', ')})`:'N/A';return`<tr><td class="td-name">${r.tipo.charAt(0)+r.tipo.slice(1).toLowerCase()}<div class="td-cls">${esc(r.nombre)}</div></td><td style="font:400 9px var(--mono);color:var(--muted)">${c}</td><td class="td-ok">${r.ok?'<span class="ic-ok">✓</span>':'<span class="ic-err">✗</span>'}</td></tr>`;}).join(''); html+=rpSec('1. Origen (0,0,0)',ok?'OK':'Error',ok?'rp-ok':'rp-err',`<table class="rp-table">${filas}</table>`,!ok); }
+  if (orig.length) { const ok=orig.every(r=>r.ok); const filas=orig.map(r=>{const c=r.x!==null?`(${[r.x,r.y,r.z].map(v=>(+v).toFixed(3)).join(', ')})`:'N/A';return`<tr><td class="td-name">${r.tipo.charAt(0)+r.tipo.slice(1).toLowerCase()}<div class="td-cls">${esc(r.nombre)}</div></td><td style="font:400 9px var(--mono);color:var(--muted)">${c}</td><td class="td-ok">${r.ok?'<span class="ic-ok">✓</span>':'<span class="ic-err">✗</span>'}</td></tr>`;}).join(''); html+=rpSec('3.2 Posición Local',ok?'OK':'Error',ok?'rp-ok':'rp-err',`<table class="rp-table">${filas}</table>`,!ok); }
   const noms = verificarNombres(est);
-  if (noms.length) { const ok=noms.every(r=>r.ok); const filas=noms.map(r=>`<tr><td class="td-name">${r.tipo.charAt(0)+r.tipo.slice(1).toLowerCase()}</td><td style="font:400 9px var(--mono)">"${esc(r.nombre)}" (${r.largo} car.)</td><td class="td-ok">${r.ok?'<span class="ic-ok">✓</span>':'<span class="ic-err">✗</span>'}</td></tr>`).join(''); html+=rpSec('2. Nombres Sitio/Edificio',ok?'OK':'Error',ok?'rp-ok':'rp-err',`<div class="rp-msg">Sitio: ≥3 car. · Edificio: ≥2 car.</div><table class="rp-table">${filas}</table>`,!ok); }
+  if (noms.length) { const ok=noms.every(r=>r.ok); const filas=noms.map(r=>`<tr><td class="td-name">${r.tipo.charAt(0)+r.tipo.slice(1).toLowerCase()}</td><td style="font:400 9px var(--mono)">"${esc(r.nombre)}" (${r.largo} car.)</td><td class="td-ok">${r.ok?'<span class="ic-ok">✓</span>':'<span class="ic-err">✗</span>'}</td></tr>`).join(''); html+=rpSec('3.3.a Nombre del sitio y del edificio',ok?'OK':'Error',ok?'rp-ok':'rp-err',`<div class="rp-msg">Sitio: ≥3 car. · Edificio: ≥2 car.</div><table class="rp-table">${filas}</table>`,!ok); }
   const nivs = verificarNiveles(est);
-  if (nivs.length) { const ok=nivs.every(r=>r.ok); const nOk=nivs.filter(r=>r.ok).length; const filas=nivs.map(r=>`<tr><td class="td-name">${esc(r.nombre||'(sin nombre)')}</td><td style="text-align:center;font:400 9px var(--mono);color:var(--muted)">${r.largo} car.</td><td class="td-ok">${r.ok?'<span class="ic-ok">✓</span>':'<span class="ic-err">✗</span>'}</td></tr>`).join(''); html+=rpSec(`3. Niveles (≥5 car.)`,`${nOk}/${nivs.length} OK`,ok?'rp-ok':nOk>0?'rp-warn':'rp-err',`<table class="rp-table">${filas}</table>`,!ok); }
+  if (nivs.length) { const ok=nivs.every(r=>r.ok); const nOk=nivs.filter(r=>r.ok).length; const filas=nivs.map(r=>`<tr><td class="td-name">${esc(r.nombre||'(sin nombre)')}</td><td style="text-align:center;font:400 9px var(--mono);color:var(--muted)">${r.largo} car.</td><td class="td-ok">${r.ok?'<span class="ic-ok">✓</span>':'<span class="ic-err">✗</span>'}</td></tr>`).join(''); html+=rpSec(`3.3.b Denominación de los niveles del edificio`,`${nOk}/${nivs.length} OK`,ok?'rp-ok':nOk>0?'rp-warn':'rp-err',`<table class="rp-table">${filas}</table>`,!ok); }
   const espKey=Object.keys(ESP).find(k=>ESP[k].cod===_espActual)||'Arquitectura'; const espEnts=ESP[espKey].ents;
   let filasP='',filasA='',presentes=0;
   espEnts.forEach(([cls,nom])=>{
@@ -356,7 +363,7 @@ function renderReporte(est) {
   if(filasP)filas+=`<tr><td colspan="4" style="padding:3px 10px;font:700 8px var(--mono);color:#00c853;text-transform:uppercase;background:rgba(0,200,83,.05)">✓ Presentes</td></tr>${filasP}`;
   if(filasA)filas+=`<tr><td colspan="4" style="padding:3px 10px;font:700 8px var(--mono);color:var(--muted);text-transform:uppercase;background:rgba(0,0,0,.15)">✗ Ausentes</td></tr>${filasA}`;
   const pct=espEnts.length?Math.round(presentes/espEnts.length*100):0;
-  html+=rpSec(`4. Entidades IFC`,`${presentes}/${espEnts.length} presentes`,pct===100?'rp-ok':pct>50?'rp-warn':'rp-err',`<table class="rp-table">${filas}</table>`,true);
+  html+=rpSec(`3.4 Uso Correcto de las entidades`,`${presentes}/${espEnts.length} presentes`,pct===100?'rp-ok':pct>50?'rp-warn':'rp-err',`<table class="rp-table">${filas}</table>`,true);
   html+=renderSecTipos(est,null);
   document.getElementById('rpBody').innerHTML=html;
 }
@@ -404,7 +411,7 @@ function renderSecTipos(est, filtrarCls) {
   let relevantes = Object.entries(_tiposCache).filter(([cls])=>espEnts.includes(cls));
   if (filtrarCls) relevantes = relevantes.filter(([cls])=>cls===filtrarCls);
   const tituloFiltro = filtrarCls ? ` — ${IFC_ICO[filtrarCls]||''} ${filtrarCls.charAt(0)+filtrarCls.slice(1).toLowerCase()}` : '';
-  const tituloSec = '5. Estructura y Denominación';
+  const tituloSec = '3.5 Estructura y denominación';
 
   if (!relevantes.length) return `<div class="rp-sec" id="sec5wrap">
     <div class="rp-sec-hdr" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'block':'none'">
