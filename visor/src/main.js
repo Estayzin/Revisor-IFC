@@ -150,73 +150,52 @@ const propsPanel = document.getElementById("propsPanel");
 const propsBody  = document.getElementById("propsBody");
 const propsEmpty = document.getElementById("propsEmpty");
 
+function getNivelDeElemento(expressID) {
+  if (!_estActual) return null;
+  for (const nivelId in _estActual.elemsPorNivel) {
+    if (_estActual.elemsPorNivel[nivelId].includes(String(expressID))) {
+      const inst = _estActual.instancias[nivelId];
+      if (!inst) continue;
+      const attrs = splitAttrs(extraerRaw(_estActual.texto, inst.pos));
+      return strVal(attrs[2]) || strVal(attrs[1]) || `#${nivelId}`;
+    }
+  }
+  return null;
+}
+
 function renderProps(data) {
   if (!data) { propsEmpty.style.display = 'block'; propsBody.style.display = 'none'; return; }
   const cls  = data._category?.value ?? 'Desconocido';
-  const nom  = data.Name?.value ?? '(sin nombre)';
   const ico  = IFC_ICO[cls] || '▪';
   const clsL = cls.charAt(0) + cls.slice(1).toLowerCase();
+  const nom  = data.Name?.value ?? '—';
+  const tag  = data.Tag?.value ?? '—';
+  const nivel = getNivelDeElemento(data.expressID) ?? '—';
 
-  // Propiedades base del elemento
-  const SKIP = new Set(['_category','expressID','type']);
-  const base = {};
-  const psets = {};
-  for (const k in data) {
-    if (SKIP.has(k)) continue;
-    const v = data[k];
-    if (v && typeof v === 'object' && v.value !== undefined) {
-      base[k] = v.value;
-    } else if (v && typeof v === 'object' && !Array.isArray(v)) {
-      // PropertySet
-      const label = k;
-      psets[label] = {};
-      for (const pk in v) {
-        const pv = v[pk];
-        psets[label][pk] = pv?.value !== undefined ? pv.value : pv;
-      }
-    }
-  }
-
-  let html = `<div class="props-elem-hdr">
-    <div class="props-elem-icon">${ico}</div>
-    <div class="props-elem-cls">${esc(clsL)}</div>
-    <div class="props-elem-name">${esc(nom)}</div>
-    <div class="props-elem-id">ID: ${data.expressID ?? '—'}</div>
-  </div>`;
-
-  // Sección propiedades base
-  const baseEntries = Object.entries(base).filter(([,v]) => v !== null && v !== undefined && v !== '');
-  if (baseEntries.length) {
-    const uid = 'pb_' + Math.random().toString(36).substr(2,4);
-    html += `<div class="props-sec">
-      <div class="props-sec-hdr" onclick="var b=document.getElementById('${uid}');b.style.display=b.style.display==='none'?'block':'none'">
-        <span class="props-sec-title">Propiedades del elemento</span>
-        <span class="rp-badge rp-info">${baseEntries.length}</span>
-      </div>
-      <div id="${uid}" class="props-sec-body">
-        ${baseEntries.map(([k,v])=>`<div class="props-row"><span class="props-key">${esc(k)}</span><span class="props-val">${esc(String(v))}</span></div>`).join('')}
-      </div>
-    </div>`;
-  }
-
-  // Secciones por PropertySet
-  for (const [psName, psProps] of Object.entries(psets)) {
-    const entries = Object.entries(psProps).filter(([,v]) => v !== null && v !== undefined && v !== '');
-    if (!entries.length) continue;
-    const uid = 'ps_' + Math.random().toString(36).substr(2,4);
-    html += `<div class="props-sec">
-      <div class="props-sec-hdr" onclick="var b=document.getElementById('${uid}');b.style.display=b.style.display==='none'?'block':'none'">
-        <span class="props-sec-title">${esc(psName)}</span>
-        <span class="rp-badge rp-info">${entries.length}</span>
-      </div>
-      <div id="${uid}" class="props-sec-body" style="display:none">
-        ${entries.map(([k,v])=>`<div class="props-row"><span class="props-key">${esc(k)}</span><span class="props-val">${esc(String(v))}</span></div>`).join('')}
-      </div>
-    </div>`;
-  }
+  const filas = [
+    ['Nombre',    nom],
+    ['Tag',       tag],
+    ['Clase IFC', clsL],
+    ['Nivel',     nivel],
+  ].map(([k,v]) => `<div class="props-row">
+    <span class="props-key">${k}</span>
+    <span class="props-val">${esc(String(v))}</span>
+  </div>`).join('');
 
   propsEmpty.style.display = 'none';
-  propsBody.innerHTML = html;
+  propsBody.innerHTML = `
+    <div class="props-elem-hdr">
+      <div class="props-elem-icon">${ico}</div>
+      <div class="props-elem-cls">${esc(clsL)}</div>
+      <div class="props-elem-name">${esc(nom)}</div>
+      <div class="props-elem-id">ID: ${data.expressID ?? '—'}</div>
+    </div>
+    <div class="props-sec">
+      <div class="props-sec-hdr">
+        <span class="props-sec-title">Información del elemento</span>
+      </div>
+      <div class="props-sec-body">${filas}</div>
+    </div>`;
   propsBody.style.display = 'block';
 }
 
