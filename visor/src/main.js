@@ -276,22 +276,6 @@ const isolatedCategories = new Set();
 
 document.getElementById("btnFit").addEventListener("click", () => world.camera.fitToItems());
 
-document.getElementById("btnPlan").addEventListener("click", async () => {
-  world.camera.set("Plan");
-  world.camera.projection.set("Orthographic");
-  await world.camera.controls.setLookAt(0, 200, 0, 0, 0, 0, true);
-  document.getElementById("btnPlan").classList.add("active");
-  document.getElementById("btn3D").classList.remove("active");
-});
-
-document.getElementById("btn3D").addEventListener("click", async () => {
-  world.camera.set("Orbit");
-  world.camera.projection.set("Perspective");
-  await world.camera.controls.setLookAt(50, 30, 50, 0, 0, 0, true);
-  document.getElementById("btn3D").classList.add("active");
-  document.getElementById("btnPlan").classList.remove("active");
-});
-
 document.getElementById("btnFitSb").addEventListener("click", () => world.camera.fitToItems());
 document.getElementById("btnOrbitSb").addEventListener("click", () => { world.camera.set("Orbit"); world.camera.projection.set("Perspective"); _planMode = false; document.getElementById("btnPlan").classList.remove("active"); });
 document.getElementById("btnPlanSb").addEventListener("click", () => { world.camera.set("Plan"); world.camera.projection.set("Orthographic"); _planMode = true; document.getElementById("btnPlan").classList.add("active"); });
