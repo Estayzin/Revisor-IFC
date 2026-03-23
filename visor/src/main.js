@@ -200,9 +200,9 @@ function renderProps(data, localId, bb = null) {
         <span class="props-sec-title">Dimensiones (Bounding Box)</span>
       </div>
       <div class="props-sec-body">
-        <div class="props-row"><span class="props-key">Ancho X</span><span class="props-val">${bb.x} m</span></div>
-        <div class="props-row"><span class="props-key">Largo Y</span><span class="props-val">${bb.y} m</span></div>
-        <div class="props-row"><span class="props-key">Alto Z</span><span class="props-val">${bb.z} m</span></div>
+        <div class="props-row"><span class="props-key">Largo (X)</span><span class="props-val">${bb.x} m</span></div>
+        <div class="props-row"><span class="props-key">Ancho (Z)</span><span class="props-val">${bb.z} m</span></div>
+        <div class="props-row"><span class="props-key">Alto (Y)</span><span class="props-val">${bb.y} m</span></div>
       </div>
     </div>` : '';
 
@@ -240,21 +240,13 @@ highlighter.events.select.onHighlight.add(async (modelIdMap) => {
       if (!model) return;
       const localId = [...ids][0];
       const [data] = await model.getItemsData([localId]);
-      // Calcular bbox del elemento seleccionado
+      // Calcular bbox del elemento seleccionado usando getMergedBox
       let bb = null;
       try {
-        const bbox = new THREE.Box3();
-        model.object.traverse(child => {
-          if (!child.isMesh || !child.geometry) return;
-          // Intentar aislar por fragmento
-          const geom = child.geometry;
-          geom.computeBoundingBox();
-          const b = geom.boundingBox.clone().applyMatrix4(child.matrixWorld);
-          bbox.union(b);
-        });
-        if (!bbox.isEmpty() && isFinite(bbox.min.x)) {
+        const itemsBox = await model.getMergedBox([localId]);
+        if (itemsBox && !itemsBox.isEmpty() && isFinite(itemsBox.min.x)) {
           const s = new THREE.Vector3();
-          bbox.getSize(s);
+          itemsBox.getSize(s);
           bb = { x: s.x.toFixed(2), y: s.y.toFixed(2), z: s.z.toFixed(2) };
         }
       } catch(e) {}
@@ -1025,9 +1017,9 @@ document.getElementById('reporteClose').addEventListener('click', () => {
 //     - Toggle de visibilidad desde el navegador del modelo
 //
 // [ ] DIMENSIONES DE ELEMENTOS (BOUNDING BOX)
-//     - Mostrar Ancho, Largo, Alto en panel de propiedades
-//     - Calcular BBox por elemento individual (no del modelo completo)
-//     - Como fallback si no hay QuantitySets disponibles
+//     - Mostrar Largo, Ancho, Alto en panel de propiedades ✅ implementado para selección individual
+//     - Para selección múltiple: mostrar conteo por categoría (no sumar dimensiones)
+//     - Evaluar en el futuro si tiene sentido mostrar bbox combinado o área total
 //
 // [ ] DIMENSIONES DE ELEMENTOS (QUANTITYSETS)
 //     - Leer Qto_WallBaseQuantities, Qto_SlabBaseQuantities, etc.

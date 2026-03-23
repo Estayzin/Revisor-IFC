@@ -1,1 +1,1 @@
-feat: zoom seleccion, modo claro fixes, scroll reporte, log mejoras futuras
+feat: dimensiones bounding box en propiedades, fixes modo claro, scroll reporte, zoom seleccion
