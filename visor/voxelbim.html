@@ -210,7 +210,7 @@ body.light-mode .viewer-wrap { background:#c8d8e8; }
 .rp-err { background:rgba(255,61,87,.12); color:#ff3d57; }
 .rp-warn { background:rgba(255,107,53,.12); color:#ff6b35; }
 .rp-info { background:rgba(0,212,255,.08); color:var(--accent); }
-.rp-content { border-top:1px solid var(--border); max-height:300px; overflow-y:auto; }
+.rp-content { border-top:1px solid var(--border); overflow-y:visible; }
 .rp-table { width:100%; border-collapse:collapse; }
 .rp-table td { padding:5px 10px; border-bottom:1px solid rgba(26,42,64,.4); font:400 10px var(--mono); color:var(--text); vertical-align:middle; }
 .rp-table tr:last-child td { border-bottom:none; }
@@ -249,7 +249,8 @@ body.light-mode .viewer-wrap { background:#c8d8e8; }
     <!-- Grupo 1: Navegación 3D -->
     <div class="header-toolbar">
       <button class="hbar-btn" id="btn3D"><span class="hb-icon">🧊</span> Vista 3D</button>
-      <button class="hbar-btn" id="btnFit"><span class="hb-icon">🎯</span> Centrar</button>
+      <button class="hbar-btn" id="btnFit"><span class="hb-icon">🎯</span> Zoom Extents</button>
+      <button class="hbar-btn" id="btnFitSel"><span class="hb-icon">🔍</span> Zoom Selección</button>
       <button class="hbar-btn" id="btnResetVis"><span class="hb-icon">👁️</span> Mostrar todo</button>
     </div>
 

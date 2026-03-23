@@ -212,6 +212,9 @@ function renderProps(data, localId) {
 
 highlighter.events.select.onHighlight.add(async (modelIdMap) => {
   try {
+    // Zoom al elemento seleccionado
+    if (world.camera.fitToItems) await world.camera.fitToItems(modelIdMap);
+
     // Contar total de elementos seleccionados
     let total = 0;
     for (const ids of Object.values(modelIdMap)) total += ids.size;
@@ -297,6 +300,16 @@ document.getElementById("btn3D").addEventListener("click", () => {
 document.getElementById("btnFitSb").addEventListener("click", () => world.camera.fitToItems());
 document.getElementById("btnOrbitSb").addEventListener("click", () => { world.camera.set("Orbit"); world.camera.projection.set("Perspective"); _planMode = false; document.getElementById("btnPlan").classList.remove("active"); });
 document.getElementById("btnPlanSb").addEventListener("click", () => { world.camera.set("Plan"); world.camera.projection.set("Orthographic"); _planMode = true; document.getElementById("btnPlan").classList.add("active"); });
+
+// Zoom Selección — fit solo a los elementos seleccionados
+document.getElementById("btnFitSel").addEventListener("click", async () => {
+  const selection = highlighter.selection['select'];
+  if (selection && Object.keys(selection).length > 0) {
+    await world.camera.fitToItems(selection);
+  } else {
+    await world.camera.fitToItems();
+  }
+});
 
 // Vista en planta — toggle entre Planta (ortogonal top) y 3D (perspectiva)
 document.getElementById("btnPlan").addEventListener("click", async () => {
