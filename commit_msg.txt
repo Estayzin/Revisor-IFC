@@ -1,1 +1,0 @@
-feat: dimensiones bounding box en propiedades, fixes modo claro, scroll reporte, zoom seleccion
