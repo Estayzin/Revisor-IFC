@@ -1,0 +1,1 @@
+feat: zoom seleccion, modo claro fixes, scroll reporte, log mejoras futuras

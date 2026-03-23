@@ -174,7 +174,7 @@ function getNivelDeElemento(localId) {
   return null;
 }
 
-function renderProps(data, localId) {
+function renderProps(data, localId, bb = null) {
   if (!data) { propsEmpty.style.display = 'block'; propsBody.style.display = 'none'; return; }
   const cls  = data._category?.value ?? 'Desconocido';
   const ico  = IFC_ICO[cls] || '▪';
@@ -193,6 +193,19 @@ function renderProps(data, localId) {
     <span class="props-val">${esc(String(v))}</span>
   </div>`).join('');
 
+  // Bounding Box
+  const bbHtml = bb ? `
+    <div class="props-sec">
+      <div class="props-sec-hdr">
+        <span class="props-sec-title">Dimensiones (Bounding Box)</span>
+      </div>
+      <div class="props-sec-body">
+        <div class="props-row"><span class="props-key">Ancho X</span><span class="props-val">${bb.x} m</span></div>
+        <div class="props-row"><span class="props-key">Largo Y</span><span class="props-val">${bb.y} m</span></div>
+        <div class="props-row"><span class="props-key">Alto Z</span><span class="props-val">${bb.z} m</span></div>
+      </div>
+    </div>` : '';
+
   propsEmpty.style.display = 'none';
   propsBody.innerHTML = `
     <div class="props-elem-hdr">
@@ -206,7 +219,8 @@ function renderProps(data, localId) {
         <span class="props-sec-title">Información del elemento</span>
       </div>
       <div class="props-sec-body">${filas}</div>
-    </div>`;
+    </div>
+    ${bbHtml}`;
   propsBody.style.display = 'block';
 }
 
@@ -226,7 +240,25 @@ highlighter.events.select.onHighlight.add(async (modelIdMap) => {
       if (!model) return;
       const localId = [...ids][0];
       const [data] = await model.getItemsData([localId]);
-      renderProps(data, localId);
+      // Calcular bbox del elemento seleccionado
+      let bb = null;
+      try {
+        const bbox = new THREE.Box3();
+        model.object.traverse(child => {
+          if (!child.isMesh || !child.geometry) return;
+          // Intentar aislar por fragmento
+          const geom = child.geometry;
+          geom.computeBoundingBox();
+          const b = geom.boundingBox.clone().applyMatrix4(child.matrixWorld);
+          bbox.union(b);
+        });
+        if (!bbox.isEmpty() && isFinite(bbox.min.x)) {
+          const s = new THREE.Vector3();
+          bbox.getSize(s);
+          bb = { x: s.x.toFixed(2), y: s.y.toFixed(2), z: s.z.toFixed(2) };
+        }
+      } catch(e) {}
+      renderProps(data, localId, bb);
     } else {
       // Múltiples elementos → recoger valores y mostrar <Múltiples> si difieren
       const vals = { nom: new Set(), tag: new Set(), cls: new Set(), nivel: new Set() };
@@ -975,3 +1007,38 @@ document.getElementById('reporteClose').addEventListener('click', () => {
   reportePanel.classList.remove('show');
   document.getElementById('btnReporte').classList.remove('active');
 });
+
+// ══════════════════════════════════════════════════════════════════
+// 📋 LOG DE MEJORAS FUTURAS
+// ══════════════════════════════════════════════════════════════════
+//
+// [ ] VISTA EN PLANTA CON CORTE POR NIVEL
+//     - Botón Planta abre selector de niveles (IFCBUILDINGSTOREY)
+//     - Leer elevación real desde atributo Elevation del IFC
+//     - Activar clipping plane horizontal a elevación + offset (1.2m)
+//     - Cámara ortogonal desde arriba con fit automático
+//     - Botón "Salir" elimina el clipping plane y vuelve a 3D
+//
+// [ ] VISUALIZACIÓN DE EJES DE GRILLA (IFCGRID)
+//     - Parsear IFCGRIDAXIS (ejes U y V) desde el IFC
+//     - Dibujar líneas en Three.js con etiquetas (A, B, 1, 2...)
+//     - Toggle de visibilidad desde el navegador del modelo
+//
+// [ ] DIMENSIONES DE ELEMENTOS (BOUNDING BOX)
+//     - Mostrar Ancho, Largo, Alto en panel de propiedades
+//     - Calcular BBox por elemento individual (no del modelo completo)
+//     - Como fallback si no hay QuantitySets disponibles
+//
+// [ ] DIMENSIONES DE ELEMENTOS (QUANTITYSETS)
+//     - Leer Qto_WallBaseQuantities, Qto_SlabBaseQuantities, etc.
+//     - Mostrar como datos primarios si existen en el modelo
+//
+// [ ] CORTE DE SECCIÓN (CLIPPING PLANE LIBRE)
+//     - Botón ✂️ Corte ya existe en la UI (disabled)
+//     - Permitir definir plano de corte en cualquier dirección
+//
+// [ ] HERRAMIENTA DE MEDICIÓN
+//     - Botón 📏 Medir ya existe en la UI (disabled)
+//     - Medir distancias entre puntos en el modelo 3D
+//
+// ══════════════════════════════════════════════════════════════════
