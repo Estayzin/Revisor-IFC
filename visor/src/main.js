@@ -226,9 +226,6 @@ function renderProps(data, localId, bb = null) {
 
 highlighter.events.select.onHighlight.add(async (modelIdMap) => {
   try {
-    // Zoom al elemento seleccionado
-    if (world.camera.fitToItems) await world.camera.fitToItems(modelIdMap);
-
     // Contar total de elementos seleccionados
     let total = 0;
     for (const ids of Object.values(modelIdMap)) total += ids.size;
@@ -364,9 +361,43 @@ document.getElementById("propsClose").addEventListener("click", () => {
   document.getElementById("btnProps").classList.remove("active");
 });
 document.getElementById("btnClip").addEventListener("click", () => {});
-document.getElementById("btnMeasure").addEventListener("click", () => {});
 
-let lightMode = false;
+// ══ HERRAMIENTA DE MEDICIÓN ══
+const measurer = components.get(OBF.LengthMeasurement);
+measurer.world = world;
+measurer.enabled = false;
+measurer.snapDistance = 1;
+
+let _measureMode = false;
+document.getElementById("btnMeasure").addEventListener("click", () => {
+  _measureMode = !_measureMode;
+  measurer.enabled = _measureMode;
+  highlighter.enabled = !_measureMode;
+  const btn = document.getElementById("btnMeasure");
+  btn.classList.toggle("active", _measureMode);
+  btn.querySelector(".hb-icon").textContent = _measureMode ? "✂" : "📏";
+  if (_measureMode) {
+    container.addEventListener("click", onMeasureClick);
+    container.addEventListener("dblclick", onMeasureDelete);
+  } else {
+    container.removeEventListener("click", onMeasureClick);
+    container.removeEventListener("dblclick", onMeasureDelete);
+    measurer.cancelCreation();
+  }
+});
+
+async function onMeasureClick() {
+  if (!_measureMode) return;
+  await measurer.create();
+}
+
+function onMeasureDelete() {
+  if (!_measureMode) return;
+  measurer.cancelCreation();
+  measurer.deleteAll();
+}
+
+
 document.getElementById("btnLightMode").addEventListener("click", () => {
   lightMode = !lightMode;
   document.body.classList.toggle("light-mode", lightMode);
