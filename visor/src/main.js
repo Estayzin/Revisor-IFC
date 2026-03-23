@@ -3,7 +3,6 @@ import * as OBF from "@thatopen/components-front";
 import * as BUI from "@thatopen/ui";
 import * as BUIC from "@thatopen/ui-obc";
 import * as THREE from "three";
-import Stats from "stats.js";
 
 BUI.Manager.init();
 
@@ -20,6 +19,19 @@ world.renderer = new OBF.PostproductionRenderer(components, container);
 world.camera = new OBC.OrthoPerspectiveCamera(components);
 await world.camera.controls.setLookAt(50, 30, 50, 0, 0, 0);
 components.init();
+
+// Ajuste de clipping planes para modelos grandes
+world.camera.three.near = 0.1;
+world.camera.three.far = 100000;
+world.camera.three.updateProjectionMatrix();
+if (world.camera.threeOrtho) {
+  world.camera.threeOrtho.near = 0.1;
+  world.camera.threeOrtho.far = 100000;
+  world.camera.threeOrtho.updateProjectionMatrix();
+}
+// Permitir acercarse mucho más
+world.camera.controls.minDistance = 0.1;
+world.camera.controls.maxDistance = 50000;
 world.renderer.postproduction.enabled = true;
 
 const grid = components.get(OBC.Grids).create(world);
@@ -97,9 +109,9 @@ const loadIfc = async (file) => {
   _nombreArchivoActual = file.name;
   _espActual = detectarEspecialidad(file.name);
   _estActual = est;
-  renderNavegador(est);
   setProgress(1);
   await ifcLoader.load(new Uint8Array(buffer), false, file.name, { processData: { progressCallback: setProgress } });
+  await renderNavegador(est);
   if (world.camera.fitToItems) await world.camera.fitToItems();
 };
 
@@ -373,11 +385,6 @@ function updateModelsList() {
 fragments.list.onItemSet.add(({ key }) => { loadedModels.set(key, { visible: true }); updateModelsList(); });
 fragments.list.onItemDeleted.add(({ key }) => { loadedModels.delete(key); updateModelsList(); });
 
-const stats = new Stats(); stats.showPanel(2); document.body.append(stats.dom);
-stats.dom.style.left = "0px"; stats.dom.style.zIndex = "unset";
-const sl = stats.dom.querySelector("div:last-child"); if (sl) sl.style.display = "none";
-world.renderer.onBeforeUpdate.add(() => stats.begin());
-world.renderer.onAfterUpdate.add(() => stats.end());
 
 const gizmoCanvas = document.getElementById("gizmo");
 const gizmoCtx = gizmoCanvas.getContext("2d");
@@ -408,7 +415,7 @@ window.navToggle = (id) => {
   if (arrow) arrow.classList.toggle('open');
 };
 
-function renderNavegador(est) {
+async function renderNavegador(est) {
   const navBody = document.getElementById('navBody');
   if (!navBody) return;
   const inst = est.instancias;
@@ -445,8 +452,18 @@ function renderNavegador(est) {
     html += `<div class="nav-group"><div class="nav-group-hdr" onclick="window.navToggle('est')"><span class="nav-group-arrow open" id="nga_est">▶</span><span class="nav-group-title">Estructura</span><span class="nav-group-badge">${nNiveles} niveles</span></div><div class="nav-group-body open" id="ng_est">${estructuraHtml}</div></div>`;
   }
 
-  // ── Sección Entidades ──
-  const entsCls = ['IFCWALL','IFCSLAB','IFCCOLUMN','IFCBEAM','IFCDOOR','IFCWINDOW','IFCROOF','IFCSTAIR','IFCPIPESEGMENT','IFCDUCTSEGMENT','IFCLIGHTFIXTURE','IFCBUILDINGELEMENTPROXY'];
+  // ── Sección Entidades — solo las que tienen geometría ──
+  const clsConGeom = new Set();
+  for (const [, model] of fragments.list) {
+    try {
+      const cats = await model.getItemsWithGeometryCategories();
+      cats.forEach(c => { if (c) clsConGeom.add(c); });
+    } catch(e) {}
+  }
+  const entsCls = Object.keys(conteo).filter(cls =>
+    clsConGeom.has(cls) && conteo[cls] > 0
+  ).sort((a, b) => conteo[b] - conteo[a]);
+
   let entHtml = '', totalEnts = 0;
   entsCls.forEach(cls => {
     const qty = conteo[cls] || 0; if (!qty) return;
