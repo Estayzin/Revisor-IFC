@@ -341,7 +341,7 @@ if (!_hasCode && !_hasToken && !_hasAuth && window.location.protocol !== 'file:'
           <div class="cp-logo">✦</div>
           <div>
             <div class="cp-title">Claude AI &nbsp;·&nbsp; BIM Assistant</div>
-            <div class="cp-model">claude-sonnet-4-20250514 &nbsp;·&nbsp; Bilingual</div>
+            <div class="cp-model">claude-sonnet-4-5 &nbsp;·&nbsp; Bilingual</div>
           </div>
           <button class="cp-close" onclick="toggleClaudePanel()" title="Cerrar">&#10005;</button>
         </div>
@@ -1110,10 +1110,13 @@ function construirContexto() {
 async function llamarClaude(userMsg) {
   var SYSTEM = 'Eres un asistente BIM experto en Autodesk Revit, IFC y ACC. Respondes en el idioma del usuario.\n'
     + 'Cuando el usuario pide una ACCION sobre el visor 3D (ocultar, mostrar, aislar, colorear, restaurar),\n'
-    + 'responde SIEMPRE con un bloque JSON al inicio con este formato:\n\n'
+    + 'responde SIEMPRE con un bloque JSON al inicio con este formato EXACTO en una sola línea:\n\n'
     + 'VIEWER_CMD:{"action":"hide","category":"muros","message":"texto"}\n\n'
-    + 'Acciones: hide, show, isolate, showAll, color, fitView\n'
-    + 'Categorias del modelo: muros, suelos, puertas, ventanas, pilares, cubiertas, techos, escaleras, rampas, barandillas, estructura, tuberias, muro cortina, ALL\n\n'
+    + 'Acciones disponibles: hide, show, isolate, showAll, color, fitView\n'
+    + 'Categorias: muros, suelos, puertas, ventanas, pilares, cubiertas, techos, escaleras, rampas, barandillas, estructura, tuberias, muro cortina, ALL\n\n'
+    + 'Para la acción "color" SIEMPRE incluye el campo "color" con un hex válido, ejemplo:\n'
+    + 'VIEWER_CMD:{"action":"color","category":"puertas","color":"#ff0000","message":"Puertas coloreadas de rojo"}\n\n'
+    + 'IMPORTANTE: El bloque VIEWER_CMD debe estar en UNA SOLA LÍNEA, sin saltos de línea dentro del JSON.\n'
     + 'Si el usuario NO pide accion de visor, responde normalmente sin VIEWER_CMD.\n'
     + 'Eres conciso y tecnico. Si tienes propiedades BIM en contexto, usalas.';
 
@@ -1131,7 +1134,7 @@ async function llamarClaude(userMsg) {
     method:'POST',
     headers:{ 'Content-Type':'application/json' },
     body: JSON.stringify({
-      model: 'claude-sonnet-4-20250514',
+      model: 'claude-sonnet-4-5',
       max_tokens: 1000,
       system: SYSTEM,
       messages: chatHistory
@@ -1143,13 +1146,14 @@ async function llamarClaude(userMsg) {
   if (chatHistory.length > 20) chatHistory = chatHistory.slice(-16);
 
   // Detectar y ejecutar comandos de visor
-  var cmdMatch = reply.match(/VIEWER_CMD:(\{.*?\})/s);
+  var cmdMatch = reply.match(/VIEWER_CMD:(\{[^}]+\})/);
+  if (!cmdMatch) cmdMatch = reply.match(/VIEWER_CMD:(\{.*?\})/s);
   if (cmdMatch) {
     try {
       var cmd = JSON.parse(cmdMatch[1]);
       ejecutarComandoVisor(cmd);
       // Devolver solo el mensaje amigable al chat
-      reply = reply.replace(/VIEWER_CMD:\{.*?\}/s, '').trim();
+      reply = reply.replace(/VIEWER_CMD:\{[^}]+\}/g, '').replace(/VIEWER_CMD:\{.*?\}/sg, '').trim();
       if (!reply && cmd.message) reply = cmd.message;
     } catch(e) { console.warn('VIEWER_CMD parse error:', e); }
   }
@@ -1161,52 +1165,67 @@ async function llamarClaude(userMsg) {
 // ============================================================
 function obtenerDbIdsPorCategoria(categoria, callback) {
   if (!viewer || !viewer.model) return callback([]);
-  viewer.model.getObjectTree(function(tree) {
-    var ids = [];
-    var total = 0, procesados = 0;
-    function checkDone() { if (++procesados >= total) callback(ids); }
 
-    // Normalizar la query del usuario
-    var query = categoria.toLowerCase().trim();
+  var query = categoria.toLowerCase().trim();
 
-    // Mapa de términos del usuario → fragmentos de categoría Revit (en español e inglés)
-    var mapa = {
-      'walls':'muros', 'muros':'muros', 'muro':'muros',
-      'floors':'suelos', 'suelos':'suelos', 'pisos':'suelos', 'losas':'suelos',
-      'doors':'puertas', 'puertas':'puertas', 'puerta':'puertas',
-      'windows':'ventanas', 'ventanas':'ventanas', 'ventana':'ventanas',
-      'columns':'pilares', 'pilares':'pilares', 'columnas':'pilares',
-      'roofs':'cubiertas', 'cubiertas':'cubiertas', 'techos':'techos',
-      'ceilings':'techos', 'techo':'techos',
-      'stairs':'escaleras', 'escaleras':'escaleras',
-      'ramps':'rampas', 'rampas':'rampas',
-      'railings':'barandillas', 'barandillas':'barandillas',
-      'structural':'armazón', 'estructura':'armazón', 'vigas':'armazón',
-      'curtain wall':'muro cortina', 'muro cortina':'muro cortina',
-      'pipes':'tuberías', 'tuberías':'tuberías', 'tubería':'tuberías',
-      'furniture':'mobiliario', 'mobiliario':'mobiliario',
-      'generic':'genéricos', 'genéricos':'genéricos',
-      'all':'all'
-    };
+  // Categorías especiales
+  if (query === 'all') {
+    viewer.model.getObjectTree(function(tree) {
+      var ids = [];
+      tree.enumNodeChildren(tree.getRootId(), function(id) { ids.push(id); }, true);
+      callback(ids);
+    });
+    return;
+  }
 
-    var termino = mapa[query] || query;
+  // Mapa términos usuario → términos en inglés (como aparecen en Revit)
+  var mapa = {
+    'muros':'walls','muro':'walls','walls':'walls',
+    'suelos':'floors','piso':'floors','losas':'floors','floors':'floors',
+    'puertas':'doors','puerta':'doors','doors':'doors',
+    'ventanas':'windows','ventana':'windows','windows':'windows',
+    'pilares':'columns','columnas':'columns','columns':'columns',
+    'cubiertas':'roofs','techo':'ceilings','techos':'ceilings','roofs':'roofs','ceilings':'ceilings',
+    'escaleras':'stairs','stairs':'stairs',
+    'rampas':'ramps','ramps':'ramps',
+    'barandillas':'railings','railings':'railings',
+    'estructura':'structural framing','vigas':'structural framing','structural':'structural framing',
+    'muro cortina':'curtain walls','curtain wall':'curtain walls',
+    'tuberías':'pipes','tubería':'pipes','pipes':'pipes',
+    'mobiliario':'furniture','furniture':'furniture',
+    'genéricos':'generic models','genericos':'generic models',
+  };
 
-    tree.enumNodeChildren(tree.getRootId(), function(dbId) {
-      total++;
-      viewer.getProperties(dbId, function(r) {
-        var catProp = (r.properties||[]).find(function(p){
-          return p.attributeName === 'Category' || p.displayName === 'Category' ||
-                 p.displayName === 'Categoría';
-        });
-        if (catProp && catProp.displayValue) {
-          var cat = catProp.displayValue.toLowerCase();
-          if (termino === 'all' || cat.includes(termino)) ids.push(dbId);
-        }
-        checkDone();
-      });
-    }, true);
-    if (total === 0) callback([]);
-  });
+  var termino = mapa[query] || query;
+
+  // Usar búsqueda nativa del viewer — mucho más rápida
+  viewer.search(termino, function(ids) {
+    if (ids && ids.length) return callback(ids);
+
+    // Fallback: buscar por propiedades si la búsqueda no dio resultado
+    viewer.model.getObjectTree(function(tree) {
+      var resultIds = [];
+      var pending = 0;
+      var done = false;
+
+      tree.enumNodeChildren(tree.getRootId(), function(dbId) {
+        pending++;
+        viewer.model.getProperties(dbId, function(r) {
+          var catProp = (r.properties||[]).find(function(p){
+            return p.attributeName === 'Category' || p.displayName === 'Category' || p.displayName === 'Categoría';
+          });
+          if (catProp && catProp.displayValue) {
+            var cat = catProp.displayValue.toLowerCase();
+            if (cat.includes(termino) || cat.includes(query)) resultIds.push(dbId);
+          }
+          pending--;
+          if (pending === 0 && done) callback(resultIds);
+        }, function() { pending--; if (pending === 0 && done) callback(resultIds); });
+      }, true);
+      done = true;
+      if (pending === 0) callback(resultIds);
+    });
+  }, function() { callback([]); }, ['Category', 'name']);
 }
 
 function ejecutarComandoVisor(cmd) {
@@ -1236,15 +1255,19 @@ function ejecutarComandoVisor(cmd) {
     } else if (acc === 'isolate') {
       viewer.isolate(ids);
       mostrarToast('✓ ' + (cmd.message || 'Aislado: ' + cat + ' (' + ids.length + ')'));
-    } else if (acc === 'color' && cmd.color) {
-      var threeColor = cmd.color.replace('#','');
-      var r = parseInt(threeColor.substr(0,2),16)/255;
-      var g = parseInt(threeColor.substr(2,2),16)/255;
-      var b = parseInt(threeColor.substr(4,2),16)/255;
+    } else if (acc === 'color') {
+      var hex = (cmd.color || cmd.hex || '#ff0000').replace('#','');
+      if (hex.length === 3) hex = hex[0]+hex[0]+hex[1]+hex[1]+hex[2]+hex[2];
+      var r = parseInt(hex.substr(0,2),16)/255;
+      var g = parseInt(hex.substr(2,2),16)/255;
+      var b = parseInt(hex.substr(4,2),16)/255;
+      var ThreeVec = (window.THREE && THREE.Vector4)
+        ? THREE.Vector4
+        : Autodesk.Viewing.Private.THREE.Vector4;
       ids.forEach(function(id){
-        viewer.setThemingColor(id, new THREE.Vector4(r,g,b,1));
+        viewer.setThemingColor(id, new ThreeVec(r,g,b,1));
       });
-      mostrarToast('✓ ' + (cmd.message || 'Coloreado: ' + cat));
+      mostrarToast('✓ ' + (cmd.message || 'Coloreado: ' + cat + ' (' + ids.length + ')'));
     }
   });
 }
