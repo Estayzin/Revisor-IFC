@@ -229,11 +229,12 @@ header { background:var(--navy); padding:11px 24px; display:flex; align-items:ce
 </head>
 <body>
 <script>
-// Guard: permite pasar si tiene sesión, si viene de OAuth (tiene ?code=) o si es local
-var _hasCode = new URLSearchParams(window.location.search).get('code');
+// Guard: permite si tiene sesión, si viene de OAuth (?code=), si tiene token APS, o si es local
+var _hasCode  = new URLSearchParams(window.location.search).get('code');
 var _hasToken = sessionStorage.getItem('aps_token');
-if (!_hasCode && !_hasToken && sessionStorage.getItem('ifc_auth') !== '1' && window.location.protocol !== 'file:') {
-  window.location.href = '/index.html';
+var _hasAuth  = sessionStorage.getItem('ifc_auth') === '1';
+if (!_hasCode && !_hasToken && !_hasAuth && window.location.protocol !== 'file:') {
+  window.location.href = '/';
 }
 </script>
 
