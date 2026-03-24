@@ -1054,26 +1054,40 @@ function construirIndiceModelo(callback) {
 // Construir resumen compacto del modelo para enviar a Claude
 function construirResumenModelo(categoriaFiltro) {
   if (!modelIndex) return '';
-  var lines = ['=== ÍNDICE COMPLETO DEL MODELO BIM ==='];
+  var lines = ['=== RESUMEN DEL MODELO BIM ==='];
 
   var cats = categoriaFiltro
     ? Object.keys(modelIndex).filter(function(k){ return k.toLowerCase().includes(categoriaFiltro.toLowerCase()); })
     : Object.keys(modelIndex);
 
+  // Primero mostrar conteo total por categoría
+  lines.push('\nCATEGORÍAS Y CANTIDADES:');
+  cats.forEach(function(cat) {
+    lines.push('  ' + cat + ': ' + modelIndex[cat].length + ' elementos');
+  });
+
+  // Luego incluir muestra de propiedades por categoría (máx 5 elementos por cat)
+  lines.push('\nMUESTRA DE PROPIEDADES:');
   cats.forEach(function(cat) {
     var items = modelIndex[cat];
-    lines.push('\n[' + cat + '] — ' + items.length + ' elementos');
-    // Incluir todos los elementos (máx 300 por categoría para no saturar el contexto)
-    items.slice(0, 300).forEach(function(item) {
+    lines.push('\n[' + cat + ']');
+    items.slice(0, 5).forEach(function(item) {
       var propStr = Object.entries(item.props)
         .filter(function(e){ return e[1] && e[1] !== 'undefined'; })
+        .slice(0, 8) // máx 8 props por elemento
         .map(function(e){ return e[0] + ': ' + e[1]; })
         .join(' | ');
       lines.push('  • ' + item.nombre + (propStr ? ' → ' + propStr : ''));
     });
-    if (items.length > 300) lines.push('  ... (' + (items.length - 300) + ' más)');
+    if (items.length > 5) lines.push('  ... (' + (items.length - 5) + ' elementos más)');
   });
-  return lines.join('\n');
+
+  var resumen = lines.join('\n');
+  // Limitar a 15000 caracteres máximo para no saturar la API
+  if (resumen.length > 15000) {
+    resumen = resumen.substring(0, 15000) + '\n... (resumen truncado)';
+  }
+  return resumen;
 }
 
 function construirContexto() {
@@ -1104,10 +1118,11 @@ async function llamarClaude(userMsg) {
     + 'Eres conciso y tecnico. Si tienes propiedades BIM en contexto, usalas.';
 
   var contexto = construirContexto();
-  // Incluir índice del modelo si está disponible
-  var resumenModelo = construirResumenModelo();
-  if (resumenModelo) contexto = (contexto ? contexto + '\n\n' : '') + resumenModelo;
-  // Limpiar caché viejo
+  // Incluir resumen del modelo si está disponible — con protección de errores
+  try {
+    var resumenModelo = construirResumenModelo();
+    if (resumenModelo) contexto = (contexto ? contexto + '\n\n' : '') + resumenModelo;
+  } catch(e) { console.warn('[Claude] Error en resumen:', e.message); }
   modelDataCache = {};
   var msgFinal = contexto ? contexto + '\n\n---\nUsuario: ' + userMsg : userMsg;
   chatHistory.push({ role:'user', content: msgFinal });
@@ -1222,11 +1237,10 @@ function ejecutarComandoVisor(cmd) {
       viewer.isolate(ids);
       mostrarToast('✓ ' + (cmd.message || 'Aislado: ' + cat + ' (' + ids.length + ')'));
     } else if (acc === 'color' && cmd.color) {
-      var THREE = window.THREE;
-      var hex = cmd.color.replace('#','');
-      var r = parseInt(hex.substr(0,2),16)/255;
-      var g = parseInt(hex.substr(2,2),16)/255;
-      var b = parseInt(hex.substr(4,2),16)/255;
+      var threeColor = cmd.color.replace('#','');
+      var r = parseInt(threeColor.substr(0,2),16)/255;
+      var g = parseInt(threeColor.substr(2,2),16)/255;
+      var b = parseInt(threeColor.substr(4,2),16)/255;
       ids.forEach(function(id){
         viewer.setThemingColor(id, new THREE.Vector4(r,g,b,1));
       });
@@ -1269,21 +1283,16 @@ async function enviarMensaje() {
   mostrarTyping();
 
   try {
-    // Si hay modelo cargado y el índice no está listo, construirlo primero
-    if (viewer && viewer.model && !modelIndex) {
-      quitarTyping();
-      agregarMensaje('assistant', '🔍 Indexando modelo por primera vez... espera un momento.');
-      mostrarTyping();
-      await new Promise(function(resolve) {
-        construirIndiceModelo(function(){ resolve(); });
-      });
+    // Si hay modelo pero no índice todavía, esperar máximo 3 segundos
+    if (viewer && viewer.model && !modelIndex && !modelIndexBuilding) {
+      construirIndiceModelo(function(){});
     }
     var reply = await llamarClaude(texto);
     quitarTyping();
     agregarMensaje('assistant', reply);
   } catch(e) {
     quitarTyping();
-    agregarMensaje('assistant', '⚠ Error al conectar con Claude: ' + e.message);
+    agregarMensaje('assistant', '⚠ Error: ' + e.message);
   }
   document.getElementById('chatSendBtn').disabled = false;
   if (!claudePanelOpen) toggleClaudePanel();

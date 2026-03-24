@@ -36,7 +36,7 @@ export default {
     if (request.method === 'POST' && url.pathname === '/claude') {
       try {
         const payload = await request.json();
-        const apiKey  = env.ANTHROPIC_API_KEY || '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';
+        const apiKey  = env.ANTHROPIC_API_KEY || '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';
         const resp = await fetch('https://api.anthropic.com/v1/messages', {
           method: 'POST',
           headers: {
