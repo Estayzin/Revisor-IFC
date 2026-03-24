@@ -2,7 +2,7 @@ const http = require('http');
 const fs   = require('fs');
 const path = require('path');
 
-const ROOT = 'C:/Users/Usuario/Documents/GitHub/VoxelBIM';
+const ROOT = path.resolve(__dirname);   // relativo al server.js, funciona en cualquier PC
 const PORT = 3000;
 
 const MIME = {
@@ -37,9 +37,15 @@ http.createServer((req, res) => {
       return;
     }
     const ext = full.split('.').pop().toLowerCase();
+
+    // Headers COOP/COEP necesarios para SharedArrayBuffer (web-ifc / WASM)
+    const isAutodesk = file.startsWith('/app/autodesk') || file.startsWith('/app/viewer');
     res.writeHead(200, {
       'Content-Type': MIME[ext] || 'application/octet-stream',
       'Access-Control-Allow-Origin': '*',
+      'Cross-Origin-Opener-Policy': 'same-origin',
+      'Cross-Origin-Embedder-Policy': isAutodesk ? 'require-corp' : 'credentialless',
+      'Cross-Origin-Resource-Policy': 'cross-origin',
     });
     res.end(data);
   });
