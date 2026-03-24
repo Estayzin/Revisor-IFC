@@ -21,7 +21,7 @@ function getCORS(origin) {
 
 // Callback URL según origen
 const CALLBACK_URLS = {
-  'https://revisor-ifc-pages.pages.dev': 'https://revisor-ifc-pages.pages.dev/autodesk.html',
+  'https://revisor-ifc-pages.pages.dev': 'https://revisor-ifc-pages.pages.dev/app/autodesk.html',
   'http://localhost:3000':               'http://localhost:3000/app/autodesk.html',
 };
 
